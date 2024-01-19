@@ -1,0 +1,75 @@
+{
+  "Live Image": "20231102T000310Z",
+  "System Type": "SunOS",
+  "Boot Time": "1703559181",
+  "SDC Version": "7.0",
+  "Manufacturer": "iXsystems",
+  "Product": "FREENAS-MINI-2.0",
+  "Serial Number": "A1-64598",
+  "SKU Number": "To Be Filled By O.E.M.",
+  "HW Version": "To Be Filled By O.E.M.",
+  "HW Family": "To Be Filled By O.E.M.",
+  "Setup": "false",
+  "VM Capable": true,
+  "Bhyve Capable": true,
+  "Bhyve Max Vcpus": 32,
+  "HVM API": true,
+  "CPU Type": "Intel(R) Atom(TM) CPU C2750 @ 2.40GHz",
+  "CPU Virtualization": "vmx",
+  "CPU Physical Cores": 1,
+  "Admin NIC Tag": "admin",
+  "Admin IP": "172.16.3.3",
+  "UUID": "00020003-0004-0005-0006-000700080009",
+  "Hostname": "smartos",
+  "CPU Total Cores": 8,
+  "CPU Socket Count": 1,
+  "CPU Core Count": 8,
+  "CPU Online Count": 8,
+  "CPU Count": 8,
+  "MiB of Memory": "32740",
+  "Zpool": "zones",
+  "Zpool Encrypted": false,
+  "Zpool Disks": "c1t002538B631413CD1d0",
+  "Zpool Profile": "striped",
+  "Zpool Creation": 1699463929,
+  "Zpool Size in GiB": 1798,
+  "Zpool Recovery": {
+  },
+  "Disks": {
+    "c1t002538B631413CD1d0": {"Size in GB": 2000},
+    "c2t0d0": {"Size in GB": 4000},
+    "c2t1d0": {"Size in GB": 4000},
+    "c3t0d0": {"Size in GB": 480},
+    "c3t1d0": {"Size in GB": 480}
+  },
+  "Boot Parameters": {
+    "smt_enabled": "false",
+    "module_name_0": "environment",
+    "console": "text",
+    "boot_args": "",
+    "bootargs": "",
+    "bootfile": "unix",
+    "fstype": "ufs",
+    "os_console": "text",
+    "root_shadow": "$5$2HOHRnK3$NvLlm.1KQBbB0WjoP7xcIwGnllhzp2HnT.mDO7DpxYA",
+    "screen__cols": "126",
+    "screen__rows": "47",
+    "screen_font": "8x16",
+    "screen_height": "768",
+    "screen_width": "1024",
+    "smartos": "true",
+    "plat_max_ncpus": "8",
+    "boot_max_ncpus": "8"
+  },
+  "Psrinfo": {
+    "smt_enabled": "false"
+  },
+  "Network Interfaces": {
+    "igb0": {"MAC Address": "d0:50:99:d0:85:33", "ip4addr": "", "Link Status": "down", "NIC Names": []},
+    "igb1": {"MAC Address": "d0:50:99:d0:85:34", "ip4addr": "172.16.3.3", "Link Status": "up", "NIC Names": ["admin"]}
+  },
+  "Virtual Network Interfaces": {
+  },
+  "Link Aggregations": {
+  }
+}

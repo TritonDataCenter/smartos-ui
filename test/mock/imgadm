@@ -1,0 +1,11 @@
+#!/bin/bash
+
+root="$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)/../data"
+case "$1" in
+    list)
+        cat "$root/imgadm/list.json";;
+    get)
+        cat "$root/imgadm/$2.json";;
+    *)
+        exit 1;;
+esac

@@ -1,0 +1,6 @@
+/target
+.DS_Store
+.idea
+/rust
+/cache
+etc/config.toml

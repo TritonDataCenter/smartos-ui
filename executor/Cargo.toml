@@ -1,0 +1,21 @@
+[package]
+name = "smartos_executor"
+version = "0.1.0"
+homepage = "https://github.com/tritondatacenter/smartos_ui"
+description = "SmartOS UI Executor"
+edition = "2021"
+repository = "https://github.com/tritondatacenter/smartos_ui"
+license = "MPL-2.0"
+authors = [
+    "MNX Cloud (mnx.io)"
+]
+
+[dependencies]
+dropshot = "0.9"
+tokio = {  version = "1.35", features = ["full"] }
+slog = "2.7"
+hyper = "0.14"
+serde = { version = "1.0.195", features = ["derive"] }
+serde_json = "1.0.111"
+schemars = "0.8"
+smartos_shared = { path = "../shared" }

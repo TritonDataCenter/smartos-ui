@@ -1,0 +1,11 @@
+#!/bin/bash
+
+root="$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)/../data"
+case "$1" in
+    list)
+        cat "$root/vmadm/list.txt";;
+    get)
+        cat "$root/vmadm/$2.json";;
+    *)
+        exit 1;;
+esac

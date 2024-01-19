@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+{% block head %}
+    <head>
+        <title>{% block title %}{% endblock %}</title>
+    </head>
+{% endblock %}
+{% block body %}
+<body>
+    <div id="content">{% block content %}{% endblock %}</div>
+</body>
+{% endblock %}
+</html>

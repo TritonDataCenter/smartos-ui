@@ -1,0 +1,25 @@
+{% extends "layout.j2" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<form action="/login" method="POST">
+    <fieldset>
+        <legend>Login</legend>
+        {% if message.is_some() %}
+            <div>
+                {{message.unwrap_or_default()}}
+            </div>
+        {% endif %}
+        <div>
+          <label for="user">Username: </label>
+          <input id="user" name="user" type="text" required />
+        </div>
+        <div>
+          <label for="password">Password: </label>
+          <input id="password" name="password" type="password" required />
+        </div>
+        <div>
+          <button type="submit">Sign in</button>
+        </div>
+    </fieldset>
+</form>
+{% endblock %}

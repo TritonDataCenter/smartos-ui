@@ -1,0 +1,11 @@
+{% extends "layout.j2" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+User: {{login}} <a href="/logout">Log out</a>
+
+<ul>
+    {% for instance in instances %}
+        <li>alias: {{instance.alias}}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

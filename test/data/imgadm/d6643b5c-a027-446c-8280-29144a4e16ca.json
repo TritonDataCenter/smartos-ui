@@ -1,0 +1,48 @@
+{
+  "manifest": {
+    "v": 2,
+    "uuid": "d6643b5c-a027-446c-8280-29144a4e16ca",
+    "owner": "00000000-0000-0000-0000-000000000000",
+    "name": "almalinux-9",
+    "version": "20231127",
+    "state": "active",
+    "disabled": false,
+    "public": true,
+    "published_at": "2023-11-27T03:08:42Z",
+    "type": "zvol",
+    "os": "linux",
+    "files": [
+      {
+        "sha1": "f7e7b67034daa25122c670c45c3925038b6a1dba",
+        "size": 459623458,
+        "compression": "gzip"
+      }
+    ],
+    "description": "AlmaLinux 9 64-bit image with just essential packages installed. Built to run on bhyve or KVM virtual machines.",
+    "homepage": "https://docs.tritondatacenter.com/public-cloud/instances/virtual-machines/images/linux",
+    "requirements": {
+      "min_ram": 500,
+      "networks": [
+        {
+          "name": "net0",
+          "description": "public"
+        }
+      ],
+      "ssh_key": true
+    },
+    "users": [
+      {
+        "name": "root"
+      }
+    ],
+    "nic_driver": "virtio",
+    "disk_driver": "virtio",
+    "cpu_type": "host",
+    "image_size": 10240,
+    "tags": {
+      "role": "os"
+    }
+  },
+  "zpool": "zones",
+  "source": "https://images.smartos.org"
+}
