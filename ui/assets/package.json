@@ -1,0 +1,12 @@
+{
+  "name": "smartos_ui_assets",
+  "version": "1.0.0",
+  "description": "Static assets for SmartOS UI",
+  "author": "MNX Cloud (mnx.io)",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "@tailwindcss/forms": "^0.5.7",
+    "htmx.org": "^1.9.10",
+    "tailwindcss": "^3.4.1"
+  }
+}

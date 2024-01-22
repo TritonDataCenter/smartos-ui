@@ -11,7 +11,7 @@
 use std::process::Stdio;
 
 use crate::endpoints::{Context, PathParams};
-use smartos_shared::instance::Instance;
+use smartos_shared::instance::ListInstance;
 
 use dropshot::{endpoint, HttpError, Path, RequestContext};
 use hyper::{Body, Response, StatusCode};
@@ -29,7 +29,7 @@ pub async fn get_index(
             "list",
             "-p",
             "-o",
-            "uuid,image_uuid,type,brand,ram,state,alias",
+            "uuid,image_uuid,type,brand,ram,state,alias,quota",
             "-s",
             "alias,image_uuid",
         ])
@@ -42,20 +42,21 @@ pub async fn get_index(
         .await
         .expect("vmadm command failed to run");
 
-    let mut instances: Vec<Instance> = Vec::new();
+    let mut instances: Vec<ListInstance> = Vec::new();
 
     let stdout = String::from_utf8(out.stdout).unwrap();
 
     for line in stdout.lines() {
         let v: Vec<&str> = line.split(':').collect();
-        instances.push(Instance {
+        instances.push(ListInstance {
             uuid: String::from(v[0]),
             image_uuid: String::from(v[1]),
             r#type: String::from(v[2]),
             brand: String::from(v[3]),
-            ram: String::from(v[4]),
+            ram: v[4].parse().unwrap_or_default(),
             state: String::from(v[5]),
             alias: String::from(v[6]),
+            quota: v[7].parse().unwrap_or_default(),
         });
     }
     let body = serde_json::to_string(&instances).unwrap_or_default();

@@ -4,3 +4,5 @@
 /rust
 /cache
 etc/config.toml
+ui/assets/*.gz
+ui/assets/node_modules

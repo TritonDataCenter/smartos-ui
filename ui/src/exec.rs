@@ -8,7 +8,9 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use smartos_shared::instance::Instance;
+use smartos_shared::{
+    image::Image, instance::Instance, instance::ListInstance, sysinfo::Sysinfo,
+};
 
 use reqwest::{Client, RequestBuilder};
 
@@ -34,9 +36,46 @@ impl ExecClient {
         self.http.get(format!("{}/{path}", self.url))
     }
 
-    pub async fn get_instances(&self) -> Result<Vec<Instance>, reqwest::Error> {
-        let response: Vec<Instance> = self
+    pub async fn get_instances(
+        &self,
+    ) -> Result<Vec<ListInstance>, reqwest::Error> {
+        let response: Vec<ListInstance> = self
             .get("instance")
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await?;
+        Ok(response)
+    }
+
+    pub async fn get_instance(
+        &self,
+        id: &String,
+    ) -> Result<Instance, reqwest::Error> {
+        let response: Instance = self
+            .get(format!("instance/{}", &id).as_str())
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await?;
+        Ok(response)
+    }
+    pub async fn get_sysinfo(&self) -> Result<Sysinfo, reqwest::Error> {
+        let response: Sysinfo = self
+            .get("sysinfo")
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await?;
+        Ok(response)
+    }
+
+    pub async fn get_images(&self) -> Result<Vec<Image>, reqwest::Error> {
+        let response: Vec<Image> = self
+            .get("image")
             .send()
             .await?
             .error_for_status()?

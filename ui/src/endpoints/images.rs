@@ -10,53 +10,53 @@
 
 use crate::endpoints::{get_header, Context};
 use crate::session::Session;
-use smartos_shared::sysinfo::Sysinfo;
+use smartos_shared::image::Image;
 
 use askama::Template;
 use dropshot::{endpoint, HttpError, RequestContext};
 use hyper::{Body, Response, StatusCode};
 
 #[derive(Template)]
-#[template(path = "dashboard.j2")]
-pub struct DashboardTemplate {
+#[template(path = "images.j2")]
+pub struct ImagesTemplate {
     title: String,
     login: String,
-    sysinfo: Sysinfo,
+    images: Vec<Image>,
 }
 
 #[derive(Template)]
-#[template(path = "dashboard-hx.j2")]
-pub struct DashboardHxTemplate {
+#[template(path = "images-hx.j2")]
+pub struct ImagesHxTemplate {
     title: String,
-    sysinfo: Sysinfo,
+    images: Vec<Image>,
 }
 
 #[endpoint {
 method = GET,
-path = "/dashboard"
+path = "/images"
 }]
 pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    let title = String::from("Dashboard");
     let is_htmx = get_header(&ctx, "HX-Request").is_some();
+    let title = String::from("Instances");
     if let Some(login) = Session::get_login(&ctx) {
-        let sysinfo = ctx.context().client.get_sysinfo().await.unwrap();
+        let images = ctx.context().client.get_images().await.unwrap();
         let result = if is_htmx {
-            let template = DashboardHxTemplate { title, sysinfo };
+            let template = ImagesHxTemplate { title, images };
             template.render().unwrap()
         } else {
-            let template = DashboardTemplate {
+            let template = ImagesTemplate {
                 title,
                 login,
-                sysinfo,
+                images,
             };
             template.render().unwrap()
         };
         return Ok(Response::builder()
             .status(StatusCode::OK)
             .header("Content-Type", "text/html")
-            .header("HX-Push-Url", String::from("/dashboard"))
+            .header("HX-Push-Url", String::from("/images"))
             .body(result.into())
             .unwrap());
     }

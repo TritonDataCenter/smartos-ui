@@ -26,3 +26,35 @@ pub async fn get_favicon(
         .body(Body::from(bytes))
         .unwrap())
 }
+
+#[endpoint {
+method = GET,
+path = "/js/htmx.js"
+}]
+pub async fn get_js_htmx(
+    _: RequestContext<Context>,
+) -> Result<Response<Body>, HttpError> {
+    let bytes = Bytes::from_static(include_bytes!(
+        "../../assets/node_modules/htmx.org/dist/htmx.min.js.gz"
+    ));
+    Ok(Response::builder()
+        .header("Content-Encoding", "gzip")
+        .header("Content-Type", "application/javascript")
+        .body(Body::from(bytes))
+        .unwrap())
+}
+
+#[endpoint {
+method = GET,
+path = "/css/main.css"
+}]
+pub async fn get_css_main(
+    _: RequestContext<Context>,
+) -> Result<Response<Body>, HttpError> {
+    let bytes = Bytes::from_static(include_bytes!("../../assets/main.css.gz"));
+    Ok(Response::builder()
+        .header("Content-Encoding", "gzip")
+        .header("Content-Type", "text/css")
+        .body(Body::from(bytes))
+        .unwrap())
+}

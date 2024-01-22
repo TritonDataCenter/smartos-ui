@@ -10,6 +10,8 @@
 
 pub mod assets;
 pub mod dashboard;
+pub mod images;
+pub mod instances;
 pub mod login;
 
 use std::collections::HashMap;
@@ -21,6 +23,13 @@ use smartos_shared::config::Config;
 
 use dropshot::{endpoint, HttpError, RequestContext};
 use hyper::{Body, Response, StatusCode};
+use schemars::JsonSchema;
+use serde::Deserialize;
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct PathParams {
+    id: String,
+}
 
 /// Available to in each Dropshot endpoint, contains global config, and the
 /// user sessions
@@ -41,6 +50,21 @@ impl Context {
             sessions: Arc::new(Mutex::new(map)),
         }
     }
+}
+
+pub fn get_header(
+    ctx: &RequestContext<Context>,
+    header: &str,
+) -> Option<String> {
+    ctx.request
+        .headers()
+        .get(header)
+        .map(|value| String::from(value.to_str().unwrap()))
+    // return if let Some(value) = ctx.request.headers().get(header) {
+    //     Some(String::from(value.to_str().unwrap()))
+    // } else {
+    //     None
+    // };
 }
 
 /// Redirect / to either /dashboard (if user has a valid session) or /login

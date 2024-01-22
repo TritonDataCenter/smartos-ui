@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html class="h-full bg-gray-900">
+{% block head %}
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %}</title>
+        <link href="/css/main.css?v=" rel="stylesheet">
+        <script src="/js/htmx.js?v="></script>
+    </head>
+{% endblock %}
+{% block body %}
+    <body class="h-full">
+    {% block content %}{% endblock %}
+    </body>
+{% endblock %}
+</html>

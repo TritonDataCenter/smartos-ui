@@ -59,12 +59,35 @@ async fn main() -> Result<(), String> {
     }
 
     let mut api = ApiDescription::new();
+
+    // /
     api.register(endpoints::get_index)?;
+
+    // /login
     api.register(endpoints::login::get_index)?;
     api.register(endpoints::login::post_index)?;
     api.register(endpoints::login::get_logout)?;
+
+    // /dashboard
     api.register(endpoints::dashboard::get_index)?;
+
+    // /favicon.ico
     api.register(endpoints::assets::get_favicon)?;
+
+    // /js/htmx.js
+    api.register(endpoints::assets::get_js_htmx)?;
+
+    // /css/main.css
+    api.register(endpoints::assets::get_css_main)?;
+
+    // /instances
+    api.register(endpoints::instances::get_index)?;
+    api.register(endpoints::instances::get_by_id)?;
+    api.register(endpoints::instances::create)?;
+
+    // /images
+    api.register(endpoints::images::get_index)?;
+    //api.register(endpoints::images::get_by_id)?;
 
     info!(log, "{} v{}", name, version);
 

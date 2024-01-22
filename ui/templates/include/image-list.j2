@@ -1,0 +1,50 @@
+<div>
+  <div class="pt-11">
+    <h2 class="px-4 text-base font-semibold leading-7 text-white sm:px-6 lg:px-8">Images</h2>
+    <table class="mt-6 w-full whitespace-nowrap text-left">
+      <colgroup>
+        <col class="w-full sm:w-4/12">
+        <col class="lg:w-1/12">
+        <col class="lg:w-4/12">
+        <col class="lg:w-2/12">
+        <col class="lg:w-2/12">
+      </colgroup>
+      <thead class="border-b border-white/10 text-sm leading-6 text-white">
+        <tr>
+          <th scope="col" class="py-2 pl-4 pr-8 font-semibold sm:pl-6 lg:pl-8">Name</th>
+          <th scope="col" class="hidden py-2 pl-0 pr-4 text-right font-semibold sm:table-cell sm:pr-6 lg:pr-8">UUID</th>
+          <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold sm:table-cell">Version</th>
+          <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">State</th>
+          <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Type</th>
+          <th scope="col" class="py-2 pl-0 pr-4 text-right font-semibold sm:pr-8 sm:text-left lg:pr-20">OS</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-white/5">
+        {% for image in images %}
+        <tr hx-get="/images/{{image.manifest.uuid}}" hx-target="#main" class="hover:bg-gray-800 cursor-pointer">
+          <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
+            <div class="flex items-center gap-x-4">
+              <div class="truncate text-sm font-medium leading-6 text-white">{{image.manifest.name}}</div>
+            </div>
+          </td>
+          <td class="hidden py-4 pl-0 pr-4 text-right text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
+            <time datetime="2023-01-23T11:00">{{image.manifest.uuid}}</time>
+          </td>
+          <td class="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8">
+            <div class="flex gap-x-3">
+              <div class="font-mono text-sm leading-6 text-gray-400">{{image.manifest.version}}</div>
+            </div>
+          </td>
+          <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.state}}</td>
+          <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.type}}</td>
+          <td class="py-4 pl-0 pr-4 text-sm leading-6 sm:pr-8 lg:pr-20">
+            <div class="flex items-center justify-end gap-x-2 sm:justify-start">
+              <div class="hidden text-white sm:block">{{image.manifest.os}}</div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

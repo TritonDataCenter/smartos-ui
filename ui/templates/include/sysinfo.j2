@@ -1,0 +1,28 @@
+<div class="grid grid-cols-1 bg-gray-700/10 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8">
+    <p class="text-sm font-medium leading-6 text-gray-400">CPUs</p>
+    <p class="mt-2 flex items-baseline gap-x-2">
+      <span class="text-4xl font-semibold tracking-tight text-white">{{sysinfo.cpu_count}}</span>
+    </p>
+  </div>
+  <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
+    <p class="text-sm font-medium leading-6 text-gray-400">Memory</p>
+    <p class="mt-2 flex items-baseline gap-x-2">
+      <span class="text-4xl font-semibold tracking-tight text-white">{{sysinfo.mib_of_memory}}</span>
+      <span class="text-sm text-gray-400">MiB</span>
+    </p>
+  </div>
+  <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 lg:border-l">
+    <p class="text-sm font-medium leading-6 text-gray-400">Zpool Size</p>
+    <p class="mt-2 flex items-baseline gap-x-2">
+      <span class="text-4xl font-semibold tracking-tight text-white">{{sysinfo.zpool_size_in_gib}}</span>
+      <span class="text-sm text-gray-400">GiB</span>
+    </p>
+  </div>
+  <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
+    <p class="text-sm font-medium leading-6 text-gray-400">Platform Version</p>
+    <p class="mt-2 flex items-baseline gap-x-2">
+      <span class="text-4xl font-semibold tracking-tight text-white">{{sysinfo.live_image}}</span>
+    </p>
+  </div>
+</div>

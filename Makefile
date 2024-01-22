@@ -22,15 +22,30 @@ include ./deps/eng/tools/mk/Makefile.rust.defs
 
 BUILD_PLATFORM = 20210826T002459Z
 
+J2_FILES ?= $(shell find $(TOP)/ui/templates -name *.j2)
+
+ui/assets/node_modules:
+	cd ui/assets && npm install
+
+ui/assets/main.css: ui/assets/input.css ui/assets/tailwind.config.js $(J2_FILES)
+	cd ui/assets && \
+		./node_modules/.bin/tailwindcss -m -i ./input.css -o ./main.css
+
+ui/assets/main.css.gz: ui/assets/main.css
+	cd ui/assets && rm -f ./main.css.gz && gzip ./main.css
+
+.PHONY: assets
+assets: ui/assets/node_modules ui/assets/main.css.gz
+
 .PHONY: all
 all: release
 
 .PHONY: release
-release: $(RS_FILES) | $(CARGO_EXEC)
+release: assets $(RS_FILES) | $(CARGO_EXEC)
 	$(CARGO) build --release
 
 .PHONY: debug
-debug: $(RS_FILES) | $(CARGO_EXEC)
+debug: assets $(RS_FILES) | $(CARGO_EXEC)
 	$(CARGO) build
 
 .PHONY: fmt
@@ -45,6 +60,10 @@ license-check: | $(CARGO_EXEC)
 .PHONY: update
 update: | $(CARGO_EXEC)
 	$(CARGO) update
+
+.PHONY: devrun
+devrun: debug
+	./tools/devrun.sh
 
 include ./deps/eng/tools/mk/Makefile.deps
 include ./deps/eng/tools/mk/Makefile.targ
