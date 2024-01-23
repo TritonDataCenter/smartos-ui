@@ -12,6 +12,7 @@ use smartos_shared::config::Config;
 
 use schemars::JsonSchema;
 use serde::Deserialize;
+use uuid::Uuid;
 
 pub mod image;
 pub mod instance;
@@ -30,5 +31,5 @@ impl Context {
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct PathParams {
-    id: String,
+    id: Uuid,
 }

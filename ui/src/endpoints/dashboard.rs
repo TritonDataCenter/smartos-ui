@@ -8,7 +8,7 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use crate::endpoints::{get_header, Context};
+use crate::endpoints::{redirect_login, Context};
 use crate::session::Session;
 use smartos_shared::sysinfo::Sysinfo;
 
@@ -31,9 +31,9 @@ path = "/dashboard"
 pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    let title = String::from("Dashboard");
-    let is_htmx = get_header(&ctx, "HX-Request").is_some();
+    let builder = Response::builder();
     if let Some(login) = Session::get_login(&ctx) {
+        let title = String::from("Dashboard");
         let sysinfo = ctx.context().client.get_sysinfo().await.unwrap();
 
         let template = DashboardTemplate {
@@ -43,25 +43,12 @@ pub async fn get_index(
         };
         let result = template.render().unwrap();
 
-        return Ok(Response::builder()
+        return Ok(builder
             .status(StatusCode::OK)
             .header("Content-Type", "text/html")
             .header("HX-Push-Url", String::from("/dashboard"))
-            .body(result.into())
-            .unwrap());
+            .body(result.into())?);
     }
 
-    if is_htmx {
-        return Ok(Response::builder()
-            .status(StatusCode::OK)
-            .header("HX-Refresh", "true")
-            .body(Body::empty())
-            .unwrap());
-    }
-
-    Ok(Response::builder()
-        .status(StatusCode::TEMPORARY_REDIRECT)
-        .header("Location", "/login")
-        .body(Body::empty())
-        .unwrap())
+    Ok(redirect_login(builder, &ctx)?)
 }

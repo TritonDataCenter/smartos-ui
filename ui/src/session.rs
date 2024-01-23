@@ -13,12 +13,13 @@ use crate::endpoints::Context;
 use dropshot::RequestContext;
 use nanoid::nanoid;
 use serde::Serialize;
+use uuid::Uuid;
 
 #[derive(Serialize, Debug)]
 pub struct UserSession {
     pub login: String,
 
-    pub uuid: String,
+    pub uuid: Uuid,
     // TODO: Check expiration on access
     // pub expires: OffsetDateTime,
 
@@ -65,7 +66,10 @@ impl Session {
                 UserSession {
                     login: username.clone(),
                     // TODO get UUID from User DB
-                    uuid: String::from("51c728af-9edd-4d7e-8469-1c6b33681f82"),
+                    uuid: Uuid::parse_str(
+                        "51c728af-9edd-4d7e-8469-1c6b33681f82",
+                    )
+                    .unwrap(),
                 },
             );
             return Some(id);
@@ -91,6 +95,17 @@ impl Session {
             if let Ok(sessions) = ctx.context().sessions.clone().lock() {
                 if let Some(session) = sessions.get(session_id) {
                     return Some(session.login.clone());
+                }
+            }
+        }
+        None
+    }
+
+    pub fn get_uuid(ctx: &RequestContext<Context>) -> Option<Uuid> {
+        if let Some(session_id) = Session::get_id(ctx) {
+            if let Ok(sessions) = ctx.context().sessions.clone().lock() {
+                if let Some(session) = sessions.get(session_id) {
+                    return Some(session.uuid);
                 }
             }
         }

@@ -43,7 +43,7 @@ pub async fn get_by_id(
 ) -> Result<Response<Body>, HttpError> {
     let path = path_params.into_inner();
     let out = Command::new("imgadm")
-        .args(["get", &path.id])
+        .args(["get", &path.id.to_string()])
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())

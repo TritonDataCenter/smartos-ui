@@ -37,6 +37,8 @@ async fn main() -> Result<(), String> {
     let mut api = ApiDescription::new();
     api.register(endpoints::sysinfo::get_index)?;
     api.register(endpoints::image::get_index)?;
+    api.register(endpoints::instance::post_index)?;
+    api.register(endpoints::instance::delete_by_id)?;
 
     info!(log, "{} v{}", name, version);
 

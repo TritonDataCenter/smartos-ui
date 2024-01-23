@@ -34,8 +34,18 @@ ui/assets/main.css: ui/assets/input.css ui/assets/tailwind.config.js $(J2_FILES)
 ui/assets/main.css.gz: ui/assets/main.css
 	cd ui/assets && rm -f ./main.css.gz && gzip ./main.css
 
+ui/assets/main.js: ui/assets/node_modules
+	cat \
+		ui/assets/node_modules/htmx.org/dist/htmx.min.js \
+		ui/assets/json-enc-typed.js \
+		ui/assets/dashboard-nav.js \
+		> ui/assets/main.js
+
+ui/assets/main.js.gz: ui/assets/main.js
+	cd ui/assets && rm -f ./main.js.gz && gzip ./main.js
+
 .PHONY: assets
-assets: ui/assets/node_modules ui/assets/main.css.gz
+assets: ui/assets/node_modules ui/assets/main.css.gz ui/assets/main.js.gz
 
 .PHONY: all
 all: release

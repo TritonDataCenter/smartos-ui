@@ -1,6 +1,8 @@
 #!/bin/bash
 trap "kill 0" EXIT
 
+export RUST_BACKTRACE=full
+
 touch /tmp/smartos_{ui,executor}.log
 
 ./test/mock/vminfod &

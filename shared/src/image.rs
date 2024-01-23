@@ -9,11 +9,12 @@
  */
 
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Manifest {
     pub v: i64,
-    pub uuid: String,
+    pub uuid: Uuid,
     pub name: String,
     pub version: String,
     pub state: String,

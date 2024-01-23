@@ -28,7 +28,7 @@
   </header>
 
     <div class="flex flex-1 items-center justify-end gap-x-6 mb-10 my-10">
-      <a hx-get="/instance-create" hx-target="#main" hx-select="#content" title="Create new VM" class="cursor-pointer rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+      <a href="/instance-create" hx-get="/instance-create" hx-target="#main" hx-select="#content" title="Create new VM" class="cursor-pointer rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
           {%  include "include/svg/plus-circle.svg" %}
       </a>
     </div>
@@ -58,7 +58,7 @@
         <tr hx-get="/instances/{{instance.uuid}}" hx-target="#main" hx-select="#content" class="hover:bg-gray-800 cursor-pointer">
           <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
             <div class="flex items-center gap-x-4">
-              <div class="truncate text-sm font-medium leading-6 text-white">{{instance.alias}}</div>
+              <div class="truncate text-sm font-medium leading-6 text-white">{{instance.alias.as_deref().unwrap_or("-")}}</div>
             </div>
           </td>
           <td class="hidden py-4 pl-0 pr-4 text-right text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">

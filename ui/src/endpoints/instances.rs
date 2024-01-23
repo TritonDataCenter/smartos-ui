@@ -10,14 +10,17 @@
 
 use std::collections::HashMap;
 
-use crate::endpoints::{get_header, Context, PathParams};
+use crate::endpoints::{redirect_login, Context, HXLocation, PathParams};
 use crate::session::Session;
 
-use smartos_shared::instance::Instance;
+use smartos_shared::instance::{CreatePayload, Instance, Nic};
 
 use askama::Template;
-use dropshot::{endpoint, HttpError, Path, RequestContext};
+use dropshot::{endpoint, HttpError, Path, RequestContext, TypedBody};
 use hyper::{Body, Response, StatusCode};
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Template)]
 #[template(path = "instance.j2")]
@@ -35,12 +38,13 @@ pub async fn get_by_id(
     ctx: RequestContext<Context>,
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
-    let path = path_params.into_inner();
-    let is_htmx = get_header(&ctx, "HX-Request").is_some();
+    let builder = Response::builder();
     if let Some(login) = Session::get_login(&ctx) {
+        let path = path_params.into_inner();
         let instance =
             ctx.context().client.get_instance(&path.id).await.unwrap();
-        let title = format!("Instance: {}", instance.alias);
+
+        let title = String::from("Instance");
         let template = InstanceTemplate {
             title,
             login,
@@ -48,27 +52,35 @@ pub async fn get_by_id(
         };
         let result = template.render().unwrap();
 
-        return Ok(Response::builder()
+        return Ok(builder
             .status(StatusCode::OK)
             .header("HX-Push-Url", format!("/instances/{}", &path.id))
             .header("Content-Type", "text/html")
-            .body(result.into())
-            .unwrap());
+            .body(result.into())?);
     }
 
-    if is_htmx {
-        return Ok(Response::builder()
-            .status(StatusCode::OK)
-            .header("HX-Refresh", "true")
-            .body(Body::empty())
-            .unwrap());
-    }
+    Ok(redirect_login(builder, &ctx)?)
+}
 
-    Ok(Response::builder()
-        .status(StatusCode::TEMPORARY_REDIRECT)
-        .header("Location", "/login?e=auth")
-        .body(Body::empty())
-        .unwrap())
+#[endpoint {
+method = DELETE,
+path = "/instances/{id}",
+}]
+pub async fn delete_by_id(
+    ctx: RequestContext<Context>,
+    path_params: Path<PathParams>,
+) -> Result<Response<Body>, HttpError> {
+    let builder = Response::builder();
+    if Session::get_login(&ctx).is_some() {
+        ctx.context()
+            .client
+            .delete_instance(&path_params.into_inner().id)
+            .await
+            .unwrap();
+
+        return Ok(HXLocation::common(builder, "/instances")?);
+    }
+    Ok(redirect_login(builder, &ctx)?)
 }
 
 #[derive(Template)]
@@ -88,9 +100,9 @@ path = "/instances"
 pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    let is_htmx = get_header(&ctx, "HX-Request").is_some();
-    let title = String::from("Instances");
+    let builder = Response::builder();
     if let Some(login) = Session::get_login(&ctx) {
+        let title = String::from("Instances");
         let instances = ctx.context().client.get_instances().await.unwrap();
         let total_ram = instances
             .iter()
@@ -105,27 +117,14 @@ pub async fn get_index(
         };
         let result = template.render().unwrap();
 
-        return Ok(Response::builder()
+        return Ok(builder
             .status(StatusCode::OK)
-            .header("Content-Type", "text/html")
             .header("HX-Push-Url", String::from("/instances"))
-            .body(result.into())
-            .unwrap());
+            .header("Content-Type", "text/html")
+            .body(result.into())?);
     }
 
-    if is_htmx {
-        return Ok(Response::builder()
-            .status(StatusCode::OK)
-            .header("HX-Refresh", "true")
-            .body(Body::empty())
-            .unwrap());
-    }
-
-    Ok(Response::builder()
-        .status(StatusCode::TEMPORARY_REDIRECT)
-        .header("Location", "/login")
-        .body(Body::empty())
-        .unwrap())
+    Ok(redirect_login(builder, &ctx)?)
 }
 
 #[derive(Template)]
@@ -145,13 +144,14 @@ pub struct ImageOption {
 method = GET,
 path = "/instance-create"
 }]
-pub async fn create(
+pub async fn get_create(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    let is_htmx = get_header(&ctx, "HX-Request").is_some();
-    let title = String::from("Create Instance");
+    let builder = Response::builder();
 
     if let Some(login) = Session::get_login(&ctx) {
+        let title = String::from("Create Instance");
+
         // Group images by os + type
         let mut image_list = HashMap::<String, Vec<ImageOption>>::new();
         let mut images = ctx.context().client.get_images().await.unwrap();
@@ -163,7 +163,7 @@ pub async fn create(
                 format!("{} {}", image.manifest.os, image.manifest.r#type);
             if let Some(image_vec) = image_list.get_mut(&key) {
                 image_vec.push(ImageOption {
-                    id: image.manifest.uuid.clone(),
+                    id: image.manifest.uuid.to_string(),
                     title: image.manifest.description.clone(),
                     name: format!(
                         "{} {}",
@@ -174,7 +174,7 @@ pub async fn create(
                 image_list.insert(
                     key,
                     vec![ImageOption {
-                        id: image.manifest.uuid.clone(),
+                        id: image.manifest.uuid.to_string(),
                         title: image.manifest.description.clone(),
                         name: format!(
                             "{} {}",
@@ -192,25 +192,62 @@ pub async fn create(
         };
         let result = template.render().unwrap();
 
-        return Ok(Response::builder()
+        return Ok(builder
             .status(StatusCode::OK)
-            .header("Content-Type", "text/html")
             .header("HX-Push-Url", String::from("/instance-create"))
-            .body(result.into())
-            .unwrap());
+            .header("Content-Type", "text/html")
+            .body(result.into())?);
     }
 
-    if is_htmx {
-        return Ok(Response::builder()
-            .status(StatusCode::OK)
-            .header("HX-Refresh", "true")
-            .body(Body::empty())
-            .unwrap());
+    Ok(redirect_login(builder, &ctx)?)
+}
+
+#[derive(Deserialize, Serialize, Debug, JsonSchema)]
+pub struct CreateRequestBody {
+    pub alias: Option<String>,
+    pub image_uuid: Uuid,
+    pub ram: Option<u64>,
+    pub quota: Option<u64>,
+    pub nic_tag: String,
+    pub ip: String,
+    pub gateway: String,
+}
+
+#[endpoint {
+method = POST,
+path = "/instances",
+}]
+pub async fn post_create(
+    ctx: RequestContext<Context>,
+    request_body: TypedBody<CreateRequestBody>,
+) -> Result<Response<Body>, HttpError> {
+    let builder = Response::builder();
+    let req = request_body.into_inner();
+    if let Some(uuid) = Session::get_uuid(&ctx) {
+        let exec_req = CreatePayload {
+            alias: req.alias,
+            brand: String::from("joyent"),
+            resolvers: vec![String::from("8.8.8.8"), String::from("8.8.4.4")],
+            ram: req.ram.unwrap_or_default(),
+            max_lwps: 4096,
+            autoboot: true,
+            nics: vec![Nic {
+                nic_tag: req.nic_tag,
+                ips: vec![req.ip],
+                gateways: vec![req.gateway],
+                primary: true,
+            }],
+            image_uuid: req.image_uuid,
+            quota: req.quota.unwrap_or_default(),
+            owner_uuid: uuid,
+        };
+        ctx.context()
+            .client
+            .create_instance(exec_req)
+            .await
+            .unwrap();
+        return Ok(HXLocation::common(builder, "/instances")?);
     }
 
-    Ok(Response::builder()
-        .status(StatusCode::TEMPORARY_REDIRECT)
-        .header("Location", "/login")
-        .body(Body::empty())
-        .unwrap())
+    Ok(redirect_login(builder, &ctx)?)
 }

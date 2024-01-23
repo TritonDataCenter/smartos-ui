@@ -74,8 +74,7 @@ pub async fn post_index(
         return Ok(Response::builder()
             .status(StatusCode::OK)
             .header("Content-Type", "text/html")
-            .body(result.into())
-            .unwrap());
+            .body(result.into())?);
     }
     if let Some(id) = Session::create(&ctx, req.user) {
         return Ok(Response::builder()
@@ -90,8 +89,7 @@ pub async fn post_index(
     let result = login.render().unwrap(); // XXX
     Ok(Response::builder()
         .status(StatusCode::FORBIDDEN)
-        .body(result.into())
-        .unwrap())
+        .body(result.into())?)
 }
 
 /// Presents user with a login form
@@ -107,6 +105,5 @@ pub async fn get_index(
     Ok(Response::builder()
         .status(StatusCode::OK)
         .header("Content-Type", "text/html")
-        .body(result.into())
-        .unwrap())
+        .body(result.into())?)
 }

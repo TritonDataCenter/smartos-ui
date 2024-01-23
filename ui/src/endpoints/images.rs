@@ -8,7 +8,7 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use crate::endpoints::{get_header, Context};
+use crate::endpoints::{redirect_login, Context};
 use crate::session::Session;
 use smartos_shared::image::Image;
 
@@ -31,9 +31,10 @@ path = "/images"
 pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    let is_htmx = get_header(&ctx, "HX-Request").is_some();
-    let title = String::from("Instances");
+    let builder = Response::builder();
+
     if let Some(login) = Session::get_login(&ctx) {
+        let title = String::from("Instances");
         let images = ctx.context().client.get_images().await.unwrap();
 
         let template = ImagesTemplate {
@@ -43,25 +44,12 @@ pub async fn get_index(
         };
         let result = template.render().unwrap();
 
-        return Ok(Response::builder()
+        return Ok(builder
             .status(StatusCode::OK)
             .header("Content-Type", "text/html")
             .header("HX-Push-Url", String::from("/images"))
-            .body(result.into())
-            .unwrap());
+            .body(result.into())?);
     }
 
-    if is_htmx {
-        return Ok(Response::builder()
-            .status(StatusCode::OK)
-            .header("HX-Refresh", "true")
-            .body(Body::empty())
-            .unwrap());
-    }
-
-    Ok(Response::builder()
-        .status(StatusCode::TEMPORARY_REDIRECT)
-        .header("Location", "/login")
-        .body(Body::empty())
-        .unwrap())
+    Ok(redirect_login(builder, &ctx)?)
 }

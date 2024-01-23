@@ -1541,14 +1541,17 @@ dependencies = [
  "slog",
  "smartos_shared",
  "tokio",
+ "uuid",
 ]
 
 [[package]]
 name = "smartos_shared"
 version = "0.1.0"
 dependencies = [
+ "schemars",
  "serde",
  "serde_json",
+ "uuid",
 ]
 
 [[package]]
@@ -1557,6 +1560,7 @@ version = "0.1.0"
 dependencies = [
  "askama",
  "dropshot",
+ "http",
  "hyper",
  "libc",
  "nanoid",
@@ -1568,6 +1572,7 @@ dependencies = [
  "slog",
  "smartos_shared",
  "tokio",
+ "uuid",
 ]
 
 [[package]]

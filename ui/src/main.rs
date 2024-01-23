@@ -75,7 +75,7 @@ async fn main() -> Result<(), String> {
     api.register(endpoints::assets::get_favicon)?;
 
     // /js/htmx.js
-    api.register(endpoints::assets::get_js_htmx)?;
+    api.register(endpoints::assets::get_js_main)?;
 
     // /css/main.css
     api.register(endpoints::assets::get_css_main)?;
@@ -83,7 +83,9 @@ async fn main() -> Result<(), String> {
     // /instances
     api.register(endpoints::instances::get_index)?;
     api.register(endpoints::instances::get_by_id)?;
-    api.register(endpoints::instances::create)?;
+    api.register(endpoints::instances::get_create)?;
+    api.register(endpoints::instances::post_create)?;
+    api.register(endpoints::instances::delete_by_id)?;
 
     // /images
     api.register(endpoints::images::get_index)?;

@@ -29,14 +29,12 @@ pub async fn get_favicon(
 
 #[endpoint {
 method = GET,
-path = "/js/htmx.js"
+path = "/js/main.js"
 }]
-pub async fn get_js_htmx(
+pub async fn get_js_main(
     _: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    let bytes = Bytes::from_static(include_bytes!(
-        "../../assets/node_modules/htmx.org/dist/htmx.min.js.gz"
-    ));
+    let bytes = Bytes::from_static(include_bytes!("../../assets/main.js.gz"));
     Ok(Response::builder()
         .header("Content-Encoding", "gzip")
         .header("Content-Type", "application/javascript")

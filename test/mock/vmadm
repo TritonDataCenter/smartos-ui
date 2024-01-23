@@ -6,6 +6,9 @@ case "$1" in
         cat "$root/vmadm/list.txt";;
     get)
         cat "$root/vmadm/$2.json";;
+    create)
+        cat - > "$root/vmadm/create_output.txt";;
     *)
+        echo "$1 not implemented"
         exit 1;;
 esac

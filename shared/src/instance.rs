@@ -10,9 +10,25 @@
 
 use std::fmt::{Display, Error, Formatter};
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize, Serialize, Debug, JsonSchema)]
+pub struct CreatePayload {
+    pub alias: Option<String>,
+    pub brand: String,
+    pub resolvers: Vec<String>,
+    pub ram: u64,
+    pub max_lwps: u64,
+    pub autoboot: bool,
+    pub nics: Vec<Nic>,
+    pub image_uuid: Uuid,
+    pub quota: u64,
+    pub owner_uuid: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Instance {
     pub zonename: String,
     pub autoboot: bool,
@@ -32,14 +48,14 @@ pub struct Instance {
     pub max_locked_memory: u64,
     pub max_swap: u64,
     pub billing_id: String,
-    pub owner_uuid: String,
+    pub owner_uuid: Uuid,
     pub tmpfs: u64,
     pub dns_domain: String,
     pub resolvers: Vec<String>,
-    pub alias: String,
+    pub alias: Option<String>,
     pub nics: Vec<Nic>,
     pub datasets: Option<Vec<String>>,
-    pub uuid: String,
+    pub uuid: Uuid,
     pub zone_state: String, // Enum
     pub zonepath: String,
     pub hvm: bool,
@@ -65,20 +81,20 @@ pub struct Instance {
     //pub snapshots: Vec<_>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize, Serialize, Debug, JsonSchema)]
 pub struct Nic {
-    pub interface: String,
-    pub mac: String,
+    //pub interface: String,
+    //pub mac: String,
     pub nic_tag: String,
-    pub gateway: String,
+    //pub gateway: String,
     pub gateways: Vec<String>,
-    pub netmask: String,
-    pub ip: String,
+    //pub netmask: String,
+    //pub ip: String,
     pub ips: Vec<String>,
     pub primary: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub enum Brand {
     #[serde(rename = "joyent")]
     Joyent,

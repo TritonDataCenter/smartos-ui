@@ -15,6 +15,7 @@ pub mod instances;
 pub mod login;
 
 use std::collections::HashMap;
+use std::fmt;
 use std::sync::{Arc, Mutex};
 
 use crate::exec::Client;
@@ -22,13 +23,91 @@ use crate::session::{Session, UserSession};
 use smartos_shared::config::Config;
 
 use dropshot::{endpoint, HttpError, RequestContext};
+use http::response::Builder;
 use hyper::{Body, Response, StatusCode};
 use schemars::JsonSchema;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+/// <https://htmx.org/headers/hx-location>
+#[derive(Debug, Deserialize, Serialize)]
+pub struct HXLocation {
+    /// url to load the response from
+    pub path: String,
+
+    /// The source element of the request
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
+
+    /// An event that “triggered” the request
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub event: Option<String>,
+
+    /// A callback that will handle the response HTML
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub handler: Option<String>,
+
+    /// The target to swap the response into
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub target: Option<String>,
+
+    /// How the response will be swapped in relative to the target
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub swap: Option<String>,
+
+    // How are these supposed to be structured? Docs don't say, guessing a
+    // Option<Vec<(String; 2)>> ?
+    // /// Values to submit with the request
+    // pub values: Option<String>,
+    // /// Headers to submit with the request
+    // pub headers: Option<String>,
+    /// Allows you to select the content you want swapped from a response
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub select: Option<String>,
+}
+
+impl HXLocation {
+    pub fn new(path: &str) -> HXLocation {
+        Self {
+            path: String::from(path),
+            source: None,
+            event: None,
+            handler: None,
+            target: None,
+            swap: None,
+            select: None,
+        }
+    }
+
+    pub fn common(
+        builder: Builder,
+        path: &str,
+    ) -> http::Result<Response<Body>> {
+        let location = Self {
+            path: String::from(path),
+            source: None,
+            event: None,
+            handler: None,
+            target: Some(String::from("#main")),
+            swap: None,
+            select: Some(String::from("#content")),
+        };
+        builder
+            .header("HX-Location", location.to_string())
+            .status(StatusCode::OK)
+            .body(Body::empty())
+    }
+}
+
+impl fmt::Display for HXLocation {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
+    }
+}
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct PathParams {
-    id: String,
+    id: Uuid,
 }
 
 /// Available to in each Dropshot endpoint, contains global config, and the
@@ -60,12 +139,26 @@ pub fn get_header(
     ctx.request
         .headers()
         .get(header)
-        .map(|value| String::from(value.to_str().unwrap()))
-    // return if let Some(value) = ctx.request.headers().get(header) {
-    //     Some(String::from(value.to_str().unwrap()))
-    // } else {
-    //     None
-    // };
+        .map(|value| String::from(value.to_str().unwrap_or("")))
+}
+
+pub fn redirect_login(
+    builder: Builder,
+    ctx: &RequestContext<Context>,
+) -> http::Result<Response<Body>> {
+    let is_htmx = get_header(ctx, "HX-Request").is_some();
+
+    if is_htmx {
+        return builder
+            .status(StatusCode::OK)
+            .header("HX-Refresh", "true")
+            .body(Body::empty());
+    }
+
+    builder
+        .status(StatusCode::SEE_OTHER)
+        .header("Location", "/login")
+        .body(Body::empty())
 }
 
 /// Redirect / to either /dashboard (if user has a valid session) or /login
