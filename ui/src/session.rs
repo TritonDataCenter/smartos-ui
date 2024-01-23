@@ -17,6 +17,8 @@ use serde::Serialize;
 #[derive(Serialize, Debug)]
 pub struct UserSession {
     pub login: String,
+
+    pub uuid: String,
     // TODO: Check expiration on access
     // pub expires: OffsetDateTime,
 
@@ -62,6 +64,8 @@ impl Session {
                 format!("sid={}", &id),
                 UserSession {
                     login: username.clone(),
+                    // TODO get UUID from User DB
+                    uuid: String::from("51c728af-9edd-4d7e-8469-1c6b33681f82"),
                 },
             );
             return Some(id);

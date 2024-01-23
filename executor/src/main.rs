@@ -35,8 +35,6 @@ async fn main() -> Result<(), String> {
         .map_err(|error| format!("Failed to create logger: {}", error))?;
 
     let mut api = ApiDescription::new();
-    api.register(endpoints::instance::get_index)?;
-    api.register(endpoints::instance::get_by_id)?;
     api.register(endpoints::sysinfo::get_index)?;
     api.register(endpoints::image::get_index)?;
 

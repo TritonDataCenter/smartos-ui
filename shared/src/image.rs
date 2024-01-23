@@ -10,7 +10,7 @@
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Manifest {
     pub v: i64,
     pub uuid: String,
@@ -26,7 +26,7 @@ pub struct Manifest {
     pub homepage: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Image {
     pub manifest: Manifest,
 }

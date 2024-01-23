@@ -17,7 +17,7 @@ pub mod login;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-use crate::exec::ExecClient;
+use crate::exec::Client;
 use crate::session::{Session, UserSession};
 use smartos_shared::config::Config;
 
@@ -36,7 +36,7 @@ pub struct PathParams {
 pub struct Context {
     pub config: Config,
     pub sessions: Arc<Mutex<HashMap<String, UserSession>>>,
-    pub client: ExecClient,
+    pub client: Client,
 }
 
 impl Context {
@@ -44,9 +44,10 @@ impl Context {
     pub fn new(config: Config) -> Self {
         let map: HashMap<String, UserSession> = HashMap::new();
         let exec_bind_address = config.exec_bind_address.clone();
+        let vminfo_bind_address = config.vminfo_bind_address.clone();
         Self {
             config,
-            client: ExecClient::new(exec_bind_address),
+            client: Client::new(exec_bind_address, vminfo_bind_address),
             sessions: Arc::new(Mutex::new(map)),
         }
     }

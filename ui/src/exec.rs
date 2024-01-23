@@ -8,23 +8,53 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use smartos_shared::{
-    image::Image, instance::Instance, instance::ListInstance, sysinfo::Sysinfo,
-};
+use smartos_shared::{image::Image, instance::Instance, sysinfo::Sysinfo};
 
-use reqwest::{Client, RequestBuilder};
+use reqwest::{Client as HTTPClient, RequestBuilder};
 
-pub struct ExecClient {
-    http: Client,
+pub struct Client {
+    exec: ExecClient,
+    vminfo: VminfodClient,
+}
+
+impl Client {
+    #[must_use]
+    pub fn new(exec_address: String, vminfo_address: String) -> Self {
+        Self {
+            exec: ExecClient::new(exec_address),
+            vminfo: VminfodClient::new(vminfo_address),
+        }
+    }
+    pub async fn get_instances(&self) -> Result<Vec<Instance>, reqwest::Error> {
+        self.vminfo.get_instances().await
+    }
+
+    pub async fn get_instance(
+        &self,
+        id: &String,
+    ) -> Result<Instance, reqwest::Error> {
+        self.vminfo.get_instance(id).await
+    }
+    pub async fn get_sysinfo(&self) -> Result<Sysinfo, reqwest::Error> {
+        self.exec.get_sysinfo().await
+    }
+
+    pub async fn get_images(&self) -> Result<Vec<Image>, reqwest::Error> {
+        self.exec.get_images().await
+    }
+}
+
+pub struct VminfodClient {
+    http: HTTPClient,
     url: String,
 }
 
-impl ExecClient {
+impl VminfodClient {
     #[must_use]
-    pub fn new(exec_bind_address: String) -> Self {
+    pub fn new(address: String) -> Self {
         Self {
-            http: Client::new(),
-            url: format!("http://{}", exec_bind_address),
+            http: HTTPClient::new(),
+            url: format!("http://{}", address),
         }
     }
 
@@ -36,11 +66,9 @@ impl ExecClient {
         self.http.get(format!("{}/{path}", self.url))
     }
 
-    pub async fn get_instances(
-        &self,
-    ) -> Result<Vec<ListInstance>, reqwest::Error> {
-        let response: Vec<ListInstance> = self
-            .get("instance")
+    pub async fn get_instances(&self) -> Result<Vec<Instance>, reqwest::Error> {
+        let response: Vec<Instance> = self
+            .get("vms")
             .send()
             .await?
             .error_for_status()?
@@ -54,7 +82,7 @@ impl ExecClient {
         id: &String,
     ) -> Result<Instance, reqwest::Error> {
         let response: Instance = self
-            .get(format!("instance/{}", &id).as_str())
+            .get(format!("vms/{}", &id).as_str())
             .send()
             .await?
             .error_for_status()?
@@ -62,6 +90,30 @@ impl ExecClient {
             .await?;
         Ok(response)
     }
+}
+
+pub struct ExecClient {
+    http: HTTPClient,
+    url: String,
+}
+
+impl ExecClient {
+    #[must_use]
+    pub fn new(address: String) -> Self {
+        Self {
+            http: HTTPClient::new(),
+            url: format!("http://{}", address),
+        }
+    }
+
+    pub fn post(&self, path: &str) -> RequestBuilder {
+        self.http.post(format!("{}/{path}", self.url))
+    }
+
+    pub fn get(&self, path: &str) -> RequestBuilder {
+        self.http.get(format!("{}/{path}", self.url))
+    }
+
     pub async fn get_sysinfo(&self) -> Result<Sysinfo, reqwest::Error> {
         let response: Sysinfo = self
             .get("sysinfo")

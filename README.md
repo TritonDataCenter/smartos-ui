@@ -9,15 +9,8 @@ and general documentation at the main
 
 ### Running in environments other than the Global Zone
 
-Some mock data and scripts currently exists in the tests directory:
-
-Set `PATH` to include the mock scripts and run the executor:
-
-    PATH=test/mock:$PATH LOG_FILE=/tmp/ui.log ./target/debug/smartos_executor
-
-and then run the UI:
-
-    LOG_FILE=/tmp/ui.log ./target/debug/smartos_ui
+Some mock data and scripts currently exists in the `test` directory, running
+`make devrun` will launch the executor, ui, and mock vminfod services.
 
 Login via browser at: [localhost:8080](http://localhost:8080) using
 user: admin and password: admin

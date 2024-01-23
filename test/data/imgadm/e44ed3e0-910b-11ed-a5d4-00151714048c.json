@@ -1,0 +1,42 @@
+{
+  "manifest": {
+    "v": 2,
+    "uuid": "e44ed3e0-910b-11ed-a5d4-00151714048c",
+    "owner": "00000000-0000-0000-0000-000000000000",
+    "name": "base-64-lts",
+    "version": "22.4.0",
+    "state": "active",
+    "disabled": false,
+    "public": true,
+    "published_at": "2023-01-10T17:26:17Z",
+    "type": "zone-dataset",
+    "os": "smartos",
+    "files": [
+      {
+        "sha1": "e84f9fd04ead1f36abbbe4397a6f541524a10fe0",
+        "size": 263159489,
+        "compression": "gzip"
+      }
+    ],
+    "description": "A 64-bit SmartOS image with just essential packages installed. Ideal for users who are comfortable with setting up their own environment and tools.",
+    "homepage": "https://docs.tritondatacenter.com/public-cloud/instances/infrastructure/images/smartos/base",
+    "urn": "sdc:sdc:base-64-lts:22.4.0",
+    "requirements": {
+      "min_platform": {
+        "7.0": "20210826T002459Z"
+      },
+      "networks": [
+        {
+          "name": "net0",
+          "description": "public"
+        }
+      ]
+    },
+    "tags": {
+      "role": "os",
+      "group": "base-64-lts"
+    }
+  },
+  "zpool": "zones",
+  "source": "https://images.smartos.org"
+}

@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+
+const {join} = require('node:path')
+const {createReadStream} = require('node:fs')
+const server = require('node:http').createServer()
+
+const port = process.env.VMINFO_BIND_ADDRESS || 9090
+const root = join(__dirname, '..', 'data', 'vminfod')
+
+server.on('request', (req, res) => {
+  const [_, id] = req.url.split('/').filter(p => p)
+  const path = join(root, id || 'vms')
+
+  res.setHeader('Content-Type', 'application/json')
+
+  createReadStream(`${path}.json`).on('error', e => {
+    console.error(e)
+    res.writeHead(404, 'Not Found').end()
+  }).pipe(res)
+})
+
+server.listen(port, () => console.log(`Starting mock vminfod on port ${port}`))

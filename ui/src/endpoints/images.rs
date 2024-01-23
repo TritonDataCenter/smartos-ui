@@ -24,13 +24,6 @@ pub struct ImagesTemplate {
     images: Vec<Image>,
 }
 
-#[derive(Template)]
-#[template(path = "images-hx.j2")]
-pub struct ImagesHxTemplate {
-    title: String,
-    images: Vec<Image>,
-}
-
 #[endpoint {
 method = GET,
 path = "/images"
@@ -42,17 +35,14 @@ pub async fn get_index(
     let title = String::from("Instances");
     if let Some(login) = Session::get_login(&ctx) {
         let images = ctx.context().client.get_images().await.unwrap();
-        let result = if is_htmx {
-            let template = ImagesHxTemplate { title, images };
-            template.render().unwrap()
-        } else {
-            let template = ImagesTemplate {
-                title,
-                login,
-                images,
-            };
-            template.render().unwrap()
+
+        let template = ImagesTemplate {
+            title,
+            login,
+            images,
         };
+        let result = template.render().unwrap();
+
         return Ok(Response::builder()
             .status(StatusCode::OK)
             .header("Content-Type", "text/html")

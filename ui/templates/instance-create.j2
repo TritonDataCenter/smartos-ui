@@ -1,5 +1,156 @@
 {% extends "layout/authed.j2" %}
 {% block title %}{{title}}{% endblock %}
 {% block content %}
-{% include "include/instance-create-form.j2" %}
+<div id="content" class="px-6">
+  <nav class="flex" aria-label="Breadcrumb">
+    <ol role="list" class="flex items-center space-x-4">
+      <li>
+        <div>
+          <a href="#" hx-get="/dashboard" hx-target="#main" hx-select="#content" class="text-gray-400 hover:text-gray-500">
+            <svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd" />
+            </svg>
+            <span class="sr-only">Dashboard</span>
+          </a>
+        </div>
+      </li>
+      <li>
+        <div class="flex items-center">
+          <svg class="h-5 w-5 flex-shrink-0 text-gray-300" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+          </svg>
+          <a href="#" hx-get="/instances" hx-target="#main" hx-select="#content" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">Instances</a>
+        </div>
+      </li>
+      <li>
+        <div class="flex items-center">
+          <svg class="h-5 w-5 flex-shrink-0 text-gray-300" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+          </svg>
+          <a class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700 cursor-default" aria-current="page">Create</a>
+        </div>
+      </li>
+    </ol>
+  </nav>
+
+  <form class="mx-auto">
+    <div class="space-y-12">
+      <div class="border-b border-white/10 pb-12">
+        <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+          <div class="col-span-full">
+            <label for="alias" class="block text-sm font-medium leading-6 text-white">Alias</label>
+            <div class="mt-2">
+              <input
+                type="text"
+                name="alias"
+                id="alias"
+                title="An alias for a VM which is for display/lookup purposes only. Not required to be unique."
+                placeholder="Name"
+                {# Experimentation shows this to be 189... #}
+                maxlength="100"
+                class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+            </div>
+          </div>
+
+          <div class="col-span-full">
+            <label for="image_uuid" class="block text-sm font-medium leading-6 text-white">Image</label>
+            <div class="mt-2">
+              <select id="image_uuid" name="image_uuid" required class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 [&_*]:text-black">
+                {% for (kind, list) in images %}
+                  <optgroup label="{{kind}}">
+                    {%  for opt in list %}
+                      <option id="{{opt.id}}" title="{{opt.title}}">{{opt.name}}</option>
+                    {% endfor %}
+                  </optgroup>
+                {%  endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="col-span-full">
+            <label for="ram" class="block text-sm font-medium leading-6 text-white">RAM <sup>MiB</sup></label>
+            <div class="mt-2">
+              <input
+                type="number"
+                name="ram"
+                id="ram"
+                title=""
+                min="0"
+                placeholder="1024"
+                required
+                class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+            </div>
+          </div>
+
+
+          <div class="col-span-full">
+            <label for="quota" class="block text-sm font-medium leading-6 text-white">Disk Quota <sup>GiB</sup></label>
+            <div class="mt-2">
+              <input
+                type="number"
+                name="quota"
+                id="quota"
+                title=""
+                min="0"
+                placeholder="8"
+                required
+                class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+            </div>
+          </div>
+
+          <div class="col-span-full">
+            <label for="quota" class="block text-sm font-medium leading-6 text-white">NICs</label>
+            <div class="mt-2">
+              <input
+                type="number"
+                name="quota"
+                id="quota"
+                title=""
+                min="0"
+                placeholder="8"
+                required
+                class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-b border-white/10 pb-12">
+        <h2 class="text-base font-semibold leading-7 text-white">Primary NIC</h2>
+        <p class="mt-1 text-sm leading-6 text-gray-400">Networking configuration.</p>
+
+        <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+
+          <div class="sm:col-span-2 sm:col-start-1">
+            <label for="nic_tag" class="block text-sm font-medium leading-6 text-white">Nic Tag</label>
+            <div class="mt-2">
+              <select id="nic_tag" name="nic_tag" class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 [&_*]:text-black">
+                <option>admin</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label for="ip" class="block text-sm font-medium leading-6 text-white">IP</label>
+            <div class="mt-2">
+              <input type="text" name="ip" id="ip" placeholder="127.0.0.1" class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+            </div>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label for="gateway" class="block text-sm font-medium leading-6 text-white">Gateway</label>
+            <div class="mt-2">
+              <input type="text" name="gateway" id="gateway" placeholder="127.0.0.1" class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 flex items-center justify-end gap-x-6">
+      <button type="button" class="text-sm font-semibold leading-6 text-white">Cancel</button>
+      <button type="submit" class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Create</button>
+    </div>
+  </form>
+</div>
 {% endblock %}

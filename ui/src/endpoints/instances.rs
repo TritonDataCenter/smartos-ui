@@ -8,9 +8,12 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
+use std::collections::HashMap;
+
 use crate::endpoints::{get_header, Context, PathParams};
 use crate::session::Session;
-use smartos_shared::instance::{Instance, ListInstance};
+
+use smartos_shared::instance::Instance;
 
 use askama::Template;
 use dropshot::{endpoint, HttpError, Path, RequestContext};
@@ -21,13 +24,6 @@ use hyper::{Body, Response, StatusCode};
 pub struct InstanceTemplate {
     title: String,
     login: String,
-    instance: Instance,
-}
-
-#[derive(Template)]
-#[template(path = "instance-hx.j2")]
-pub struct InstanceHxTemplate {
-    title: String,
     instance: Instance,
 }
 
@@ -45,18 +41,12 @@ pub async fn get_by_id(
         let instance =
             ctx.context().client.get_instance(&path.id).await.unwrap();
         let title = format!("Instance: {}", instance.alias);
-
-        let result = if is_htmx {
-            let template = InstanceHxTemplate { title, instance };
-            template.render().unwrap()
-        } else {
-            let template = InstanceTemplate {
-                title,
-                login,
-                instance,
-            };
-            template.render().unwrap()
+        let template = InstanceTemplate {
+            title,
+            login,
+            instance,
         };
+        let result = template.render().unwrap();
 
         return Ok(Response::builder()
             .status(StatusCode::OK)
@@ -84,20 +74,11 @@ pub async fn get_by_id(
 #[derive(Template)]
 #[template(path = "instances.j2")]
 pub struct InstancesTemplate {
-    total_ram: u32,
-    total_quota: u32,
+    total_ram: u64,
+    total_quota: u64,
     title: String,
     login: String,
-    instances: Vec<ListInstance>,
-}
-
-#[derive(Template)]
-#[template(path = "instances-hx.j2")]
-pub struct InstancesHxTemplate {
-    total_ram: u32,
-    total_quota: u32,
-    title: String,
-    instances: Vec<ListInstance>,
+    instances: Vec<Instance>,
 }
 
 #[endpoint {
@@ -111,26 +92,19 @@ pub async fn get_index(
     let title = String::from("Instances");
     if let Some(login) = Session::get_login(&ctx) {
         let instances = ctx.context().client.get_instances().await.unwrap();
-        let total_ram = instances.iter().fold(0, |acc, i| i.ram + acc);
+        let total_ram = instances
+            .iter()
+            .fold(0, |acc, i| i.max_physical_memory + acc);
         let total_quota = instances.iter().fold(0, |acc, i| i.quota + acc);
-        let result = if is_htmx {
-            let template = InstancesHxTemplate {
-                total_ram,
-                total_quota,
-                title,
-                instances,
-            };
-            template.render().unwrap()
-        } else {
-            let template = InstancesTemplate {
-                total_ram,
-                total_quota,
-                title,
-                login,
-                instances,
-            };
-            template.render().unwrap()
+        let template = InstancesTemplate {
+            total_ram,
+            total_quota,
+            title,
+            login,
+            instances,
         };
+        let result = template.render().unwrap();
+
         return Ok(Response::builder()
             .status(StatusCode::OK)
             .header("Content-Type", "text/html")
@@ -159,12 +133,12 @@ pub async fn get_index(
 pub struct InstanceCreateTemplate {
     title: String,
     login: String,
+    images: HashMap<String, Vec<ImageOption>>,
 }
-
-#[derive(Template)]
-#[template(path = "instance-create-hx.j2")]
-pub struct InstanceCreateHxTemplate {
-    title: String,
+pub struct ImageOption {
+    pub id: String,
+    pub title: String,
+    pub name: String,
 }
 
 #[endpoint {
@@ -176,14 +150,48 @@ pub async fn create(
 ) -> Result<Response<Body>, HttpError> {
     let is_htmx = get_header(&ctx, "HX-Request").is_some();
     let title = String::from("Create Instance");
+
     if let Some(login) = Session::get_login(&ctx) {
-        let result = if is_htmx {
-            let template = InstanceCreateHxTemplate { title };
-            template.render().unwrap()
-        } else {
-            let template = InstanceCreateTemplate { title, login };
-            template.render().unwrap()
+        // Group images by os + type
+        let mut image_list = HashMap::<String, Vec<ImageOption>>::new();
+        let mut images = ctx.context().client.get_images().await.unwrap();
+        while let Some(image) = images.pop() {
+            if image.manifest.state != "active" || image.manifest.disabled {
+                continue;
+            }
+            let key =
+                format!("{} {}", image.manifest.os, image.manifest.r#type);
+            if let Some(image_vec) = image_list.get_mut(&key) {
+                image_vec.push(ImageOption {
+                    id: image.manifest.uuid.clone(),
+                    title: image.manifest.description.clone(),
+                    name: format!(
+                        "{} {}",
+                        image.manifest.name, image.manifest.version
+                    ),
+                });
+            } else {
+                image_list.insert(
+                    key,
+                    vec![ImageOption {
+                        id: image.manifest.uuid.clone(),
+                        title: image.manifest.description.clone(),
+                        name: format!(
+                            "{} {}",
+                            image.manifest.name, image.manifest.version
+                        ),
+                    }],
+                );
+            }
+        }
+
+        let template = InstanceCreateTemplate {
+            title,
+            login,
+            images: image_list,
         };
+        let result = template.render().unwrap();
+
         return Ok(Response::builder()
             .status(StatusCode::OK)
             .header("Content-Type", "text/html")
