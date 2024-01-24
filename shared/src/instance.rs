@@ -25,7 +25,6 @@ pub struct CreatePayload {
     pub nics: Vec<Nic>,
     pub image_uuid: Uuid,
     pub quota: u64,
-    pub owner_uuid: Uuid,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

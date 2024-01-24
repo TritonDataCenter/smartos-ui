@@ -64,32 +64,23 @@ pub async fn post_index(
     body_param: TypedBody<LoginRequestBody>,
 ) -> Result<Response<Body>, HttpError> {
     let req = body_param.into_inner();
+    let response = Response::builder();
+    let authed = ctx.context().validate_password(req.password);
+    if req.user == "root" && authed {
+        if let Some(id) = Session::create(&ctx, req.user) {
+            return Ok(response
+                .status(StatusCode::SEE_OTHER)
+                .header("Set-Cookie", format!("sid={}; HttpOnly", &id))
+                .header("Location", "/dashboard")
+                .body(Body::empty())?);
+        }
+    }
 
-    // TODO: Spoofed for the moment
-    if req.user != "admin" || req.password != "admin" {
-        let login = LoginTemplate {
-            message: Some("Invalid username or password"),
-        };
-        let result = login.render().unwrap(); // XXX
-        return Ok(Response::builder()
-            .status(StatusCode::OK)
-            .header("Content-Type", "text/html")
-            .body(result.into())?);
-    }
-    if let Some(id) = Session::create(&ctx, req.user) {
-        return Ok(Response::builder()
-            .status(StatusCode::SEE_OTHER)
-            .header("Set-Cookie", format!("sid={}; HttpOnly", &id))
-            .header("Location", "/dashboard")
-            .body(Body::empty())?);
-    }
     let login = LoginTemplate {
         message: Some("Invalid username or password"),
     };
     let result = login.render().unwrap(); // XXX
-    Ok(Response::builder()
-        .status(StatusCode::FORBIDDEN)
-        .body(result.into())?)
+    Ok(response.status(StatusCode::FORBIDDEN).body(result.into())?)
 }
 
 /// Presents user with a login form

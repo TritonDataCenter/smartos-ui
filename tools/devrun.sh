@@ -12,6 +12,7 @@ LOG_FILE=/tmp/smartos_executor.log \
 	./target/debug/smartos_executor &
 
 LOG_FILE=/tmp/smartos_ui.log \
+  SHADOW_PATH=test/data/shadow \
 	./target/debug/smartos_ui &
 
 tail -f /tmp/smartos_{ui,executor}.log | bunyan

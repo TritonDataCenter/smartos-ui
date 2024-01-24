@@ -12,8 +12,7 @@ and general documentation at the main
 Some mock data and scripts currently exists in the `test` directory, running
 `make devrun` will launch the executor, ui, and mock vminfod services.
 
-Login via browser at: [localhost:8080](http://localhost:8080) using
-user: admin and password: admin
+Login at: [localhost:8080](http://localhost:8080) using user "root" and password "root"
 
 ### Running in the Global Zone
 
@@ -21,3 +20,5 @@ Copy `smartos_executor` and `smartos_ui` into the GZ and run:
 
     ./smartos_executor &
     UI_BIND_ADDRESS=0.0.0.0:8080 ./smartos_ui
+
+Login using user root and the password specified in `/etc/shadow`

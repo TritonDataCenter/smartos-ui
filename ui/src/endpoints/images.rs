@@ -20,7 +20,6 @@ use hyper::{Body, Response, StatusCode};
 #[template(path = "images.j2")]
 pub struct ImagesTemplate {
     title: String,
-    login: String,
     images: Vec<Image>,
 }
 
@@ -31,25 +30,21 @@ path = "/images"
 pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    let builder = Response::builder();
+    let response = Response::builder();
 
-    if let Some(login) = Session::get_login(&ctx) {
+    if Session::get_login(&ctx).is_some() {
         let title = String::from("Instances");
         let images = ctx.context().client.get_images().await.unwrap();
 
-        let template = ImagesTemplate {
-            title,
-            login,
-            images,
-        };
+        let template = ImagesTemplate { title, images };
         let result = template.render().unwrap();
 
-        return Ok(builder
+        return Ok(response
             .status(StatusCode::OK)
             .header("Content-Type", "text/html")
             .header("HX-Push-Url", String::from("/images"))
             .body(result.into())?);
     }
 
-    Ok(redirect_login(builder, &ctx)?)
+    Ok(redirect_login(response, &ctx)?)
 }

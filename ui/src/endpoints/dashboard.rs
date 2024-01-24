@@ -20,7 +20,6 @@ use hyper::{Body, Response, StatusCode};
 #[template(path = "dashboard.j2")]
 pub struct DashboardTemplate {
     title: String,
-    login: String,
     sysinfo: Sysinfo,
 }
 
@@ -31,24 +30,20 @@ path = "/dashboard"
 pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    let builder = Response::builder();
-    if let Some(login) = Session::get_login(&ctx) {
+    let response = Response::builder();
+    if Session::get_login(&ctx).is_some() {
         let title = String::from("Dashboard");
         let sysinfo = ctx.context().client.get_sysinfo().await.unwrap();
 
-        let template = DashboardTemplate {
-            title,
-            login,
-            sysinfo,
-        };
+        let template = DashboardTemplate { title, sysinfo };
         let result = template.render().unwrap();
 
-        return Ok(builder
+        return Ok(response
             .status(StatusCode::OK)
             .header("Content-Type", "text/html")
             .header("HX-Push-Url", String::from("/dashboard"))
             .body(result.into())?);
     }
 
-    Ok(redirect_login(builder, &ctx)?)
+    Ok(redirect_login(response, &ctx)?)
 }

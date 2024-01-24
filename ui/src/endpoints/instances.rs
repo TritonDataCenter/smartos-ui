@@ -27,7 +27,6 @@ use uuid::Uuid;
 #[template(path = "instance.j2")]
 pub struct InstanceTemplate {
     title: String,
-    login: String,
     instance: Instance,
 }
 
@@ -39,28 +38,24 @@ pub async fn get_by_id(
     ctx: RequestContext<Context>,
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
-    let builder = Response::builder();
-    if let Some(login) = Session::get_login(&ctx) {
+    let response = Response::builder();
+    if Session::get_login(&ctx).is_some() {
         let path = path_params.into_inner();
         let instance =
             ctx.context().client.get_instance(&path.id).await.unwrap();
 
         let title = String::from("Instance");
-        let template = InstanceTemplate {
-            title,
-            login,
-            instance,
-        };
+        let template = InstanceTemplate { title, instance };
         let result = template.render().unwrap();
 
-        return Ok(builder
+        return Ok(response
             .status(StatusCode::OK)
             .header("HX-Push-Url", format!("/instances/{}", &path.id))
             .header("Content-Type", "text/html")
             .body(result.into())?);
     }
 
-    Ok(redirect_login(builder, &ctx)?)
+    Ok(redirect_login(response, &ctx)?)
 }
 
 #[endpoint {
@@ -71,7 +66,7 @@ pub async fn delete_by_id(
     ctx: RequestContext<Context>,
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
-    let builder = Response::builder();
+    let response = Response::builder();
     if Session::get_login(&ctx).is_some() {
         ctx.context()
             .client
@@ -79,9 +74,9 @@ pub async fn delete_by_id(
             .await
             .unwrap();
 
-        return Ok(HXLocation::common(builder, "/instances")?);
+        return Ok(HXLocation::common(response, "/instances")?);
     }
-    Ok(redirect_login(builder, &ctx)?)
+    Ok(redirect_login(response, &ctx)?)
 }
 
 #[derive(Template)]
@@ -90,7 +85,6 @@ pub struct InstancesTemplate {
     total_ram: u64,
     total_quota: u64,
     title: String,
-    login: String,
     instances: Vec<Instance>,
 }
 
@@ -101,8 +95,8 @@ path = "/instances"
 pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    let builder = Response::builder();
-    if let Some(login) = Session::get_login(&ctx) {
+    let response = Response::builder();
+    if Session::get_login(&ctx).is_some() {
         let title = String::from("Instances");
         let instances = ctx.context().client.get_instances().await.unwrap();
         let total_ram = instances
@@ -113,26 +107,24 @@ pub async fn get_index(
             total_ram,
             total_quota,
             title,
-            login,
             instances,
         };
         let result = template.render().unwrap();
 
-        return Ok(builder
+        return Ok(response
             .status(StatusCode::OK)
             .header("HX-Push-Url", String::from("/instances"))
             .header("Content-Type", "text/html")
             .body(result.into())?);
     }
 
-    Ok(redirect_login(builder, &ctx)?)
+    Ok(redirect_login(response, &ctx)?)
 }
 
 #[derive(Template)]
 #[template(path = "instance-create.j2")]
 pub struct InstanceCreateTemplate {
     title: String,
-    login: String,
     images: HashMap<String, Vec<ImageOption>>,
     nictags: Vec<NicTag>,
 }
@@ -149,9 +141,9 @@ path = "/instance-create"
 pub async fn get_create(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    let builder = Response::builder();
+    let response = Response::builder();
 
-    if let Some(login) = Session::get_login(&ctx) {
+    if Session::get_login(&ctx).is_some() {
         let title = String::from("Create Instance");
 
         let nictags = ctx.context().client.get_nictags().await.unwrap();
@@ -191,20 +183,19 @@ pub async fn get_create(
 
         let template = InstanceCreateTemplate {
             title,
-            login,
             images: image_list,
             nictags,
         };
         let result = template.render().unwrap();
 
-        return Ok(builder
+        return Ok(response
             .status(StatusCode::OK)
             .header("HX-Push-Url", String::from("/instance-create"))
             .header("Content-Type", "text/html")
             .body(result.into())?);
     }
 
-    Ok(redirect_login(builder, &ctx)?)
+    Ok(redirect_login(response, &ctx)?)
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -226,9 +217,9 @@ pub async fn post_create(
     ctx: RequestContext<Context>,
     request_body: TypedBody<CreateRequestBody>,
 ) -> Result<Response<Body>, HttpError> {
-    let builder = Response::builder();
+    let response = Response::builder();
     let req = request_body.into_inner();
-    if let Some(uuid) = Session::get_uuid(&ctx) {
+    if Session::get_login(&ctx).is_some() {
         let exec_req = CreatePayload {
             alias: req.alias,
             brand: String::from("joyent"),
@@ -244,15 +235,14 @@ pub async fn post_create(
             }],
             image_uuid: req.image_uuid,
             quota: req.quota.unwrap_or_default(),
-            owner_uuid: uuid,
         };
         ctx.context()
             .client
             .create_instance(exec_req)
             .await
             .unwrap();
-        return Ok(HXLocation::common(builder, "/instances")?);
+        return Ok(HXLocation::common(response, "/instances")?);
     }
 
-    Ok(redirect_login(builder, &ctx)?)
+    Ok(redirect_login(response, &ctx)?)
 }

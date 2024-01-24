@@ -16,6 +16,7 @@ pub mod login;
 
 use std::collections::HashMap;
 use std::fmt;
+use std::fs::read_to_string;
 use std::sync::{Arc, Mutex};
 
 use crate::exec::Client;
@@ -25,6 +26,7 @@ use smartos_shared::config::Config;
 use dropshot::{endpoint, HttpError, RequestContext};
 use http::response::Builder;
 use hyper::{Body, Response, StatusCode};
+use pwhash::unix;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -80,7 +82,7 @@ impl HXLocation {
     }
 
     pub fn common(
-        builder: Builder,
+        response: Builder,
         path: &str,
     ) -> http::Result<Response<Body>> {
         let location = Self {
@@ -92,7 +94,7 @@ impl HXLocation {
             swap: None,
             select: Some(String::from("#content")),
         };
-        builder
+        response
             .header("HX-Location", location.to_string())
             .status(StatusCode::OK)
             .body(Body::empty())
@@ -116,6 +118,7 @@ pub struct Context {
     pub config: Config,
     pub sessions: Arc<Mutex<HashMap<String, UserSession>>>,
     pub client: Client,
+    pub root_password_hash: Option<String>,
 }
 
 impl Context {
@@ -124,11 +127,37 @@ impl Context {
         let map: HashMap<String, UserSession> = HashMap::new();
         let exec_bind_address = config.exec_bind_address.clone();
         let vminfo_bind_address = config.vminfo_bind_address.clone();
+        let root_password_hash =
+            Self::get_root_password_hash(&config.shadow_path);
         Self {
             config,
             client: Client::new(exec_bind_address, vminfo_bind_address),
             sessions: Arc::new(Mutex::new(map)),
+            root_password_hash,
         }
+    }
+
+    /// This runs before chroot while /etc/shadow is still accessible
+    pub fn get_root_password_hash(shadow_path: &String) -> Option<String> {
+        if let Ok(shadow_contents) = read_to_string(shadow_path) {
+            for line in shadow_contents.lines() {
+                let v: Vec<&str> = line.split(':').collect();
+                if v.len() < 2 {
+                    continue;
+                }
+                if v[0] == "root" {
+                    return Some(String::from(v[1]));
+                }
+            }
+        }
+        None
+    }
+
+    pub fn validate_password(&self, password: String) -> bool {
+        if let Some(root_password_hash) = &self.root_password_hash {
+            return unix::verify(password, root_password_hash);
+        }
+        false
     }
 }
 
@@ -143,19 +172,19 @@ pub fn get_header(
 }
 
 pub fn redirect_login(
-    builder: Builder,
+    response: Builder,
     ctx: &RequestContext<Context>,
 ) -> http::Result<Response<Body>> {
     let is_htmx = get_header(ctx, "HX-Request").is_some();
 
     if is_htmx {
-        return builder
+        return response
             .status(StatusCode::OK)
             .header("HX-Refresh", "true")
             .body(Body::empty());
     }
 
-    builder
+    response
         .status(StatusCode::SEE_OTHER)
         .header("Location", "/login")
         .body(Body::empty())

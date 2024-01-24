@@ -17,6 +17,7 @@ pub struct Config {
     pub vminfo_bind_address: String,
     pub request_body_max_bytes: usize,
     pub chroot: String,
+    pub shadow_path: String,
 }
 
 impl Config {
@@ -33,6 +34,8 @@ impl Config {
                 .unwrap_or_else(|_| String::from("127.0.0.1:9090")),
             chroot: env::var("CHROOT")
                 .unwrap_or_else(|_| String::from("/opt/smartos_ui")),
+            shadow_path: env::var("SHADOW_PATH")
+                .unwrap_or_else(|_| String::from("/etc/shadow")),
             request_body_max_bytes: 1024 * 1024 * 8,
         }
     }

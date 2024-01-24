@@ -12,24 +12,25 @@
 extern crate slog;
 
 use smartos_shared::config::Config;
+use smartos_ui::privilege::drop_privileges;
 use smartos_ui::{endpoints, endpoints::Context};
 
 use dropshot::{
     ApiDescription, ConfigDropshot, ConfigLogging, HttpServerStarter,
 };
 
-use privdrop::PrivDrop;
-
-use libc::{getuid, uid_t};
-pub fn get_current_uid() -> uid_t {
-    unsafe { getuid() }
-}
-
 #[tokio::main]
 async fn main() -> Result<(), String> {
     let name = option_env!("CARGO_PKG_NAME").unwrap_or("?");
     let version = option_env!("CARGO_PKG_VERSION").unwrap_or("v?");
     let config = Config::new(name);
+
+    let request_body_max_bytes = config.request_body_max_bytes;
+    let bind_address = config
+        .ui_bind_address
+        .parse()
+        .expect("Failed to parse BIND_ADDRESS");
+    let chroot = config.chroot.clone();
 
     let config_logging = ConfigLogging::File {
         level: dropshot::ConfigLoggingLevel::Debug,
@@ -41,22 +42,10 @@ async fn main() -> Result<(), String> {
         .to_logger(String::from("smartos_ui"))
         .map_err(|error| format!("Failed to create logger: {}", error))?;
 
-    // TODO: we'll likely just do this in SMF instead of here
-    let uid = get_current_uid();
-    if uid == 0 {
-        info!(log, "Running as root uid: {}, dropping privileges", uid);
-        PrivDrop::default()
-            .chroot(&config.chroot)
-            .user("nobody")
-            .apply()
-            .unwrap_or_else(|e| panic!("Failed to drop privileges: {}", e));
-        info!(log, "New uid: {}", get_current_uid());
-    } else {
-        info!(
-            log,
-            "Running as non-root uid: {}, not dropping privileges", uid
-        );
-    }
+    // Must occur before chroot
+    let ctx = Context::new(config);
+
+    drop_privileges(&log, &chroot);
 
     let mut api = ApiDescription::new();
 
@@ -95,15 +84,12 @@ async fn main() -> Result<(), String> {
 
     let server = HttpServerStarter::new(
         &ConfigDropshot {
-            bind_address: config
-                .ui_bind_address
-                .parse()
-                .expect("Failed to parse BIND_ADDRESS"),
-            request_body_max_bytes: config.request_body_max_bytes,
+            bind_address,
+            request_body_max_bytes,
             tls: None,
         },
         api,
-        Context::new(config),
+        ctx,
         &log,
     )
     .map_err(|error| format!("failed to start server: {}", error))?

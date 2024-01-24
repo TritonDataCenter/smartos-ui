@@ -98,3 +98,24 @@ pub async fn delete_by_id(
         .body(Body::empty())
         .unwrap())
 }
+
+#[endpoint {
+method = POST,
+path = "/validate",
+}]
+pub async fn post_validate(
+    _: RequestContext<Context>,
+) -> Result<Response<Body>, HttpError> {
+    let _ = Command::new("vmadm")
+        .args(["validate"])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("vmadm command failed to start");
+
+    Ok(Response::builder()
+        .status(StatusCode::OK)
+        .body(Body::empty())
+        .unwrap())
+}
