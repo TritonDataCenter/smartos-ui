@@ -59,8 +59,8 @@ pub struct Instance {
     pub zone_state: String, // Enum
     pub zonepath: String,
     pub hvm: bool,
-    pub zoneid: u64,
-    pub zonedid: u64,
+    //pub zoneid: u64,
+    //pub zonedid: u64,
     pub last_modified: String, // OffsetDateTime
     pub firewall_enabled: bool,
     pub server_uuid: String,

@@ -8,7 +8,10 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
+use std::sync::{Arc, Mutex};
+
 use smartos_shared::config::Config;
+use time::OffsetDateTime;
 
 use schemars::JsonSchema;
 use serde::Deserialize;
@@ -19,14 +22,28 @@ pub mod instance;
 pub mod nictag;
 pub mod sysinfo;
 
+#[derive(Debug)]
+pub struct CacheEntry {
+    pub expiry: OffsetDateTime,
+    pub content: String,
+}
+#[derive(Debug)]
+pub struct ExecCache {
+    pub images: Option<CacheEntry>,
+}
+
 pub struct Context {
     pub config: Config,
+    pub cache: Arc<Mutex<ExecCache>>,
 }
 
 impl Context {
     #[must_use]
     pub fn new(config: Config) -> Self {
-        Self { config }
+        Self {
+            config,
+            cache: Arc::new(Mutex::new(ExecCache { images: None })),
+        }
     }
 }
 

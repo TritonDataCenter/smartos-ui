@@ -78,6 +78,21 @@
                 <div class="h-1.5 w-1.5 rounded-full bg-current"></div>
               </div>
               {% endif %}
+              {% if instance.state == "provisioning" %}
+              <div class="flex-none rounded-full p-1 text-yellow-400 bg-yellow-400/10">
+                <div class="h-1.5 w-1.5 rounded-full bg-current"></div>
+              </div>
+              {% endif %}
+              {% if instance.state == "stopped" %}
+              <div class="flex-none rounded-full p-1 text-red-400 bg-red-400/10">
+                <div class="h-1.5 w-1.5 rounded-full bg-current"></div>
+              </div>
+              {% endif %}
+              {% if instance.state == "down" %}
+              <div class="flex-none rounded-full p-1 text-black-400 bg-black-400/10">
+                <div class="h-1.5 w-1.5 rounded-full bg-current"></div>
+              </div>
+              {% endif %}
               <div class="hidden text-white sm:block">{{instance.state|capitalize}}</div>
             </div>
           </td>
