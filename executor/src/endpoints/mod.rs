@@ -16,6 +16,7 @@ use uuid::Uuid;
 
 pub mod image;
 pub mod instance;
+pub mod nictag;
 pub mod sysinfo;
 
 pub struct Context {

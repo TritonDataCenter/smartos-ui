@@ -111,7 +111,9 @@
             <label for="nic_tag" class="block text-sm font-medium leading-6 text-white">Nic Tag</label>
             <div class="mt-2">
               <select id="nic_tag" name="nic_tag" class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 [&_*]:text-black">
-                <option>admin</option>
+                {% for tag in nictags %}
+                  <option value="{{tag.name}}" title="{{tag.link}} {{tag.mac_address}}">{{tag.name}}</option>
+                {%  endfor %}
               </select>
             </div>
           </div>
@@ -134,8 +136,11 @@
     </div>
 
     <div class="mt-6 flex items-center justify-end gap-x-6">
+      <div class="htmx-indicator" id="loader">{% include "include/svg/loading.svg" %}</div>
       <button type="button" class="text-sm font-semibold leading-6 text-white">Cancel</button>
-      <button type="submit" class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Create</button>
+      <button type="submit" hx-disabled-elt="this" hx-indicator="#loader" class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+        Create
+      </button>
     </div>
   </form>
 </div>

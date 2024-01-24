@@ -14,6 +14,7 @@ use crate::endpoints::{redirect_login, Context, HXLocation, PathParams};
 use crate::session::Session;
 
 use smartos_shared::instance::{CreatePayload, Instance, Nic};
+use smartos_shared::nictag::NicTag;
 
 use askama::Template;
 use dropshot::{endpoint, HttpError, Path, RequestContext, TypedBody};
@@ -133,6 +134,7 @@ pub struct InstanceCreateTemplate {
     title: String,
     login: String,
     images: HashMap<String, Vec<ImageOption>>,
+    nictags: Vec<NicTag>,
 }
 pub struct ImageOption {
     pub id: String,
@@ -151,6 +153,8 @@ pub async fn get_create(
 
     if let Some(login) = Session::get_login(&ctx) {
         let title = String::from("Create Instance");
+
+        let nictags = ctx.context().client.get_nictags().await.unwrap();
 
         // Group images by os + type
         let mut image_list = HashMap::<String, Vec<ImageOption>>::new();
@@ -189,6 +193,7 @@ pub async fn get_create(
             title,
             login,
             images: image_list,
+            nictags,
         };
         let result = template.render().unwrap();
 

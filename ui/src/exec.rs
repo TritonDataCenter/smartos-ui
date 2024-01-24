@@ -9,7 +9,8 @@
  */
 
 use smartos_shared::{
-    image::Image, instance::CreatePayload, instance::Instance, sysinfo::Sysinfo,
+    image::Image, instance::CreatePayload, instance::Instance, nictag::NicTag,
+    sysinfo::Sysinfo,
 };
 
 use reqwest::{Client as HTTPClient, RequestBuilder};
@@ -58,6 +59,10 @@ impl Client {
         id: &Uuid,
     ) -> Result<(), reqwest::Error> {
         self.exec.delete_instance(id).await
+    }
+
+    pub async fn get_nictags(&self) -> Result<Vec<NicTag>, reqwest::Error> {
+        self.exec.get_nictags().await
     }
 }
 
@@ -180,5 +185,16 @@ impl ExecClient {
             .await?
             .error_for_status()?;
         Ok(())
+    }
+
+    pub async fn get_nictags(&self) -> Result<Vec<NicTag>, reqwest::Error> {
+        let response: Vec<NicTag> = self
+            .get("nictag")
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await?;
+        Ok(response)
     }
 }

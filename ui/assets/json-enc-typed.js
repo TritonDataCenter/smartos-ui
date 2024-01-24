@@ -10,7 +10,6 @@ htmx.defineExtension('json-enc-typed', {
     
     encodeParameters : function(xhr, parameters, elt) {
         elt.querySelectorAll('[name]').forEach(element => {
-            console.log('element before:', element.name, element.value);
             let value = element.value
             switch(element.dataset && element.dataset.encType || element.type) {
                 case 'number':

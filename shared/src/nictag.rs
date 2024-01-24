@@ -11,13 +11,9 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-pub struct Sysinfo {
-    #[serde(rename = "Live Image")]
-    pub live_image: String,
-    #[serde(rename = "CPU Count")]
-    pub cpu_count: u64,
-    #[serde(rename = "MiB of Memory")]
-    pub mib_of_memory: String,
-    #[serde(rename = "Zpool Size in GiB")]
-    pub zpool_size_in_gib: u64,
+pub struct NicTag {
+    pub name: String,
+    pub mac_address: String,
+    pub link: String,
+    pub r#type: String,
 }
