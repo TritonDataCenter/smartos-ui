@@ -24,7 +24,7 @@
       </thead>
       <tbody class="divide-y divide-white/5">
         {% for image in images %}
-        <tr hx-get="/images/{{image.manifest.uuid}}" hx-target="#main" class="hover:bg-gray-800 cursor-pointer">
+        <tr hx-get="/images/{{image.manifest.uuid}}" hx-target="#main" hx-select="#content" class="hover:bg-gray-800 cursor-pointer">
           <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
             <div class="flex items-center gap-x-4">
               <div class="truncate text-sm font-medium leading-6 text-white">{{image.manifest.name}}</div>

@@ -8,6 +8,7 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use smartos_shared::config::Config;
@@ -30,6 +31,7 @@ pub struct CacheEntry {
 #[derive(Debug)]
 pub struct ExecCache {
     pub images: Option<CacheEntry>,
+    pub image: HashMap<Uuid, CacheEntry>,
 }
 
 pub struct Context {
@@ -42,7 +44,10 @@ impl Context {
     pub fn new(config: Config) -> Self {
         Self {
             config,
-            cache: Arc::new(Mutex::new(ExecCache { images: None })),
+            cache: Arc::new(Mutex::new(ExecCache {
+                images: None,
+                image: HashMap::new(),
+            })),
         }
     }
 }

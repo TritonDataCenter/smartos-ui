@@ -80,7 +80,8 @@ async fn main() -> Result<(), String> {
 
     // /images
     api.register(endpoints::images::get_index)?;
-    //api.register(endpoints::images::get_by_id)?;
+    api.register(endpoints::images::get_by_id)?;
+    api.register(endpoints::images::delete_by_id)?;
 
     info!(log, "{} v{}", name, VERSION);
 

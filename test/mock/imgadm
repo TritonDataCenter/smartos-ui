@@ -7,5 +7,6 @@ case "$1" in
     get)
         cat "$root/imgadm/$2.json";;
     *)
+        echo "$1 not implemented"
         exit 1;;
 esac

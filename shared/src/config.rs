@@ -19,6 +19,7 @@ pub struct Config {
     pub chroot: String,
     pub shadow_path: String,
     pub login_user: String,
+    pub exec_cache_seconds: i64,
 }
 
 impl Config {
@@ -40,6 +41,10 @@ impl Config {
             login_user: env::var("LOGIN_USER")
                 .unwrap_or_else(|_| String::from("root")),
             request_body_max_bytes: 1024 * 1024 * 8,
+            exec_cache_seconds: env::var("EXEC_CACHE")
+                .unwrap_or_else(|_| String::from("180"))
+                .parse()
+                .unwrap_or(180),
         }
     }
 }

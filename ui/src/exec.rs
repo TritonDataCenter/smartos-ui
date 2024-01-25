@@ -46,6 +46,13 @@ impl Client {
     pub async fn get_images(&self) -> Result<Vec<Image>, reqwest::Error> {
         self.exec.get_images().await
     }
+    pub async fn get_image(&self, id: &Uuid) -> Result<Image, reqwest::Error> {
+        self.exec.get_image(id).await
+    }
+
+    pub async fn delete_image(&self, id: &Uuid) -> Result<(), reqwest::Error> {
+        self.exec.delete_image(id).await
+    }
 
     pub async fn create_instance(
         &self,
@@ -89,28 +96,24 @@ impl VminfodClient {
     }
 
     pub async fn get_instances(&self) -> Result<Vec<Instance>, reqwest::Error> {
-        let response: Vec<Instance> = self
-            .get("vms")
+        self.get("vms")
             .send()
             .await?
             .error_for_status()?
             .json()
-            .await?;
-        Ok(response)
+            .await
     }
 
     pub async fn get_instance(
         &self,
         id: &Uuid,
     ) -> Result<Instance, reqwest::Error> {
-        let response: Instance = self
-            .get(format!("vms/{}", &id.as_hyphenated()).as_str())
+        self.get(format!("vms/{}", &id.as_hyphenated()).as_str())
             .send()
             .await?
             .error_for_status()?
             .json()
-            .await?;
-        Ok(response)
+            .await
     }
 }
 
@@ -141,26 +144,38 @@ impl ExecClient {
     }
 
     pub async fn get_sysinfo(&self) -> Result<Sysinfo, reqwest::Error> {
-        let response: Sysinfo = self
-            .get("sysinfo")
+        self.get("sysinfo")
             .send()
             .await?
             .error_for_status()?
             .json()
-            .await?;
-        Ok(response)
+            .await
     }
 
-    // TODO: Needs to be cached
     pub async fn get_images(&self) -> Result<Vec<Image>, reqwest::Error> {
-        let response: Vec<Image> = self
-            .get("image")
+        self.get("image")
             .send()
             .await?
             .error_for_status()?
             .json()
-            .await?;
-        Ok(response)
+            .await
+    }
+
+    pub async fn get_image(&self, id: &Uuid) -> Result<Image, reqwest::Error> {
+        self.get(format!("image/{}", &id.as_hyphenated()).as_str())
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await
+    }
+
+    pub async fn delete_image(&self, id: &Uuid) -> Result<(), reqwest::Error> {
+        self.delete(format!("image/{}", id.as_hyphenated()).as_str())
+            .send()
+            .await?
+            .error_for_status()?;
+        Ok(())
     }
 
     pub async fn create_instance(
@@ -188,13 +203,11 @@ impl ExecClient {
     }
 
     pub async fn get_nictags(&self) -> Result<Vec<NicTag>, reqwest::Error> {
-        let response: Vec<NicTag> = self
-            .get("nictag")
+        self.get("nictag")
             .send()
             .await?
             .error_for_status()?
             .json()
-            .await?;
-        Ok(response)
+            .await
     }
 }
