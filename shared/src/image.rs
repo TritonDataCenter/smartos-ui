@@ -8,8 +8,16 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use time::OffsetDateTime;
 use uuid::Uuid;
+
+#[derive(Deserialize, Serialize, Debug, JsonSchema)]
+pub struct ImageImportParams {
+    pub url: String, // sanitize
+                     // pub channel: String
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Manifest {
@@ -20,14 +28,21 @@ pub struct Manifest {
     pub state: String,
     pub disabled: bool,
     pub public: bool,
-    pub published_at: String,
+    #[serde(deserialize_with = "time::serde::iso8601::deserialize")]
+    pub published_at: OffsetDateTime,
     pub r#type: String,
     pub os: String,
     pub description: String,
-    pub homepage: String,
+    pub homepage: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Image {
     pub manifest: Manifest,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Source {
+    pub url: String,
+    pub r#type: String,
 }

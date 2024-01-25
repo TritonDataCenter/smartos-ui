@@ -6,7 +6,16 @@ case "$1" in
         cat "$root/imgadm/list.json";;
     get)
         cat "$root/imgadm/$2.json";;
+    sources)
+        cat "$root/imgadm/sources.json";;
+    import)
+        echo "Importing $4 (xxx@xxx) from \"$3\""
+        echo "Gather image $4 ancestry"
+        echo "Must download and install 1 image (100.0 MiB)"
+        sleep 15 # this often takes a while...
+        echo "Downloaded image $4 (100.0 MiB)"
+        echo "Imported image $4 (xxx@xxx)";;
     *)
-        echo "$1 not implemented"
-        exit 1;;
+    echo "$1 not implemented"
+    exit 1;;
 esac

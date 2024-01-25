@@ -7,6 +7,7 @@ case "$1" in
     get)
         cat "$root/vmadm/$2.json";;
     create)
+        sleep 15 # this often takes a while...
         cat - > "$root/vmadm/create_output.txt";;
     *)
         echo "$1 not implemented"

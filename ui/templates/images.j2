@@ -4,6 +4,13 @@
 <div id="content" class="px-6">
   <div class="pt-11">
     <h2 class="px-4 text-base font-semibold leading-7 text-white sm:px-6 lg:px-8">Images</h2>
+
+    <div class="flex flex-1 items-center justify-end gap-x-6 mb-10 my-10">
+      <a href="/import" hx-get="/import" hx-target="#main" hx-select="#content" title="Import image" class="cursor-pointer rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+          {%  include "include/svg/import.svg" %}
+      </a>
+    </div>
+
     <table class="mt-6 w-full whitespace-nowrap text-left">
       <colgroup>
         <col class="w-full sm:w-4/12">

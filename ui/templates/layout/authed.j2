@@ -50,8 +50,8 @@
               </li>
             </ul>
           </li>
-          <li class="-mx-6 mt-auto">
-            <a href="/logout" class="cursor-pointer flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-white hover:bg-gray-800">
+          <li class="mt-auto">
+            <a href="/logout" class="text-white group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer hover:bg-gray-800">
               {% include "include/svg/logout.svg" %}
               Logout
             </a>
@@ -60,7 +60,6 @@
       </nav>
     </div>
   </div>
-
   <main id="main" class="py-10 lg:pl-72">
       {% block content %}{% endblock %}
   </main>

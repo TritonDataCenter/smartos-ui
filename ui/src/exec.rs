@@ -8,13 +8,17 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
+use std::fs;
+use std::path::PathBuf;
 use smartos_shared::{
     image::Image, instance::CreatePayload, instance::Instance, nictag::NicTag,
     sysinfo::Sysinfo,
 };
 
-use reqwest::{Client as HTTPClient, RequestBuilder};
+use reqwest::{Client as HTTPClient, RequestBuilder, Url};
+use smartos_shared::image::{ImageImportParams, Manifest, Source};
 use uuid::Uuid;
+use crate::endpoints::to_internal_error;
 
 pub struct Client {
     exec: ExecClient,
@@ -50,8 +54,20 @@ impl Client {
         self.exec.get_image(id).await
     }
 
+    pub async fn get_sources(&self) -> Result<Vec<Source>, reqwest::Error> {
+        self.exec.get_sources().await
+    }
+
     pub async fn delete_image(&self, id: &Uuid) -> Result<(), reqwest::Error> {
         self.exec.delete_image(id).await
+    }
+
+    pub async fn import_image(
+        &self,
+        id: &Uuid,
+        params: &ImageImportParams,
+    ) -> Result<(), reqwest::Error> {
+        self.exec.import_image(id, params).await
     }
 
     pub async fn create_instance(
@@ -178,6 +194,29 @@ impl ExecClient {
         Ok(())
     }
 
+    pub async fn import_image(
+        &self,
+        id: &Uuid,
+        params: &ImageImportParams,
+    ) -> Result<(), reqwest::Error> {
+        let req = serde_json::to_string(&params).expect("failed");
+        self.post(format!("import/{}", id.as_hyphenated()).as_str())
+            .body(req)
+            .send()
+            .await?
+            .error_for_status()?;
+        Ok(())
+    }
+
+    pub async fn get_sources(&self) -> Result<Vec<Source>, reqwest::Error> {
+        self.get("source")
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await
+    }
+
     pub async fn create_instance(
         &self,
         payload: CreatePayload,
@@ -209,5 +248,60 @@ impl ExecClient {
             .error_for_status()?
             .json()
             .await
+    }
+}
+
+pub struct ImageApiClient {
+    http: HTTPClient,
+    url: String,
+    cache_dir: String
+}
+
+impl ImageApiClient {
+    #[must_use]
+    pub fn new(address: String, cache_dir: String) -> Self {
+        Self {
+            http: HTTPClient::new(),
+            url: address,
+            cache_dir
+        }
+    }
+
+    pub fn post(&self, path: &str) -> RequestBuilder {
+        self.http.post(format!("{}/{path}", self.url))
+    }
+
+    pub fn get(&self, path: &str) -> RequestBuilder {
+        self.http.get(format!("{}/{path}", self.url))
+    }
+
+    pub fn delete(&self, path: &str) -> RequestBuilder {
+        self.http.delete(format!("{}/{path}", self.url))
+    }
+
+    pub async fn get_images(&self) -> Result<Vec<Manifest>, reqwest::Error>  {
+        let url = Url::parse(&self.url).unwrap();
+        let mut cache_file = PathBuf::from(&self.cache_dir);
+        cache_file.push(format!("{}.json", url.domain().unwrap_or("domain.tld")));
+        println!("cache file: {}", cache_file.to_str().unwrap());
+        if let Ok(metadata) = fs::metadata(&cache_file) {
+            if let Ok(time) = metadata.modified() {
+                println!("last modified: {:?}", time.elapsed());
+            } else {
+                println!("Not supported on this platform");
+            }
+        }
+
+        let response = self
+            .get("images")
+            .send()
+            .await?
+            .error_for_status()?
+            .text()
+            .await?;
+
+        let manifests: Vec<Manifest> = serde_json::from_str(&response).unwrap();
+        fs::write(&cache_file, response).expect("Unable to write file");
+        Ok(manifests)
     }
 }

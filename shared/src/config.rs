@@ -10,6 +10,9 @@
 
 use std::env;
 
+const REQ_MAX_BYTES: usize = 1024 * 1024 * 8;
+
+#[derive(Debug)]
 pub struct Config {
     pub log_file: String,
     pub ui_bind_address: String,
@@ -20,11 +23,25 @@ pub struct Config {
     pub shadow_path: String,
     pub login_user: String,
     pub exec_cache_seconds: i64,
+    pub skip_privilege_drop: bool,
+    pub cache_dir: String,
 }
 
 impl Config {
     #[must_use]
     pub fn new(log_file: &str) -> Self {
+        let skip_privilege_drop =
+            if let Ok(priv_drop) = env::var("SKIP_PRIVILEGE_DROP") {
+                println!(
+                    "SKIP_PRIVILEGE_DROP: {} ({})",
+                    priv_drop,
+                    priv_drop.len()
+                );
+                !priv_drop.is_empty()
+            } else {
+                false
+            };
+
         Self {
             log_file: env::var("LOG_FILE")
                 .unwrap_or(format!("/var/log/{}.log", log_file)),
@@ -40,11 +57,17 @@ impl Config {
                 .unwrap_or_else(|_| String::from("/etc/shadow")),
             login_user: env::var("LOGIN_USER")
                 .unwrap_or_else(|_| String::from("root")),
-            request_body_max_bytes: 1024 * 1024 * 8,
-            exec_cache_seconds: env::var("EXEC_CACHE")
-                .unwrap_or_else(|_| String::from("180"))
+            request_body_max_bytes: env::var("REQ_MAX_BYTES")
+                .unwrap_or_else(|_| REQ_MAX_BYTES.to_string())
                 .parse()
-                .unwrap_or(180),
+                .unwrap_or(REQ_MAX_BYTES),
+            exec_cache_seconds: env::var("EXEC_CACHE")
+                .unwrap_or_else(|_| String::from("300"))
+                .parse()
+                .unwrap_or(300),
+            skip_privilege_drop,
+            cache_dir: env::var("CACHE_DIR")
+                .unwrap_or_else(|_| String::from("/tmp/smartos_ui")),
         }
     }
 }

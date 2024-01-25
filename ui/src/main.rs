@@ -31,6 +31,7 @@ async fn main() -> Result<(), String> {
         .parse()
         .expect("Failed to parse BIND_ADDRESS");
     let chroot = config.chroot.clone();
+    let skip_privilege_drop = config.skip_privilege_drop;
 
     let config_logging = ConfigLogging::File {
         level: dropshot::ConfigLoggingLevel::Debug,
@@ -39,13 +40,19 @@ async fn main() -> Result<(), String> {
     };
 
     let log = config_logging
-        .to_logger(String::from("smartos_ui"))
+        .to_logger(env!("CARGO_PKG_NAME"))
         .map_err(|error| format!("Failed to create logger: {}", error))?;
 
-    // Must occur before chroot
+    info!(log, "CONFIG: {:#?}", &config);
+
+    // This must occur before chroot
     let ctx = Context::new(config);
 
-    drop_privileges(&log, &chroot);
+    if skip_privilege_drop {
+        info!(log, "SKIP_PRIVILEGE_DROP set, not dropping privileges")
+    } else {
+        drop_privileges(&log, &chroot);
+    }
 
     let mut api = ApiDescription::new();
 
@@ -82,6 +89,10 @@ async fn main() -> Result<(), String> {
     api.register(endpoints::images::get_index)?;
     api.register(endpoints::images::get_by_id)?;
     api.register(endpoints::images::delete_by_id)?;
+
+    // / import
+    api.register(endpoints::images::get_import_index)?;
+    api.register(endpoints::images::post_import_index)?;
 
     info!(log, "{} v{}", name, VERSION);
 

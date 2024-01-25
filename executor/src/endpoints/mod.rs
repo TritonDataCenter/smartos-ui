@@ -32,6 +32,7 @@ pub struct CacheEntry {
 pub struct ExecCache {
     pub images: Option<CacheEntry>,
     pub image: HashMap<Uuid, CacheEntry>,
+    pub sources: Option<CacheEntry>,
 }
 
 pub struct Context {
@@ -47,6 +48,7 @@ impl Context {
             cache: Arc::new(Mutex::new(ExecCache {
                 images: None,
                 image: HashMap::new(),
+                sources: None,
             })),
         }
     }
