@@ -23,13 +23,20 @@ use crate::exec::Client;
 use crate::session::{Session, UserSession};
 use smartos_shared::config::Config;
 
-use dropshot::{endpoint, HttpError, RequestContext};
+use dropshot::{
+    endpoint, http_response_see_other, HttpError, HttpResponseSeeOther,
+    RequestContext,
+};
 use http::response::Builder;
 use hyper::{Body, Response, StatusCode};
 use pwhash::unix;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+pub fn to_internal_error<T: std::fmt::Display>(e: T) -> HttpError {
+    HttpError::for_internal_error(e.to_string())
+}
 
 /// <https://htmx.org/headers/hx-location>
 #[derive(Debug, Deserialize, Serialize)]
@@ -63,6 +70,7 @@ pub struct HXLocation {
     // pub values: Option<String>,
     // /// Headers to submit with the request
     // pub headers: Option<String>,
+    //
     /// Allows you to select the content you want swapped from a response
     #[serde(skip_serializing_if = "Option::is_none")]
     pub select: Option<String>,
@@ -84,7 +92,7 @@ impl HXLocation {
     pub fn common(
         response: Builder,
         path: &str,
-    ) -> http::Result<Response<Body>> {
+    ) -> Result<Response<Body>, HttpError> {
         let location = Self {
             path: String::from(path),
             source: None,
@@ -98,12 +106,13 @@ impl HXLocation {
             .header("HX-Location", location.to_string())
             .status(StatusCode::OK)
             .body(Body::empty())
+            .map_err(to_internal_error)
     }
 }
 
 impl fmt::Display for HXLocation {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", serde_json::to_string(&self).unwrap())
+        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
     }
 }
 
@@ -168,26 +177,41 @@ pub fn get_header(
     ctx.request
         .headers()
         .get(header)
-        .map(|value| String::from(value.to_str().unwrap_or("")))
+        .map(|value| String::from(value.to_str().unwrap_or_default()))
 }
 
 pub fn redirect_login(
     response: Builder,
     ctx: &RequestContext<Context>,
-) -> http::Result<Response<Body>> {
+) -> Result<Response<Body>, HttpError> {
     let is_htmx = get_header(ctx, "HX-Request").is_some();
 
     if is_htmx {
         return response
             .status(StatusCode::OK)
             .header("HX-Refresh", "true")
-            .body(Body::empty());
+            .body(Body::empty())
+            .map_err(to_internal_error);
     }
 
     response
         .status(StatusCode::SEE_OTHER)
         .header("Location", "/login")
         .body(Body::empty())
+        .map_err(to_internal_error)
+}
+
+pub fn htmx_response(
+    response: Builder,
+    location: &str,
+    body: Body,
+) -> Result<Response<Body>, HttpError> {
+    response
+        .status(StatusCode::OK)
+        .header("HX-Push-Url", location)
+        .header("Content-Type", "text/html")
+        .body(body)
+        .map_err(to_internal_error)
 }
 
 /// Redirect / to either /dashboard (if user has a valid session) or /login
@@ -197,17 +221,11 @@ path = "/"
 }]
 pub async fn get_index(
     ctx: RequestContext<Context>,
-) -> Result<Response<Body>, HttpError> {
-    if Session::is_valid(&ctx) {
-        return Ok(Response::builder()
-            .status(StatusCode::TEMPORARY_REDIRECT)
-            .header("Location", "/dashboard")
-            .body(Body::empty())
-            .unwrap());
-    }
-    Ok(Response::builder()
-        .status(StatusCode::TEMPORARY_REDIRECT)
-        .header("Location", "/login")
-        .body(Body::empty())
-        .unwrap())
+) -> Result<HttpResponseSeeOther, HttpError> {
+    let location = if Session::is_valid(&ctx) {
+        "/dashboard"
+    } else {
+        "/login"
+    };
+    http_response_see_other(location.to_string())
 }

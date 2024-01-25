@@ -8,7 +8,7 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use crate::endpoints::Context;
+use crate::endpoints::{to_internal_error, Context};
 
 use dropshot::{endpoint, HttpError, RequestContext};
 use hyper::{body::Bytes, Body, Response};
@@ -21,10 +21,10 @@ pub async fn get_favicon(
     _: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
     let bytes = Bytes::from_static(include_bytes!("../../assets/favicon.ico"));
-    Ok(Response::builder()
+    Response::builder()
         .header("Content-Type", "image/vnd.microsoft.icon")
         .body(Body::from(bytes))
-        .unwrap())
+        .map_err(to_internal_error)
 }
 
 #[endpoint {
@@ -35,11 +35,11 @@ pub async fn get_js_main(
     _: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
     let bytes = Bytes::from_static(include_bytes!("../../assets/main.js.gz"));
-    Ok(Response::builder()
+    Response::builder()
         .header("Content-Encoding", "gzip")
         .header("Content-Type", "application/javascript")
         .body(Body::from(bytes))
-        .unwrap())
+        .map_err(to_internal_error)
 }
 
 #[endpoint {
@@ -50,9 +50,9 @@ pub async fn get_css_main(
     _: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
     let bytes = Bytes::from_static(include_bytes!("../../assets/main.css.gz"));
-    Ok(Response::builder()
+    Response::builder()
         .header("Content-Encoding", "gzip")
         .header("Content-Type", "text/css")
         .body(Body::from(bytes))
-        .unwrap())
+        .map_err(to_internal_error)
 }

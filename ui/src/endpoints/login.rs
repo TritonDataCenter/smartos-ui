@@ -8,11 +8,14 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use crate::endpoints::Context;
+use crate::endpoints::{to_internal_error, Context};
 use crate::session::Session;
 
 use askama::Template;
-use dropshot::{endpoint, HttpError, RequestContext, TypedBody};
+use dropshot::{
+    endpoint, HttpError, HttpResponseTemporaryRedirect, RequestContext,
+    TypedBody,
+};
 use hyper::{Body, Response, StatusCode};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -29,28 +32,14 @@ pub struct LoginRequestBody {
     pub password: String,
 }
 
-// Destroy the in-memory session (if exists) and set the Max-Age of the
-// cookie (if any) to 0
 #[endpoint {
 method = GET,
 path = "/logout"
 }]
 pub async fn get_logout(
     ctx: RequestContext<Context>,
-) -> Result<Response<Body>, HttpError> {
-    if let Some(id) = Session::destroy(&ctx) {
-        return Ok(Response::builder()
-            .status(StatusCode::TEMPORARY_REDIRECT)
-            .header("Location", "/login")
-            .header("Set-Cookie", format!("{}; Max-Age=0; HttpOnly", id))
-            .body(Body::empty())
-            .unwrap());
-    }
-    Ok(Response::builder()
-        .status(StatusCode::TEMPORARY_REDIRECT)
-        .header("Location", "/login")
-        .body(Body::empty())
-        .unwrap())
+) -> Result<HttpResponseTemporaryRedirect, HttpError> {
+    Session::destroy(&ctx)
 }
 
 /// Authenticates POSTed user/pass, created a session and redirects to /dashboard
@@ -63,24 +52,18 @@ pub async fn post_index(
     ctx: RequestContext<Context>,
     body_param: TypedBody<LoginRequestBody>,
 ) -> Result<Response<Body>, HttpError> {
-    let req = body_param.into_inner();
-    let response = Response::builder();
-    let authed = ctx.context().validate_password(req.password);
-    if req.user == "root" && authed {
-        if let Some(id) = Session::create(&ctx, req.user) {
-            return Ok(response
-                .status(StatusCode::SEE_OTHER)
-                .header("Set-Cookie", format!("sid={}; HttpOnly", &id))
-                .header("Location", "/dashboard")
-                .body(Body::empty())?);
-        }
+    let LoginRequestBody { user, password } = body_param.into_inner();
+    let authed = ctx.context().validate_password(password);
+    if user == ctx.context().config.login_user && authed {
+        return Session::create(&ctx, user);
     }
-
     let login = LoginTemplate {
         message: Some("Invalid username or password"),
     };
-    let result = login.render().unwrap(); // XXX
-    Ok(response.status(StatusCode::FORBIDDEN).body(result.into())?)
+    let result = login.render().map_err(to_internal_error)?;
+    Ok(Response::builder()
+        .status(StatusCode::FORBIDDEN)
+        .body(result.into())?)
 }
 
 /// Presents user with a login form
@@ -92,7 +75,7 @@ pub async fn get_index(
     _: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
     let login = LoginTemplate { message: None };
-    let result = login.render().unwrap(); // XXX
+    let result = login.render().map_err(to_internal_error)?;
     Ok(Response::builder()
         .status(StatusCode::OK)
         .header("Content-Type", "text/html")

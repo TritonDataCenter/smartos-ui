@@ -8,18 +8,20 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use crate::endpoints::{redirect_login, Context};
+use crate::endpoints::{
+    htmx_response, redirect_login, to_internal_error, Context,
+};
 use crate::session::Session;
 use smartos_shared::image::Image;
 
 use askama::Template;
 use dropshot::{endpoint, HttpError, RequestContext};
-use hyper::{Body, Response, StatusCode};
+use hyper::{Body, Response};
 
 #[derive(Template)]
 #[template(path = "images.j2")]
-pub struct ImagesTemplate {
-    title: String,
+pub struct ImagesTemplate<'a> {
+    title: &'a str,
     images: Vec<Image>,
 }
 
@@ -33,18 +35,21 @@ pub async fn get_index(
     let response = Response::builder();
 
     if Session::get_login(&ctx).is_some() {
-        let title = String::from("Instances");
-        let images = ctx.context().client.get_images().await.unwrap();
+        let images = ctx
+            .context()
+            .client
+            .get_images()
+            .await
+            .map_err(to_internal_error)?;
 
-        let template = ImagesTemplate { title, images };
-        let result = template.render().unwrap();
+        let template = ImagesTemplate {
+            title: "Images",
+            images,
+        };
+        let result = template.render().map_err(to_internal_error)?;
 
-        return Ok(response
-            .status(StatusCode::OK)
-            .header("Content-Type", "text/html")
-            .header("HX-Push-Url", String::from("/images"))
-            .body(result.into())?);
+        return htmx_response(response, "/images", result.into());
     }
 
-    Ok(redirect_login(response, &ctx)?)
+    redirect_login(response, &ctx)
 }

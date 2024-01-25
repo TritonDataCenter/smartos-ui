@@ -9,8 +9,12 @@
  */
 
 use crate::endpoints::Context;
-
-use dropshot::RequestContext;
+use dropshot::{
+    http_response_temporary_redirect, HttpError, HttpResponseTemporaryRedirect,
+    RequestContext,
+};
+use http::{HeaderValue, Response, StatusCode};
+use hyper::Body;
 use nanoid::nanoid;
 use serde::Serialize;
 
@@ -53,33 +57,50 @@ impl Session {
     pub fn create(
         ctx: &RequestContext<Context>,
         username: String,
-    ) -> Option<String> {
-        // Acquire sessions hashmap from context
+    ) -> Result<Response<Body>, HttpError> {
+        let response = Response::builder();
         if let Ok(mut sessions) = ctx.context().sessions.clone().lock() {
-            // Generate random Session ID
-            let id = nanoid!(64);
+            let session_id = nanoid!(64);
             sessions.insert(
-                format!("sid={}", &id),
+                format!("sid={}", &session_id),
                 UserSession {
                     login: username.clone(),
                 },
             );
-            return Some(id);
+            let response = Response::builder();
+            return Ok(response
+                .status(StatusCode::SEE_OTHER)
+                .header("Set-Cookie", format!("sid={}; HttpOnly", &session_id))
+                .header("Location", "/dashboard")
+                .body(Body::empty())?);
         }
-        None
+        Ok(response
+            .status(StatusCode::INTERNAL_SERVER_ERROR)
+            .header("Location", "/login")
+            .body(Body::empty())?)
     }
 
-    pub fn destroy(ctx: &RequestContext<Context>) -> Option<String> {
-        let mut id = None;
+    pub fn destroy(
+        ctx: &RequestContext<Context>,
+    ) -> Result<HttpResponseTemporaryRedirect, HttpError> {
+        let login_path = String::from("/login");
+        let mut response = http_response_temporary_redirect(login_path)?;
         if let Some(session_id) = Session::get_id(ctx) {
-            id = Some(String::from(session_id));
             if let Ok(mut sessions) = ctx.context().sessions.clone().lock() {
                 if sessions.remove(session_id).is_some() {
-                    return id;
+                    let headers = response.headers_mut();
+                    let cookie = HeaderValue::from_str(&format!(
+                        "{}; Max-Age=0; HttpOnly",
+                        session_id
+                    ))
+                    .map_err(|e| {
+                        HttpError::for_bad_request(None, e.to_string())
+                    })?;
+                    headers.insert("Set-Cookie", cookie);
                 }
             }
         }
-        id
+        Ok(response)
     }
 
     pub fn get_login(ctx: &RequestContext<Context>) -> Option<String> {

@@ -8,8 +8,9 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 pub mod endpoints;
 pub mod exec;
-pub mod session;
-
 pub mod privilege;
+pub mod session;

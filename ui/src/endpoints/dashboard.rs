@@ -8,18 +8,20 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use crate::endpoints::{redirect_login, Context};
+use crate::endpoints::{
+    htmx_response, redirect_login, to_internal_error, Context,
+};
 use crate::session::Session;
 use smartos_shared::sysinfo::Sysinfo;
 
 use askama::Template;
 use dropshot::{endpoint, HttpError, RequestContext};
-use hyper::{Body, Response, StatusCode};
+use hyper::{Body, Response};
 
 #[derive(Template)]
 #[template(path = "dashboard.j2")]
-pub struct DashboardTemplate {
-    title: String,
+pub struct DashboardTemplate<'a> {
+    title: &'a str,
     sysinfo: Sysinfo,
 }
 
@@ -32,18 +34,20 @@ pub async fn get_index(
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
     if Session::get_login(&ctx).is_some() {
-        let title = String::from("Dashboard");
-        let sysinfo = ctx.context().client.get_sysinfo().await.unwrap();
+        let sysinfo = ctx
+            .context()
+            .client
+            .get_sysinfo()
+            .await
+            .map_err(to_internal_error)?;
 
-        let template = DashboardTemplate { title, sysinfo };
-        let result = template.render().unwrap();
-
-        return Ok(response
-            .status(StatusCode::OK)
-            .header("Content-Type", "text/html")
-            .header("HX-Push-Url", String::from("/dashboard"))
-            .body(result.into())?);
+        let template = DashboardTemplate {
+            title: "Dashboard",
+            sysinfo,
+        };
+        let result = template.render().map_err(to_internal_error)?;
+        return htmx_response(response, "/dashboard", result.into());
     }
 
-    Ok(redirect_login(response, &ctx)?)
+    redirect_login(response, &ctx)
 }

@@ -12,8 +12,9 @@
 extern crate slog;
 
 use smartos_shared::config::Config;
-use smartos_ui::privilege::drop_privileges;
-use smartos_ui::{endpoints, endpoints::Context};
+use smartos_ui::{
+    endpoints, endpoints::Context, privilege::drop_privileges, VERSION,
+};
 
 use dropshot::{
     ApiDescription, ConfigDropshot, ConfigLogging, HttpServerStarter,
@@ -22,7 +23,6 @@ use dropshot::{
 #[tokio::main]
 async fn main() -> Result<(), String> {
     let name = option_env!("CARGO_PKG_NAME").unwrap_or("?");
-    let version = option_env!("CARGO_PKG_VERSION").unwrap_or("v?");
     let config = Config::new(name);
 
     let request_body_max_bytes = config.request_body_max_bytes;
@@ -72,15 +72,17 @@ async fn main() -> Result<(), String> {
     // /instances
     api.register(endpoints::instances::get_index)?;
     api.register(endpoints::instances::get_by_id)?;
-    api.register(endpoints::instances::get_create)?;
-    api.register(endpoints::instances::post_create)?;
     api.register(endpoints::instances::delete_by_id)?;
+
+    // /provision
+    api.register(endpoints::instances::get_provision)?;
+    api.register(endpoints::instances::post_provision)?;
 
     // /images
     api.register(endpoints::images::get_index)?;
     //api.register(endpoints::images::get_by_id)?;
 
-    info!(log, "{} v{}", name, version);
+    info!(log, "{} v{}", name, VERSION);
 
     let server = HttpServerStarter::new(
         &ConfigDropshot {
