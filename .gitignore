@@ -7,3 +7,4 @@ etc/config.toml
 ui/assets/*.gz
 ui/assets/node_modules
 test/data/vmadm/create_output.txt
+._*

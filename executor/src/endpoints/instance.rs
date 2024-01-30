@@ -55,10 +55,7 @@ pub async fn post_index(
 
     drop(stdin);
 
-    let out = process
-        .wait_with_output()
-        .await
-        .expect("Failed to read stdout");
+    let out = process.wait_with_output().await.expect("Failed to read stdout");
 
     let stdout = String::from_utf8(out.stdout).unwrap_or_default();
     println!("stdout: {}", stdout);
@@ -93,10 +90,7 @@ pub async fn delete_by_id(
         .spawn()
         .expect("vmadm command failed to start");
 
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .body(Body::empty())
-        .unwrap())
+    Ok(Response::builder().status(StatusCode::OK).body(Body::empty()).unwrap())
 }
 
 #[endpoint {
@@ -114,8 +108,5 @@ pub async fn post_validate(
         .spawn()
         .expect("vmadm command failed to start");
 
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .body(Body::empty())
-        .unwrap())
+    Ok(Response::builder().status(StatusCode::OK).body(Body::empty()).unwrap())
 }

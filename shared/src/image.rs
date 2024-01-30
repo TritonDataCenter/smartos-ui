@@ -11,24 +11,32 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
+use url::Url;
 use uuid::Uuid;
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
 pub struct ImageImportParams {
-    pub url: String, // sanitize
-                     // pub channel: String
+    pub url: Url,
+    pub name: String,
+    pub version: String,
+    pub r#type: String,
+    pub os: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Manifest {
-    pub v: i64,
+    //pub v: u64, // put this back later as an example to handle malformed requests.
     pub uuid: Uuid,
     pub name: String,
     pub version: String,
+
+    #[serde(default)]
     pub state: String,
-    pub disabled: bool,
-    pub public: bool,
-    #[serde(deserialize_with = "time::serde::iso8601::deserialize")]
+
+    #[serde(
+        deserialize_with = "time::serde::iso8601::deserialize",
+        serialize_with = "time::serde::iso8601::serialize"
+    )]
     pub published_at: OffsetDateTime,
     pub r#type: String,
     pub os: String,
@@ -36,13 +44,24 @@ pub struct Manifest {
     pub homepage: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum ImportStatus {
+    Importing,
+    Failed(String),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Image {
     pub manifest: Manifest,
+
+    pub source: Url,
+
+    // field for internal use
+    pub import_status: Option<ImportStatus>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Source {
-    pub url: String,
+    pub url: Url,
     pub r#type: String,
 }

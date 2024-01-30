@@ -26,10 +26,8 @@ async fn main() -> Result<(), String> {
     let config = Config::new(name);
 
     let request_body_max_bytes = config.request_body_max_bytes;
-    let bind_address = config
-        .ui_bind_address
-        .parse()
-        .expect("Failed to parse BIND_ADDRESS");
+    let bind_address =
+        config.ui_bind_address.parse().expect("Failed to parse BIND_ADDRESS");
     let chroot = config.chroot.clone();
     let skip_privilege_drop = config.skip_privilege_drop;
 
@@ -97,11 +95,7 @@ async fn main() -> Result<(), String> {
     info!(log, "{} v{}", name, VERSION);
 
     let server = HttpServerStarter::new(
-        &ConfigDropshot {
-            bind_address,
-            request_body_max_bytes,
-            tls: None,
-        },
+        &ConfigDropshot { bind_address, request_body_max_bytes, tls: None },
         api,
         ctx,
         &log,

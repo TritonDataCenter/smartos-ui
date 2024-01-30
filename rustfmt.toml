@@ -1,4 +1,5 @@
 max_width=80
+use_small_heuristics="max"
 # Nightly-only features as of Rust 1.73
 # doc_comment_code_block_width = 80
 # comment_width = 80

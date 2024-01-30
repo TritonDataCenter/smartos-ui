@@ -24,7 +24,6 @@ pub struct Config {
     pub login_user: String,
     pub exec_cache_seconds: i64,
     pub skip_privilege_drop: bool,
-    pub cache_dir: String,
 }
 
 impl Config {
@@ -32,11 +31,6 @@ impl Config {
     pub fn new(log_file: &str) -> Self {
         let skip_privilege_drop =
             if let Ok(priv_drop) = env::var("SKIP_PRIVILEGE_DROP") {
-                println!(
-                    "SKIP_PRIVILEGE_DROP: {} ({})",
-                    priv_drop,
-                    priv_drop.len()
-                );
                 !priv_drop.is_empty()
             } else {
                 false
@@ -66,8 +60,6 @@ impl Config {
                 .parse()
                 .unwrap_or(300),
             skip_privilege_drop,
-            cache_dir: env::var("CACHE_DIR")
-                .unwrap_or_else(|_| String::from("/tmp/smartos_ui")),
         }
     }
 }

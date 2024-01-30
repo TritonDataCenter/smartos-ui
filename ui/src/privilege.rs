@@ -16,7 +16,7 @@ use privdrop::PrivDrop;
 pub fn drop_privileges(log: &Logger, chroot_dir: &str) {
     info!(log, "Running on illumos, dropping privileges");
     PrivDrop::default()
-        .chroot(&chroot_dir)
+        .chroot(chroot_dir)
         .user("nobody")
         .apply()
         .unwrap_or_else(|e| {

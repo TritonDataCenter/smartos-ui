@@ -41,9 +41,11 @@ async fn main() -> Result<(), String> {
     api.register(endpoints::image::delete_by_id)?;
     api.register(endpoints::image::get_source_index)?;
     api.register(endpoints::image::post_import_by_id)?;
+    api.register(endpoints::image::get_avail)?;
     api.register(endpoints::instance::post_index)?;
     api.register(endpoints::instance::delete_by_id)?;
     api.register(endpoints::nictag::get_index)?;
+    api.register(endpoints::pwhash::get_index)?;
     info!(log, "{} v{}", name, version);
 
     let server = HttpServerStarter::new(

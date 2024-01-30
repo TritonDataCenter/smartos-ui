@@ -15,7 +15,7 @@ tokio = "1.35"
 hyper = "0.14"
 dropshot = "0.9"
 slog = "2.7"
-schemars = "0.8"
+schemars = { version = "0.8", features = ["url"] }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"]}
 nanoid = "0.4"
@@ -26,11 +26,11 @@ uuid = { version = "1.7.0", features = ["serde", "v4"] }
 smartos_shared = { path = "../shared" }
 http = "0.2.11"
 pwhash = "1.0.0"
-url = "2.5.0"
+url = { version = "2.5.0", features = ["serde"] }
 
 [target.'cfg(target_os = "illumos")'.dependencies]
 illumos-priv = "0.2.0"
 
 [target.'cfg(target_os = "illumos")'.dependencies.reqwest]
 version = "0.11"
-features = ["json", "native-tls-vendored", "trust-dns"]
+features = ["json", "native-tls-vendored"]

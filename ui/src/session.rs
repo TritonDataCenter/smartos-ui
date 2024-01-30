@@ -63,9 +63,7 @@ impl Session {
             let session_id = nanoid!(64);
             sessions.insert(
                 format!("sid={}", &session_id),
-                UserSession {
-                    login: username.clone(),
-                },
+                UserSession { login: username.clone() },
             );
             let response = Response::builder();
             return Ok(response

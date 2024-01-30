@@ -9,7 +9,7 @@
  */
 
 pub mod config;
-
+pub mod http_server;
 pub mod image;
 pub mod instance;
 pub mod nictag;

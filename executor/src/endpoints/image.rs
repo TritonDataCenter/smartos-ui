@@ -1,12 +1,26 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+/*
+ * Copyright 2024 MNX Cloud, Inc.
+ */
+
 use std::process::Stdio;
 
-use crate::endpoints::{CacheEntry, Context, PathParams};
+use crate::endpoints::{exec, exec_and_cache, Context, PathParams};
+
+use smartos_shared::http_server::{
+    empty_ok, to_bad_request, to_internal_error,
+};
+use smartos_shared::image::{Image, ImageImportParams, ImportStatus, Manifest};
 
 use dropshot::{endpoint, HttpError, Path, RequestContext, TypedBody};
 use hyper::{Body, Response, StatusCode};
-use slog::info;
-use smartos_shared::image::ImageImportParams;
-use time::{Duration, OffsetDateTime};
+use slog::{debug, error, info};
+use time::OffsetDateTime;
 use tokio::process::Command;
 
 #[endpoint {
@@ -16,56 +30,67 @@ path = "/image",
 pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    if let Ok(cache) = ctx.context().cache.clone().lock() {
-        if let Some(entry) = &cache.images {
-            if entry.expiry > OffsetDateTime::now_utc() {
-                info!(ctx.log, "Cache hit: expiry: {}", entry.expiry);
-                return Ok(Response::builder()
-                    .status(StatusCode::OK)
-                    .header("Content-Type", "application/json")
-                    .body(entry.content.clone().into())?);
-            } else {
-                info!(ctx.log, "Cache miss");
+    let response = Response::builder()
+        .status(StatusCode::OK)
+        .header("Content-Type", "application/json");
+    let key = "imgadm list -j";
+
+    let (stdout, cached) = match ctx.context().get_cache(key) {
+        Some(cache) => {
+            debug!(ctx.log, "Cache hit for \"{key}\"");
+            (cache, true)
+        }
+        None => {
+            debug!(ctx.log, "Cache miss for \"{key}\"");
+            (exec(&ctx, "imgadm", ["list", "-j"]).await?, false)
+        }
+    };
+
+    let import_queue = ctx.context().import_queue.clone();
+    if let Ok(mut queue) = import_queue.lock() {
+        // If there are images in the import queue? Parse the imgadm output
+        // and append any queued images to the list.
+        if !queue.is_empty() {
+            let mut images: Vec<Image> =
+                serde_json::from_str(&stdout).map_err(to_internal_error)?;
+            let mut found = Vec::new();
+            for (id, image) in queue.iter() {
+                if !images.iter().any(|i| i.manifest.uuid == *id) {
+                    images.push(image.clone());
+                } else {
+                    found.push(*id);
+                }
             }
-        } else {
-            info!(ctx.log, "No cache");
+            for k in found {
+                queue.remove(&k);
+            }
+            let response_body =
+                serde_json::to_string(&images).map_err(to_internal_error)?;
+
+            if !cached {
+                debug!(ctx.log, "Caching output");
+                ctx.context().set_cache(key, stdout);
+            }
+
+            return response
+                .body(response_body.into())
+                .map_err(to_internal_error);
         }
 
-        drop(cache);
+        if !cached {
+            debug!(ctx.log, "Caching output");
+            ctx.context().set_cache("imgadm list -j", stdout.clone());
+        }
+
+        // happy path, just return the raw output from imgadm
+        return response
+            .status(StatusCode::OK)
+            .body(stdout.into())
+            .map_err(to_internal_error);
     }
 
-    let out = Command::new("imgadm")
-        .args(["list", "-j"])
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .spawn()
-        .expect("imgadm command failed to start")
-        .wait_with_output()
-        .await
-        .expect("imgadm command failed to run");
-
-    let stdout = String::from_utf8(out.stdout).unwrap();
-
-    info!(ctx.log, "imgadm list: {}", stdout);
-
-    if let Ok(mut cache) = ctx.context().cache.clone().lock() {
-        let cache_duration = ctx.context().config.exec_cache_seconds;
-        let expiry =
-            OffsetDateTime::now_utc() + Duration::new(cache_duration, 0);
-        info!(ctx.log, "Updating cache, expiry: {}", expiry);
-        cache.images = Some(CacheEntry {
-            expiry,
-            content: stdout.clone(),
-        });
-        drop(cache);
-    }
-
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .header("Content-Type", "application/json")
-        .body(stdout.into())
-        .unwrap())
+    // failed to get lock on queue
+    Err(to_internal_error("Failed to lock image import queue"))
 }
 
 #[endpoint {
@@ -77,63 +102,7 @@ pub async fn get_by_id(
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
     let id = path_params.into_inner().id;
-
-    if let Ok(cache) = ctx.context().cache.clone().lock() {
-        if let Some(entry) = cache.image.get(&id) {
-            if entry.expiry > OffsetDateTime::now_utc() {
-                info!(
-                    ctx.log,
-                    "/image/{} Cache hit, expires: {}", id, entry.expiry
-                );
-                return Ok(Response::builder()
-                    .status(StatusCode::OK)
-                    .header("Content-Type", "application/json")
-                    .body(entry.content.clone().into())?);
-            } else {
-                info!(ctx.log, "Cache miss for: /image/{}", id);
-            }
-        } else {
-            info!(ctx.log, "No cache for: /image/{}", id);
-        }
-        drop(cache);
-    }
-
-    let out = Command::new("imgadm")
-        .args(["get", &id.to_string()])
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .spawn()
-        .expect("imgadm get failed to start")
-        .wait_with_output()
-        .await
-        .expect("imgadm get failed to run");
-
-    let stdout = String::from_utf8(out.stdout).unwrap_or_default();
-
-    if let Ok(mut cache) = ctx.context().cache.clone().lock() {
-        let cache_duration = ctx.context().config.exec_cache_seconds;
-        let expiry =
-            OffsetDateTime::now_utc() + Duration::new(cache_duration, 0);
-        info!(
-            ctx.log,
-            "Cache entry added for /image/{}, expires: {}", id, expiry
-        );
-        cache.image.insert(
-            id,
-            CacheEntry {
-                expiry,
-                content: stdout.clone(),
-            },
-        );
-        drop(cache);
-    }
-
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .header("Content-Type", "application/json")
-        .body(stdout.into())
-        .unwrap())
+    exec_and_cache(ctx, "imgadm", ["get", &id.to_string()]).await
 }
 
 #[endpoint {
@@ -146,91 +115,18 @@ pub async fn delete_by_id(
 ) -> Result<Response<Body>, HttpError> {
     let id = path_params.into_inner().id;
 
-    let _ = Command::new("imgadm")
-        .args(["delete", &id.to_string()])
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .expect("imgadm command failed to start");
+    exec(&ctx, "imgadm", ["delete", &id.to_string()]).await?;
 
-    if let Ok(mut cache) = ctx.context().cache.clone().lock() {
-        cache.images = None;
-        cache.image.remove(&id);
-        info!(ctx.log, "Purging cache due to image delete: {}", id);
-        drop(cache);
-    }
+    ctx.context().remove_cache(format!("imgadm get {}", id));
 
-    // This is a hack. Sometimes after deleting an image, execing `imgadm list`
-    // immediately after will return the deleted image (even after purging
-    // the cache or disabling it entirely.)
-    // Oddly, the same thing does not occur when adding an image, it's always
-    // shown in the list. I've also not been able to reproduce with
-    // `imgadm delete $ID && imgadm list -j`
+    ctx.context().remove_cache("imgadm list -j");
+
+    // TODO: Sometimes after invoking a delete, the image will still show up
+    // in imgadm list, this very slight delay appears to resolve it but is
+    // a hack.
     tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
 
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .body(Body::empty())
-        .unwrap())
-}
-
-#[endpoint {
-method = GET,
-path = "/source",
-}]
-pub async fn get_source_index(
-    ctx: RequestContext<Context>,
-) -> Result<Response<Body>, HttpError> {
-    if let Ok(cache) = ctx.context().cache.clone().lock() {
-        if let Some(entry) = &cache.sources {
-            if entry.expiry > OffsetDateTime::now_utc() {
-                return Ok(Response::builder()
-                    .status(StatusCode::OK)
-                    .header("Content-Type", "application/json")
-                    .body(entry.content.clone().into())?);
-            } else {
-                info!(ctx.log, "Image source cache miss");
-            }
-        } else {
-            info!(ctx.log, "No cache for image source");
-        }
-        drop(cache);
-    }
-
-    let out = Command::new("imgadm")
-        .args(["sources", "-j"])
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .spawn()
-        .expect("imgadm command failed to start")
-        .wait_with_output()
-        .await
-        .expect("imgadm command failed to run");
-
-    let stdout = String::from_utf8(out.stdout).unwrap();
-
-    if let Ok(mut cache) = ctx.context().cache.clone().lock() {
-        let cache_duration = ctx.context().config.exec_cache_seconds;
-        let expiry =
-            OffsetDateTime::now_utc() + Duration::new(cache_duration, 0);
-        info!(
-            ctx.log,
-            "Cache entry added for image sources, expires: {}", expiry
-        );
-        cache.sources = Some(CacheEntry {
-            expiry,
-            content: stdout.clone(),
-        });
-        drop(cache);
-    }
-
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .header("Content-Type", "application/json")
-        .body(stdout.into())
-        .unwrap())
+    empty_ok()
 }
 
 #[endpoint {
@@ -243,47 +139,128 @@ pub async fn post_import_by_id(
     request_body: TypedBody<ImageImportParams>,
 ) -> Result<Response<Body>, HttpError> {
     let id = path_params.into_inner().id;
-    let url = request_body.into_inner().url;
-    let cache = ctx.context().cache.clone();
-    info!(ctx.log, "ID: {}, URL: {}", id, url);
+    let req = request_body.into_inner();
+    let image_import_queue = ctx.context().import_queue.clone();
+
+    // Check the queue to ensure this image isn't already being imported
+    if let Ok(mut queue) = image_import_queue.lock() {
+        if let Some(entry) = queue.get(&id) {
+            match &entry.import_status {
+                Some(ImportStatus::Failed(msg)) => {
+                    info!(
+                        ctx.log,
+                        "Attempting to re-import failed image: {} {}", id, msg
+                    );
+                }
+                Some(ImportStatus::Importing) => {
+                    return Err(to_bad_request(format!(
+                        "Image is still being imported: {}",
+                        id
+                    )));
+                }
+                None => {
+                    return Err(to_internal_error(format!(
+                        "Encountered image in queue with no status: {}",
+                        id
+                    )));
+                }
+            }
+        }
+
+        debug!(ctx.log, "Inserting {} into import queue", id);
+        queue.insert(
+            id,
+            Image {
+                manifest: Manifest {
+                    uuid: id,
+                    name: req.name,
+                    version: req.version,
+                    state: "importing".to_string(),
+                    published_at: OffsetDateTime::now_utc(),
+                    r#type: req.r#type,
+                    os: req.os,
+                    description: String::new(),
+                    homepage: None,
+                },
+                source: req.url.clone(),
+                import_status: Some(ImportStatus::Importing),
+            },
+        );
+        drop(queue);
+    } else {
+        return Err(to_internal_error("Unable to get image import queue"));
+    }
 
     // We need to spawn tokio tasks for long-running processes
     // https://github.com/oxidecomputer/dropshot/issues/695
     match tokio::spawn(async move {
+        info!(ctx.log, "Starting import task for {}", id);
+        let args = ["import", "-q", "-S", &req.url.as_ref(), &id.to_string()];
+        debug!(ctx.log, "Executing imgadm {:?}", &args);
         let out = Command::new("imgadm")
-            .args(["import", "-q", "-S", &url, &id.to_string()])
+            .args(args)
             .stdin(Stdio::null())
             .stdout(Stdio::piped())
-            .stderr(Stdio::null())
+            .stderr(Stdio::piped())
             .spawn()
-            .expect("imgadm get failed to start")
+            .map_err(to_internal_error)?
             .wait_with_output()
             .await
-            .expect("imgadm get failed to run");
+            .map_err(to_internal_error)?;
 
-        info!(ctx.log, "Waiting for import");
+        if let Ok(mut queue) = image_import_queue.lock() {
+            if out.status.success() {
+                let stdout =
+                    String::from_utf8(out.stdout).map_err(to_internal_error)?;
+                info!(ctx.log, "Image {} import success: {}", id, stdout);
+                queue.remove(&id);
+                ctx.context().remove_cache("imgadm list -j");
+                drop(queue);
+                return empty_ok();
+            }
 
-        let stdout = String::from_utf8(out.stdout).unwrap_or_default();
+            if let Some(mut image) = queue.remove(&id) {
+                let stderr =
+                    String::from_utf8(out.stderr).map_err(to_internal_error)?;
+                error!(ctx.log, "Image {} import failed: {}", id, stderr);
+                image.import_status = Some(ImportStatus::Failed(stderr));
+                queue.insert(id, image);
+            } else {
+                error!(ctx.log, "Not queue entry found for {}", id);
+            }
 
-        if let Ok(mut cache) = cache.lock() {
-            info!(ctx.log, "Purging cache due to image import: {}", id);
-            cache.images = None;
-            cache.image.remove(&id);
-            info!(ctx.log, "Purging cache");
-            drop(cache);
+            drop(queue);
+            return Err(to_internal_error(format!("Import failed for {}", id)));
         }
 
-        Response::builder()
-            .status(StatusCode::OK)
-            .header("Content-Type", "application/json")
-            .body(stdout.into()).unwrap()
-    }).await {
-        Ok(result) => Ok(result),
-        Err(e) => {
-            return Err(HttpError::for_internal_error(format!(
-                "unexpected failure awaiting \"services_ensure\": {:#}",
-                e
-            )));
-        }
+        Err(to_internal_error("Failed to get image import queue"))
+    })
+    .await
+    {
+        Ok(result) => result,
+        Err(e) => Err(HttpError::for_internal_error(format!(
+            "Failed awaiting \"post_import_by_id\": {:#}",
+            e
+        ))),
     }
+}
+
+#[endpoint {
+method = GET,
+path = "/source",
+}]
+pub async fn get_source_index(
+    ctx: RequestContext<Context>,
+) -> Result<Response<Body>, HttpError> {
+    exec_and_cache(ctx, "imgadm", ["sources", "-j"]).await
+}
+
+#[endpoint {
+method = GET,
+path = "/avail",
+}]
+pub async fn get_avail(
+    ctx: RequestContext<Context>,
+) -> Result<Response<Body>, HttpError> {
+    exec_and_cache(ctx, "imgadm", ["avail", "-j"]).await
 }

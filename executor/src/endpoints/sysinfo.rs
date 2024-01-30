@@ -1,33 +1,24 @@
-use std::process::Stdio;
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 
-use crate::endpoints::Context;
+/*
+ * Copyright 2024 MNX Cloud, Inc.
+ */
+
+use crate::endpoints::{exec_and_cache, Context};
 
 use dropshot::{endpoint, HttpError, RequestContext};
-use hyper::{Body, Response, StatusCode};
-use tokio::process::Command;
+use hyper::{Body, Response};
 
 #[endpoint {
 method = GET,
 path = "/sysinfo",
 }]
 pub async fn get_index(
-    _: RequestContext<Context>,
+    ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    let out = Command::new("sysinfo")
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .spawn()
-        .expect("sysinfo command failed to start")
-        .wait_with_output()
-        .await
-        .expect("sysinfo command failed to run");
-
-    let stdout = String::from_utf8(out.stdout).unwrap();
-
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .header("Content-Type", "application/json")
-        .body(stdout.into())
-        .unwrap())
+    exec_and_cache(ctx, "sysinfo", []).await
 }

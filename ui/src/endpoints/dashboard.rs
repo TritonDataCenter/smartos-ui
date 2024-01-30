@@ -41,10 +41,7 @@ pub async fn get_index(
             .await
             .map_err(to_internal_error)?;
 
-        let template = DashboardTemplate {
-            title: "Dashboard",
-            sysinfo,
-        };
+        let template = DashboardTemplate { title: "Dashboard", sysinfo };
         let result = template.render().map_err(to_internal_error)?;
         return htmx_response(response, "/dashboard", result.into());
     }

@@ -4,12 +4,6 @@
 <div id="content" class="px-6">
 
   <div>
-    <label for="location" class="block text-sm font-medium leading-6 text-gray-900">Import Source</label>
-    <select id="location" name="location" class="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-            {%  for source in sources %}
-            <option>{{source.url}}</option>
-            {% endfor %}
-    </select>
     <table class="mt-6 w-full whitespace-nowrap text-left">
       <colgroup>
         <col class="w-full sm:w-4/12">
@@ -30,31 +24,35 @@
         </tr>
       </thead>
       <tbody class="divide-y divide-white/5">
-        {% for manifest in manifests %}
+        {% for image in images %}
         <tr class="hover:bg-gray-800 cursor-pointer">
           <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
             <div class="flex items-center gap-x-4">
-              <div class="truncate text-sm font-medium leading-6 text-white">{{manifest.name}}</div>
+              <div class="truncate text-sm font-medium leading-6 text-white">{{image.manifest.name}}</div>
             </div>
           </td>
           <td class="hidden py-4 pl-0 pr-4 text-right text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
-            <time datetime="2023-01-23T11:00">{{manifest.uuid}}</time>
+            <time datetime="2023-01-23T11:00">{{image.manifest.uuid}}</time>
           </td>
           <td class="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8">
             <div class="flex gap-x-3">
-              <div class="font-mono text-sm leading-6 text-gray-400">{{manifest.version}}</div>
+              <div class="font-mono text-sm leading-6 text-gray-400">{{image.manifest.version}}</div>
             </div>
           </td>
-          <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{manifest.state}}</td>
-          <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{manifest.type}}</td>
+          <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.state}}</td>
+          <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.type}}</td>
           <td class="py-4 pl-0 pr-4 text-sm leading-6 sm:pr-8 lg:pr-20">
             <div class="flex items-center justify-end gap-x-2 sm:justify-start">
-              <div class="hidden text-white sm:block">{{manifest.os}}</div>
+              <div class="hidden text-white sm:block">{{image.manifest.os}}</div>
             </div>
           </td>
           <td>
-            <form hx-ext="json-enc-typed" method="POST" hx-post="/import/{{manifest.uuid}}" action="/import/{{manifest.uuid}}">
-              <input type="hidden" name="url" value="{{url}}" />
+            <form hx-ext="json-enc-typed" method="POST" hx-post="/import/{{image.manifest.uuid}}" action="/import/{{image.manifest.uuid}}">
+              <input type="hidden" name="url" value="{{image.source}}" />
+              <input type="hidden" name="name" value="{{image.manifest.name}}" />
+              <input type="hidden" name="version" value="{{image.manifest.version}}" />
+              <input type="hidden" name="type" value="{{image.manifest.type}}" />
+              <input type="hidden" name="os" value="{{image.manifest.os}}" />
               <div class="htmx-indicator" id="loader">{% include "include/svg/loading.svg" %}</div>
               <button type="submit" hx-disabled-elt="this" hx-indicator="#loader" class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
                 Import

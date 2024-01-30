@@ -53,17 +53,18 @@ pub async fn post_index(
     body_param: TypedBody<LoginRequestBody>,
 ) -> Result<Response<Body>, HttpError> {
     let LoginRequestBody { user, password } = body_param.into_inner();
-    let authed = ctx.context().validate_password(password);
+    let authed = ctx
+        .context()
+        .validate_password(password)
+        .await
+        .map_err(to_internal_error)?;
     if user == ctx.context().config.login_user && authed {
+        ctx.context().client.warm_cache().await.map_err(to_internal_error)?;
         return Session::create(&ctx, user);
     }
-    let login = LoginTemplate {
-        message: Some("Invalid username or password"),
-    };
+    let login = LoginTemplate { message: Some("Invalid username or password") };
     let result = login.render().map_err(to_internal_error)?;
-    Ok(Response::builder()
-        .status(StatusCode::FORBIDDEN)
-        .body(result.into())?)
+    Ok(Response::builder().status(StatusCode::FORBIDDEN).body(result.into())?)
 }
 
 /// Presents user with a login form

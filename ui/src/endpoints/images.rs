@@ -13,13 +13,12 @@ use crate::endpoints::{
     PathParams,
 };
 use crate::session::Session;
-use smartos_shared::image::{Image, ImageImportParams, Manifest, Source};
+use smartos_shared::image::{Image, ImageImportParams};
 
 use askama::Template;
 use dropshot::{endpoint, HttpError, Path, RequestContext, TypedBody};
 use hyper::{Body, Response};
-use reqwest::Client as HTTPClient;
-use crate::exec::ImageApiClient;
+use serde_json::json;
 
 #[derive(Template)]
 #[template(path = "images.j2")]
@@ -45,10 +44,7 @@ pub async fn get_index(
             .await
             .map_err(to_internal_error)?;
 
-        let template = ImagesTemplate {
-            title: "Images",
-            images,
-        };
+        let template = ImagesTemplate { title: "Images", images };
         let result = template.render().map_err(to_internal_error)?;
 
         return htmx_response(response, "/images", result.into());
@@ -109,13 +105,24 @@ pub async fn delete_by_id(
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
     if Session::get_login(&ctx).is_some() {
+        let id = path_params.into_inner().id;
         ctx.context()
             .client
-            .delete_image(&path_params.into_inner().id)
+            .delete_image(&id)
             .await
             .map_err(to_internal_error)?;
 
-        return HXLocation::common(response, "/images");
+        let mut location = HXLocation::new_with_common("/images");
+        location.values = Some(json!({
+            "longRunning": true,
+            "allowedPaths": [format!("/images/{}", id)],
+            "alwaysNotify": true,
+            "notification": {
+                "heading": "Image deletion complete",
+                "body": format!("Image {} has been deleted", id)
+            }
+        }));
+        return location.serve(response);
     }
     redirect_login(response, &ctx)
 }
@@ -124,11 +131,13 @@ pub async fn delete_by_id(
 #[template(path = "import.j2")]
 pub struct ImportTemplate {
     title: String,
-    sources: Vec<Source>,
-    manifests: Vec<Manifest>,
-    url: String,
+    images: Vec<Image>,
 }
 
+// TODO: if you navigate here, then quickly navigate elsewhere before it has
+// loaded, you will be redirected here when it later loads, instead of aborting
+// the request like the other side-panel navigation entries (need to grok how to
+// make hx-sync work here too.)
 #[endpoint {
 method = GET,
 path = "/import",
@@ -137,36 +146,18 @@ pub async fn get_import_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    let mut url = String::new();
     if Session::get_login(&ctx).is_some() {
-        let sources = ctx
+        let mut images = ctx
             .context()
             .client
-            .get_sources()
+            .get_available_images()
             .await
             .map_err(to_internal_error)?;
-
-        let mut manifests: Vec<Manifest> = if let Some(first) = sources.first()
-        {
-            url = first.url.clone();
-            let client = ImageApiClient::new(url.clone(), ctx.context().config.cache_dir.clone());
-            client.get_images().await.map_err(to_internal_error)?
-        } else {
-            Vec::<Manifest>::new()
-        };
-
-        manifests.sort_by_key(|m| m.published_at);
-        manifests.reverse();
-
-        let template = ImportTemplate {
-            title: "Image Sources".to_string(),
-            sources,
-            manifests,
-            url,
-        };
+        images.reverse();
+        let template =
+            ImportTemplate { title: "Available Images".to_string(), images };
 
         let result = template.render().map_err(to_internal_error)?;
-
         return htmx_response(response, "/import", result.into());
     }
 
@@ -183,15 +174,25 @@ pub async fn post_import_index(
     request_body: TypedBody<ImageImportParams>,
 ) -> Result<Response<Body>, HttpError> {
     let request = request_body.into_inner();
+    let id = &path_params.into_inner().id;
     let response = Response::builder();
     if Session::get_login(&ctx).is_some() {
         ctx.context()
             .client
-            .import_image(&path_params.into_inner().id, &request)
+            .import_image(id, &request)
             .await
             .map_err(to_internal_error)?;
 
-        return HXLocation::common(response, "/images");
+        let mut location = HXLocation::new_with_common("/images");
+        location.values = Some(json!({
+            "longRunning": true,
+            "allowedPaths": [],
+            "notification": {
+                "heading": "Image import complete",
+                "body": format!("Image {} has been imported and is ready to use.", id)
+            }
+        }));
+        return location.serve(response);
     }
     redirect_login(response, &ctx)
 }

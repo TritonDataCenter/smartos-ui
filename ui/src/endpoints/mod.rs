@@ -16,7 +16,6 @@ pub mod login;
 
 use std::collections::HashMap;
 use std::fmt;
-use std::fs::read_to_string;
 use std::sync::{Arc, Mutex};
 
 use crate::exec::Client;
@@ -32,6 +31,7 @@ use hyper::{Body, Response, StatusCode};
 use pwhash::unix;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use uuid::Uuid;
 
 pub fn to_internal_error<T: std::fmt::Display>(e: T) -> HttpError {
@@ -64,10 +64,10 @@ pub struct HXLocation {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub swap: Option<String>,
 
-    // How are these supposed to be structured? Docs don't say, guessing a
-    // Option<Vec<(String; 2)>> ?
-    // /// Values to submit with the request
-    // pub values: Option<String>,
+    /// Values to submit with the request
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub values: Option<Value>,
+
     // /// Headers to submit with the request
     // pub headers: Option<String>,
     //
@@ -85,23 +85,41 @@ impl HXLocation {
             handler: None,
             target: None,
             swap: None,
+            values: None,
             select: None,
         }
     }
 
-    pub fn common(
-        response: Builder,
-        path: &str,
-    ) -> Result<Response<Body>, HttpError> {
-        let location = Self {
+    pub fn new_with_common(path: &str) -> Self {
+        Self {
             path: String::from(path),
             source: None,
             event: None,
             handler: None,
             target: Some(String::from("#main")),
             swap: None,
+            values: None,
             select: Some(String::from("#content")),
-        };
+        }
+    }
+
+    pub fn serve(
+        &self,
+        response: Builder,
+    ) -> Result<Response<Body>, HttpError> {
+        let header = serde_json::to_string(&self).map_err(to_internal_error)?;
+        response
+            .header("HX-Location", header)
+            .status(StatusCode::OK)
+            .body(Body::empty())
+            .map_err(to_internal_error)
+    }
+
+    pub fn common(
+        response: Builder,
+        path: &str,
+    ) -> Result<Response<Body>, HttpError> {
+        let location = Self::new_with_common(path);
         response
             .header("HX-Location", location.to_string())
             .status(StatusCode::OK)
@@ -127,7 +145,6 @@ pub struct Context {
     pub config: Config,
     pub sessions: Arc<Mutex<HashMap<String, UserSession>>>,
     pub client: Client,
-    pub root_password_hash: Option<String>,
 }
 
 impl Context {
@@ -136,37 +153,19 @@ impl Context {
         let map: HashMap<String, UserSession> = HashMap::new();
         let exec_bind_address = config.exec_bind_address.clone();
         let vminfo_bind_address = config.vminfo_bind_address.clone();
-        let root_password_hash =
-            Self::get_root_password_hash(&config.shadow_path);
         Self {
             config,
             client: Client::new(exec_bind_address, vminfo_bind_address),
             sessions: Arc::new(Mutex::new(map)),
-            root_password_hash,
         }
     }
 
-    /// This runs before chroot while /etc/shadow is still accessible
-    pub fn get_root_password_hash(shadow_path: &String) -> Option<String> {
-        if let Ok(shadow_contents) = read_to_string(shadow_path) {
-            for line in shadow_contents.lines() {
-                let v: Vec<&str> = line.split(':').collect();
-                if v.len() < 2 {
-                    continue;
-                }
-                if v[0] == "root" {
-                    return Some(String::from(v[1]));
-                }
-            }
-        }
-        None
-    }
-
-    pub fn validate_password(&self, password: String) -> bool {
-        if let Some(root_password_hash) = &self.root_password_hash {
-            return unix::verify(password, root_password_hash);
-        }
-        false
+    pub async fn validate_password(
+        &self,
+        password: String,
+    ) -> Result<bool, reqwest::Error> {
+        let hash = self.client.get_pwhash().await?;
+        Ok(unix::verify(password, &hash))
     }
 }
 
@@ -222,10 +221,7 @@ path = "/"
 pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<HttpResponseSeeOther, HttpError> {
-    let location = if Session::is_valid(&ctx) {
-        "/dashboard"
-    } else {
-        "/login"
-    };
+    let location =
+        if Session::is_valid(&ctx) { "/dashboard" } else { "/login" };
     http_response_see_other(location.to_string())
 }

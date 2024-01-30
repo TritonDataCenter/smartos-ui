@@ -114,9 +114,8 @@ pub async fn get_index(
             .get_instances()
             .await
             .map_err(to_internal_error)?;
-        let total_ram = instances
-            .iter()
-            .fold(0, |acc, i| i.max_physical_memory + acc);
+        let total_ram =
+            instances.iter().fold(0, |acc, i| i.max_physical_memory + acc);
         let total_quota = instances.iter().fold(0, |acc, i| i.quota + acc);
         let template = InstancesTemplate {
             total_ram,
@@ -172,9 +171,6 @@ pub async fn get_provision(
             .await
             .map_err(to_internal_error)?;
         while let Some(image) = images.pop() {
-            if image.manifest.state != "active" || image.manifest.disabled {
-                continue;
-            }
             let key =
                 format!("{} {}", image.manifest.os, image.manifest.r#type);
             if let Some(image_vec) = image_list.get_mut(&key) {
@@ -201,11 +197,8 @@ pub async fn get_provision(
             }
         }
 
-        let template = InstanceCreateTemplate {
-            title,
-            images: image_list,
-            nictags,
-        };
+        let template =
+            InstanceCreateTemplate { title, images: image_list, nictags };
         let result = template.render().map_err(to_internal_error)?;
         return htmx_response(response, "/provision", result.into());
     }
