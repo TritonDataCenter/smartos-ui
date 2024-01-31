@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#notify-close').addEventListener('click', hideNotify)
 
   function notify(notification, timeout=10000) {
-    console.log(notification)
     if (!notification || !notification.heading || !notification.body) {
       // nothing to do here
       return
@@ -69,10 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   })
 
-  htmx.on('htmx:beforeOnLoad', e => {
-    console.log('htmx:beforeOnLoad', document.location.pathname, e.detail)
-  })
-
   // Long running requests such as importing images or creating an instance
   // may send their response when the user has navigated to another view within
   // the app which will then redirect them to the path in the HX-Location header
@@ -83,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const {detail: {etc: {values}}} = e
     if (values) {
       let {longRunning, allowedPaths, notification, alwaysNotify} = values
-      let {pathname} = document.location;
+      let {pathname} = document.location
       if (longRunning && allowedPaths.indexOf(pathname) == -1) {
         e.preventDefault()
         return notify(notification)

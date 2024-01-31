@@ -1,3 +1,0 @@
-b990f39c-0619-4975-85b2-2442115bc0d8:e44ed3e0-910b-11ed-a5d4-00151714048c:OS:joyent:4096:running:mariadb:32
-d11dbea9-cb8f-4415-9c21-3c5e48e55ea2:3277be68-9109-11ed-a9ba-00151714048c:OS:joyent-minimal:4096:running:music:300
-509f142f-f8ac-43fa-b5b8-c41fe238ff7d:e44ed3e0-910b-11ed-a5d4-00151714048c:OS:joyent:4096:running:ui:32

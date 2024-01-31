@@ -1,21 +1,53 @@
-#!/bin/bash
+#!/usr/bin/env node
 
-root="$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)/../data"
-case "$1" in
-    list)
-        cat "$root/imgadm/list.json";;
-    get)
-        cat "$root/imgadm/$2.json";;
-    sources)
-        cat "$root/imgadm/sources.json";;
-    import)
-        echo "Importing $4 (xxx@xxx) from \"$3\""
-        echo "Gather image $4 ancestry"
-        echo "Must download and install 1 image (100.0 MiB)"
-        sleep 15 # this often takes a while...
-        echo "Downloaded image $4 (100.0 MiB)"
-        echo "Imported image $4 (xxx@xxx)";;
-    *)
-    echo "$1 not implemented"
-    exit 1;;
-esac
+const {join} = require('node:path')
+const {
+  readdirSync, readFileSync, writeFileSync, unlinkSync
+} = require('node:fs')
+
+const root = join(__dirname, '..', 'data', 'db', 'img')
+const sources = [{'url': 'https://images.smartos.org','type': 'imgapi'}]
+
+const cmd = {
+  list: () => {
+    const imgs = readdirSync(root)
+      .filter(file => !file.startsWith('.'))
+      .map(file => {
+      return JSON.parse(readFileSync(join(root, file)))
+    })
+    console.log(JSON.stringify(imgs, null, 2))
+  },
+  get: ([uuid]) => {
+    console.log(readFileSync(join(root, `${uuid}.json`), 'utf-8'))
+  },
+  sources: () => console.log(JSON.stringify(sources, null, 2)),
+  import: ([,,source,uuid]) => {
+    fetch(`${source}/images/${uuid}`)
+      .then(res => res.json())
+      .then(manifest => {
+        setTimeout(() => {
+          const fileName = join(root, `${uuid}.json`)
+          writeFileSync(fileName, JSON.stringify({manifest, source}))
+          console.log(`Image ${uuid} import success: Importing ${uuid} \
+(${manifest.name}@${manifest.version}) from "${source}"
+Gather image ${uuid} ancestry
+Must download and install 1 image (100.0 MiB)
+Downloaded image ${uuid} (100.0 MiB)
+Imported image ${uuid} (${manifest.name}@${manifest.version})`)
+        }, 5000)
+      })
+  },
+  delete: ([uuid]) => unlinkSync(join(root, `${uuid}.json`)),
+  avail: () => {
+    const [{url}] = sources
+    fetch(`${url}/images`)
+      .then(res => res.json())
+      .then(images => {
+        const list = images.map(manifest => ({manifest, source: url}));
+        console.log(JSON.stringify(list, null, 2))
+      })
+  }
+}
+
+cmd[process.argv[2]](process.argv.slice(3))
+

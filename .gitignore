@@ -6,5 +6,8 @@
 etc/config.toml
 ui/assets/*.gz
 ui/assets/node_modules
-test/data/vmadm/create_output.txt
+test/data/db/img/*
+!test/data/db/img/.gitkeep
+test/data/db/vm/*
+!test/data/db/vm/.gitkeep
 ._*

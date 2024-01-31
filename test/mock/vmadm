@@ -1,15 +1,27 @@
-#!/bin/bash
+#!/usr/bin/env node
 
-root="$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)/../data"
-case "$1" in
-    list)
-        cat "$root/vmadm/list.txt";;
-    get)
-        cat "$root/vmadm/$2.json";;
-    create)
-        sleep 15 # this often takes a while...
-        cat - > "$root/vmadm/create_output.txt";;
-    *)
-        echo "$1 not implemented"
-        exit 1;;
-esac
+const {join} = require('node:path')
+const {readFileSync, writeFileSync, unlinkSync} = require('node:fs')
+
+const root = join(__dirname, '..', 'data', 'db', 'vm')
+
+function getPayload() {
+  try {
+    return JSON.parse(readFileSync('/dev/stdin', 'utf-8'))
+  } catch (e) {
+    console.error(e)
+    process.exit(1)
+  }
+}
+
+const cmd = {
+  create: () => {
+    const vm = getPayload()
+    const fileName = join(root, `${vm.uuid}.json`)
+    setTimeout(() => writeFileSync(fileName, JSON.stringify(vm)), 5000)
+  },
+  validate: () => getPayload(),
+  delete: ([uuid]) => unlinkSync(join(root, `${uuid}.json`))
+}
+
+cmd[process.argv[2]](process.argv.slice(3))

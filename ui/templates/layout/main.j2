@@ -6,7 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{% endblock %}</title>
         <link href="/css/main.css?v={{crate::VERSION}}" rel="stylesheet">
+        {%  block head_scripts %}
         <script src="/js/main.js?v={{crate::VERSION}}"></script>
+        {% endblock %}
     </head>
 {% endblock %}
 {% block body %}
