@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    /*
+     * Classes for the side bar navigation
+     */
+    .active-sidebar-nav {
+        @apply bg-gray-800;
+        @apply text-white;
+    }
+    .inactive-sidebar-nav {
+        @apply text-gray-400;
+        @apply hover:text-white hover:bg-gray-800
+    }
+    .inactive-sidebar-nav:hover {
+        @apply text-white;
+        @apply bg-gray-800;
+    }
+
+    /*
+     * Classes for the provisioning editor tabs
+     */
+    .active-editor-tab {
+        @apply border-blue-500;
+        @apply text-blue-600;
+    }
+    .inactive-editor-tab {
+        @apply border-transparent;
+        @apply text-gray-500;
+    }
+    .inactive-editor-tab:hover {
+      @apply border-gray-300;
+      @apply text-gray-400;
+    }
+}
+
+/* Misc custom classes */
+.notify-icons svg {
+    display:none;
+}

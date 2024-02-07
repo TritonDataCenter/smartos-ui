@@ -16,6 +16,9 @@ use dropshot::{endpoint, HttpError, RequestContext};
 use hyper::{Body, Response, StatusCode};
 use smartos_shared::http_server::to_internal_error;
 
+// TODO: Just realized root hash is in sysinfo, use that instead and remove
+// this entirely
+
 #[endpoint {
 method = GET,
 path = "/pwhash",

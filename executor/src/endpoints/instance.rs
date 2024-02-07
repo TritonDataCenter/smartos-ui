@@ -11,10 +11,13 @@
 use std::process::Stdio;
 
 use crate::endpoints::{Context, PathParams};
-use smartos_shared::instance::CreatePayload;
+use smartos_shared::instance::{
+    CreatePayload, InstancePayload, InstanceValidateResponse,
+};
 
 use dropshot::{endpoint, HttpError, Path, RequestContext, TypedBody};
 use hyper::{Body, Response, StatusCode};
+use smartos_shared::http_server::to_internal_error;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
 
@@ -70,6 +73,52 @@ pub async fn post_index(
         .header("Content-Type", "application/json")
         .body(Body::empty())
         .unwrap())
+}
+
+#[endpoint {
+method = POST,
+path = "/validate/create",
+}]
+pub async fn post_validate_create(
+    _: RequestContext<Context>,
+    request_body: TypedBody<InstancePayload>,
+) -> Result<Response<Body>, HttpError> {
+    let InstancePayload { payload } = request_body.into_inner();
+
+    // Confirm we at least have valid JSON ?
+    //let _ = serde_json::from_str(&payload).map_err(to_bad_request)?;
+
+    let mut process = Command::new("vmadm")
+        .args(["validate", "create"])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(to_internal_error)?;
+
+    let mut stdin = process.stdin.take().expect("waiting get stdin");
+
+    stdin.write_all(payload.as_bytes()).await.map_err(to_internal_error)?;
+
+    drop(stdin);
+
+    let out = process.wait_with_output().await.map_err(to_internal_error)?;
+    //let stdout = String::from_utf8(out.stdout).unwrap_or_default();
+    let stderr = String::from_utf8(out.stderr).unwrap_or_default();
+
+    let response = InstanceValidateResponse {
+        message: stderr,
+        success: out.status.success(),
+    };
+
+    let response_body =
+        serde_json::to_string(&response).map_err(to_internal_error)?;
+
+    Response::builder()
+        .status(StatusCode::OK)
+        .header("Content-Type", "application/json")
+        .body(response_body.into())
+        .map_err(to_internal_error)
 }
 
 #[endpoint {

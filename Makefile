@@ -27,25 +27,45 @@ J2_FILES ?= $(shell find $(TOP)/ui/templates -name *.j2)
 ui/assets/node_modules:
 	cd ui/assets && npm install
 
-ui/assets/main.css: ui/assets/input.css ui/assets/tailwind.config.js $(J2_FILES)
+ui/assets/main.css: ui/assets/main.in.css ui/assets/tailwind.config.js $(J2_FILES)
 	cd ui/assets && \
-		./node_modules/.bin/tailwindcss -m -i ./input.css -o ./main.css
+		./node_modules/.bin/tailwindcss -m -i ./main.in.css -o ./main.css
 
 ui/assets/main.css.gz: ui/assets/main.css
 	cd ui/assets && rm -f ./main.css.gz && gzip ./main.css
 
 ui/assets/main.js: ui/assets/node_modules
-	cat \
-		ui/assets/node_modules/htmx.org/dist/htmx.min.js \
-		ui/assets/json-enc-typed.js \
-		ui/assets/dashboard-nav.js \
-		> ui/assets/main.js
+	cd ui/assets && \
+	./node_modules/.bin/rollup main.in.js \
+		--silent \
+		--format es \
+		--file main.js \
+		--plugin @rollup/plugin-node-resolve
+
+ui/assets/provision.js: ui/assets/node_modules
+	cd ui/assets && \
+	./node_modules/.bin/rollup provision.in.js \
+		--silent \
+		--format es \
+		--file provision.js \
+		--plugin @rollup/plugin-node-resolve
 
 ui/assets/main.js.gz: ui/assets/main.js
 	cd ui/assets && rm -f ./main.js.gz && gzip ./main.js
 
+ui/assets/provision.js.gz: ui/assets/provision.js
+	cd ui/assets && rm -f ./provision.js.gz && gzip ./provision.js
+
 .PHONY: assets
-assets: ui/assets/node_modules ui/assets/main.css.gz ui/assets/main.js.gz
+assets: ui/assets/node_modules ui/assets/main.css.gz ui/assets/main.js.gz ui/assets/provision.js.gz
+
+.PHONY: clean-assets
+clean-assets:
+	rm -f ui/assets/*.gz
+
+.PHONY: js-fmt
+fmt-js:
+	cd ui/assets && npm run fmt
 
 .PHONY: all
 all: release

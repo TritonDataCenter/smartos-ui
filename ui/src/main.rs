@@ -68,8 +68,9 @@ async fn main() -> Result<(), String> {
     // /favicon.ico
     api.register(endpoints::assets::get_favicon)?;
 
-    // /js/htmx.js
+    // /js/*.js
     api.register(endpoints::assets::get_js_main)?;
+    api.register(endpoints::assets::get_js_provision)?;
 
     // /css/main.css
     api.register(endpoints::assets::get_css_main)?;
@@ -82,6 +83,7 @@ async fn main() -> Result<(), String> {
     // /provision
     api.register(endpoints::instances::get_provision)?;
     api.register(endpoints::instances::post_provision)?;
+    api.register(endpoints::instances::post_provision_validate)?;
 
     // /images
     api.register(endpoints::images::get_index)?;

@@ -47,14 +47,18 @@
             </div>
           </td>
           <td>
-            <form hx-ext="json-enc-typed" method="POST" hx-post="/import/{{image.manifest.uuid}}" action="/import/{{image.manifest.uuid}}">
+            <form
+              method="POST"
+              hx-ext="json-enc-typed"
+              hx-post="/import/{{image.manifest.uuid}}"
+              action="/import/{{image.manifest.uuid}}">
               <input type="hidden" name="url" value="{{image.source}}" />
               <input type="hidden" name="name" value="{{image.manifest.name}}" />
               <input type="hidden" name="version" value="{{image.manifest.version}}" />
               <input type="hidden" name="type" value="{{image.manifest.type}}" />
               <input type="hidden" name="os" value="{{image.manifest.os}}" />
-              <div class="htmx-indicator" id="loader">{% include "include/svg/loading.svg" %}</div>
-              <button type="submit" hx-disabled-elt="this" hx-indicator="#loader" class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+              <div class="htmx-indicator" id="loader-{{image.manifest.uuid}}">{% include "include/svg/loading.svg" %}</div>
+              <button type="submit" hx-disabled-elt="this" hx-indicator="#loader-{{image.manifest.uuid}}" class="rounded-md bg-blue-500 px-3 py-2 text-sm font-semibold shadow-sm hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">
                 Import
               </button>
             </form>

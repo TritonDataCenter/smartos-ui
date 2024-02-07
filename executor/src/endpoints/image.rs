@@ -181,6 +181,8 @@ pub async fn post_import_by_id(
                     os: req.os,
                     description: String::new(),
                     homepage: None,
+                    requirements: None,
+                    disabled: true,
                 },
                 source: req.url.clone(),
                 import_status: Some(ImportStatus::Importing),

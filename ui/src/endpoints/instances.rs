@@ -8,7 +8,7 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use std::collections::HashMap;
+use std::str::FromStr;
 
 use crate::endpoints::{
     htmx_response, redirect_login, to_internal_error, Context, HXLocation,
@@ -16,14 +16,18 @@ use crate::endpoints::{
 };
 use crate::session::Session;
 
-use smartos_shared::instance::{CreatePayload, Instance, Nic};
+use smartos_shared::instance::{
+    Brand, CreatePayload, Instance, InstancePayload, Nic,
+};
 use smartos_shared::nictag::NicTag;
 
 use askama::Template;
-use dropshot::{endpoint, HttpError, Path, RequestContext, TypedBody};
+use dropshot::{endpoint, HttpError, Path, Query, RequestContext, TypedBody};
+use http::StatusCode;
 use hyper::{Body, Response};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use smartos_shared::image::Image;
 use uuid::Uuid;
 
 #[derive(Template)]
@@ -132,15 +136,54 @@ pub async fn get_index(
 
 #[derive(Template)]
 #[template(path = "provision.j2")]
-pub struct InstanceCreateTemplate {
+pub struct InstanceCreateTemplate<'a> {
     title: String,
-    images: HashMap<String, Vec<ImageOption>>,
+    images: Vec<&'a Image>,
     nictags: Vec<NicTag>,
+    default_image_message: &'a str,
+    alias: String,
+    brand: Brand,
+    image_uuid: String,
+    ram: String,
+    quota: String,
+    nic_tag: String,
+    nic_setup: String,
+    nic_ips: String,
+    nic_gateways: String,
+    resolvers: String,
+    vcpus: String,
 }
 pub struct ImageOption {
     pub id: String,
     pub title: String,
     pub name: String,
+    pub for_brand: Vec<String>,
+}
+
+#[derive(Deserialize, Serialize, Debug, JsonSchema)]
+pub struct ProvisionQuery {
+    #[serde(default)]
+    alias: String,
+    #[serde(default)]
+    brand: String,
+    #[serde(default)]
+    image_uuid: String,
+    #[serde(default)]
+    ram: String,
+    #[serde(default)]
+    quota: String,
+    #[serde(default)]
+    nic_tag: String,
+    #[serde(default)]
+    nic_setup: String,
+    #[serde(default)]
+    nic_ips: String,
+    #[serde(default)]
+    nic_gateways: String,
+    #[serde(default)]
+    resolvers: String,
+    #[serde(default)]
+    vcpus: String,
 }
 
 #[endpoint {
@@ -149,11 +192,28 @@ path = "/provision"
 }]
 pub async fn get_provision(
     ctx: RequestContext<Context>,
+    query: Query<ProvisionQuery>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
 
     if Session::get_login(&ctx).is_some() {
+        let ProvisionQuery {
+            alias,
+            brand,
+            image_uuid,
+            ram,
+            quota,
+            nic_tag,
+            nic_setup,
+            nic_ips,
+            nic_gateways,
+            resolvers,
+            vcpus,
+        } = query.into_inner();
+        let actual_brand = Brand::from_str(&brand).unwrap_or_default();
+
         let title = String::from("Create Instance");
+        let mut default_image_message = "Select an Image";
 
         let nictags = ctx
             .context()
@@ -162,43 +222,39 @@ pub async fn get_provision(
             .await
             .map_err(to_internal_error)?;
 
-        // Group images by os + type
-        let mut image_list = HashMap::<String, Vec<ImageOption>>::new();
-        let mut images = ctx
-            .context()
-            .client
-            .get_images()
-            .await
-            .map_err(to_internal_error)?;
-        while let Some(image) = images.pop() {
-            let key =
-                format!("{} {}", image.manifest.os, image.manifest.r#type);
-            if let Some(image_vec) = image_list.get_mut(&key) {
-                image_vec.push(ImageOption {
-                    id: image.manifest.uuid.to_string(),
-                    title: image.manifest.description.clone(),
-                    name: format!(
-                        "{} {}",
-                        image.manifest.name, image.manifest.version
-                    ),
-                });
-            } else {
-                image_list.insert(
-                    key,
-                    vec![ImageOption {
-                        id: image.manifest.uuid.to_string(),
-                        title: image.manifest.description.clone(),
-                        name: format!(
-                            "{} {}",
-                            image.manifest.name, image.manifest.version
-                        ),
-                    }],
-                );
-            }
-        }
+        let images: Vec<Image> = if actual_brand == Brand::Other {
+            default_image_message = "Select a Brand to choose an Image";
+            vec![]
+        } else {
+            ctx.context()
+                .client
+                .get_images()
+                .await
+                .map_err(to_internal_error)?
+        };
 
-        let template =
-            InstanceCreateTemplate { title, images: image_list, nictags };
+        let image_list = images
+            .iter()
+            .filter(|image| actual_brand.for_image_type(&image.manifest.r#type))
+            .collect();
+
+        let template = InstanceCreateTemplate {
+            title,
+            images: image_list,
+            nictags,
+            default_image_message,
+            alias,
+            brand: actual_brand,
+            image_uuid,
+            ram,
+            quota,
+            nic_tag,
+            nic_setup,
+            nic_ips,
+            nic_gateways,
+            resolvers,
+            vcpus,
+        };
         let result = template.render().map_err(to_internal_error)?;
         return htmx_response(response, "/provision", result.into());
     }
@@ -251,6 +307,45 @@ pub async fn post_provision(
             .map_err(to_internal_error)?;
 
         return HXLocation::common(response, "/instances");
+    }
+
+    redirect_login(response, &ctx)
+}
+
+#[derive(Template)]
+#[template(path = "validate_create_result.j2")]
+pub struct ValidateTemplate {
+    success: bool,
+    message: String,
+}
+
+#[endpoint {
+method = POST,
+path = "/provision/validate",
+content_type = "application/x-www-form-urlencoded"
+}]
+pub async fn post_provision_validate(
+    ctx: RequestContext<Context>,
+    request_body: TypedBody<InstancePayload>,
+) -> Result<Response<Body>, HttpError> {
+    let response = Response::builder();
+    let req = request_body.into_inner();
+    if Session::get_login(&ctx).is_some() {
+        let validation = ctx
+            .context()
+            .client
+            .validate_create(req)
+            .await
+            .map_err(to_internal_error)?;
+        let template = ValidateTemplate {
+            success: validation.success,
+            message: validation.message,
+        };
+        let result = template.render().map_err(to_internal_error)?;
+        return response
+            .status(StatusCode::OK)
+            .body(result.into())
+            .map_err(to_internal_error);
     }
 
     redirect_login(response, &ctx)

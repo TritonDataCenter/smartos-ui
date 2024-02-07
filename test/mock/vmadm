@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-const {join} = require('node:path')
-const {readFileSync, writeFileSync, unlinkSync} = require('node:fs')
+const { join } = require('node:path')
+const { readFileSync, writeFileSync, unlinkSync } = require('node:fs')
 
 const root = join(__dirname, '..', 'data', 'db', 'vm')
 
-function getPayload() {
+function getPayload () {
   try {
     return JSON.parse(readFileSync('/dev/stdin', 'utf-8'))
   } catch (e) {
@@ -20,7 +20,19 @@ const cmd = {
     const fileName = join(root, `${vm.uuid}.json`)
     setTimeout(() => writeFileSync(fileName, JSON.stringify(vm)), 5000)
   },
-  validate: () => getPayload(),
+  validate: ([subcmd]) => {
+    const { brand } = getPayload()
+    if (!brand) {
+      console.error('{"bad_brand": "undefined"}')
+      process.exit(1)
+    }
+    if (subcmd === 'create') {
+      // vmadm writes success message to stderr
+      return console.error(`VALID 'create' payload for ${brand} brand VMs.`)
+    }
+    console.error(`${subcmd} is currently unsupported in the mock scripts`)
+    process.exit(1)
+  },
   delete: ([uuid]) => unlinkSync(join(root, `${uuid}.json`))
 }
 

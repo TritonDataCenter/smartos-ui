@@ -15,6 +15,7 @@ use smartos_shared::{
 
 use reqwest::{Client as HTTPClient, RequestBuilder};
 use smartos_shared::image::{ImageImportParams, Source};
+use smartos_shared::instance::{InstancePayload, InstanceValidateResponse};
 use tokio::try_join;
 use uuid::Uuid;
 
@@ -86,6 +87,13 @@ impl Client {
         payload: CreatePayload,
     ) -> Result<(), reqwest::Error> {
         self.exec.create_instance(payload).await
+    }
+
+    pub async fn validate_create(
+        &self,
+        payload: InstancePayload,
+    ) -> Result<InstanceValidateResponse, reqwest::Error> {
+        self.exec.validate_create(payload).await
     }
 
     pub async fn delete_instance(
@@ -219,6 +227,20 @@ impl ExecClient {
         let req = serde_json::to_string(&payload).expect("failed");
         self.post("instance").body(req).send().await?.error_for_status()?;
         Ok(())
+    }
+
+    pub async fn validate_create(
+        &self,
+        payload: InstancePayload,
+    ) -> Result<InstanceValidateResponse, reqwest::Error> {
+        let req = serde_json::to_string(&payload).expect("failed");
+        self.post("validate/create")
+            .body(req)
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await
     }
 
     pub async fn delete_instance(

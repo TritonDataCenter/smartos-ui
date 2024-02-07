@@ -44,6 +44,22 @@ pub async fn get_js_main(
 
 #[endpoint {
 method = GET,
+path = "/js/provision.js"
+}]
+pub async fn get_js_provision(
+    _: RequestContext<Context>,
+) -> Result<Response<Body>, HttpError> {
+    let bytes =
+        Bytes::from_static(include_bytes!("../../assets/provision.js.gz"));
+    Response::builder()
+        .header("Content-Encoding", "gzip")
+        .header("Content-Type", "application/javascript")
+        .body(Body::from(bytes))
+        .map_err(to_internal_error)
+}
+
+#[endpoint {
+method = GET,
 path = "/css/main.css"
 }]
 pub async fn get_css_main(

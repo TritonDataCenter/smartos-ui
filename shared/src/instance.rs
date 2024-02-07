@@ -8,7 +8,9 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
+use std::fmt;
 use std::fmt::{Display, Error, Formatter};
+use std::str::FromStr;
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -25,6 +27,19 @@ pub struct CreatePayload {
     pub nics: Vec<Nic>,
     pub image_uuid: Uuid,
     pub quota: u64,
+}
+
+// Used for sending the instance json for vmadm validate create and vmadm create
+#[derive(Deserialize, Serialize, Debug, JsonSchema)]
+pub struct InstancePayload {
+    // String containing instance JSON
+    pub payload: String,
+}
+
+#[derive(Deserialize, Serialize, Debug, JsonSchema)]
+pub struct InstanceValidateResponse {
+    pub message: String,
+    pub success: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -93,7 +108,7 @@ pub struct Nic {
     pub primary: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, JsonSchema, Eq, PartialEq)]
 pub enum Brand {
     #[serde(rename = "joyent")]
     Joyent,
@@ -103,6 +118,43 @@ pub enum Brand {
     Bhyve,
     #[serde(rename = "kvm")]
     KVM,
+    #[serde(rename = "lx")]
+    LX,
+    #[serde(rename = "lxd")]
+    LXD,
+    #[serde(rename = "other")]
+    Other,
+}
+
+impl Brand {
+    pub fn for_image_type(&self, image_type: &str) -> bool {
+        matches!(
+            (self, image_type),
+            (Brand::Joyent, "zone-dataset")
+                | (Brand::JoyentMinimal, "zone-dataset")
+                | (Brand::Bhyve, "zvol")
+                | (Brand::KVM, "zvol")
+                | (Brand::LX, "lx-dataset")
+                | (Brand::LXD, "lxd")
+                | (Brand::Other, _)
+        )
+    }
+
+    pub fn allows_delegate_dataset(&self) -> bool {
+        matches!(self, Brand::Joyent | Brand::JoyentMinimal | Brand::LX)
+    }
+
+    pub fn is_hvm(&self) -> bool {
+        match self {
+            Brand::Joyent => false,
+            Brand::JoyentMinimal => false,
+            Brand::Bhyve => true,
+            Brand::KVM => true,
+            Brand::LX => false,
+            Brand::LXD => false,
+            Brand::Other => false,
+        }
+    }
 }
 
 impl Display for Brand {
@@ -112,6 +164,45 @@ impl Display for Brand {
             Brand::JoyentMinimal => write!(fmt, "joyent-minimal"),
             Brand::Bhyve => write!(fmt, "bhyve"),
             Brand::KVM => write!(fmt, "kvm"),
+            Brand::LX => write!(fmt, "lx"),
+            Brand::LXD => write!(fmt, "lxd"),
+            Brand::Other => write!(fmt, "other"),
+        }
+    }
+}
+impl Default for Brand {
+    fn default() -> Self {
+        Self::Other
+    }
+}
+
+#[derive(Debug)]
+pub enum BrandError {
+    UnknownBrand,
+}
+
+impl std::error::Error for BrandError {}
+
+impl fmt::Display for BrandError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            BrandError::UnknownBrand => write!(f, "Unknown Brand"),
+        }
+    }
+}
+
+impl FromStr for Brand {
+    type Err = BrandError;
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        match value {
+            "joyent" => Ok(Brand::Joyent),
+            "joyent-minimal" => Ok(Brand::JoyentMinimal),
+            "bhyve" => Ok(Brand::Bhyve),
+            "kvm" => Ok(Brand::KVM),
+            "lx" => Ok(Brand::LX),
+            "lxd" => Ok(Brand::LXD),
+            "other" => Ok(Brand::LXD),
+            _ => Err(BrandError::UnknownBrand),
         }
     }
 }

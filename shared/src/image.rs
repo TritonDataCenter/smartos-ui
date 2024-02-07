@@ -10,6 +10,7 @@
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use time::OffsetDateTime;
 use url::Url;
 use uuid::Uuid;
@@ -31,7 +32,7 @@ pub struct Manifest {
     pub version: String,
 
     #[serde(default)]
-    pub state: String,
+    pub state: String, // Create enum
 
     #[serde(
         deserialize_with = "time::serde::iso8601::deserialize",
@@ -42,6 +43,8 @@ pub struct Manifest {
     pub os: String,
     pub description: String,
     pub homepage: Option<String>,
+    pub requirements: Option<Value>,
+    pub disabled: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

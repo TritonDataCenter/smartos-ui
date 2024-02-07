@@ -1,33 +1,33 @@
 #!/usr/bin/env node
 
-const {join} = require('node:path')
+const { join } = require('node:path')
 const {
   readdirSync, readFileSync, writeFileSync, unlinkSync
 } = require('node:fs')
 
 const root = join(__dirname, '..', 'data', 'db', 'img')
-const sources = [{'url': 'https://images.smartos.org','type': 'imgapi'}]
+const sources = [{ url: 'https://images.smartos.org', type: 'imgapi' }]
 
 const cmd = {
   list: () => {
     const imgs = readdirSync(root)
       .filter(file => !file.startsWith('.'))
       .map(file => {
-      return JSON.parse(readFileSync(join(root, file)))
-    })
+        return JSON.parse(readFileSync(join(root, file)))
+      })
     console.log(JSON.stringify(imgs, null, 2))
   },
   get: ([uuid]) => {
     console.log(readFileSync(join(root, `${uuid}.json`), 'utf-8'))
   },
   sources: () => console.log(JSON.stringify(sources, null, 2)),
-  import: ([,,source,uuid]) => {
+  import: ([,, source, uuid]) => {
     fetch(`${source}/images/${uuid}`)
       .then(res => res.json())
       .then(manifest => {
         setTimeout(() => {
           const fileName = join(root, `${uuid}.json`)
-          writeFileSync(fileName, JSON.stringify({manifest, source}))
+          writeFileSync(fileName, JSON.stringify({ manifest, source }))
           console.log(`Image ${uuid} import success: Importing ${uuid} \
 (${manifest.name}@${manifest.version}) from "${source}"
 Gather image ${uuid} ancestry
@@ -39,15 +39,14 @@ Imported image ${uuid} (${manifest.name}@${manifest.version})`)
   },
   delete: ([uuid]) => unlinkSync(join(root, `${uuid}.json`)),
   avail: () => {
-    const [{url}] = sources
+    const [{ url }] = sources
     fetch(`${url}/images`)
       .then(res => res.json())
       .then(images => {
-        const list = images.map(manifest => ({manifest, source: url}));
+        const list = images.map(manifest => ({ manifest, source: url }))
         console.log(JSON.stringify(list, null, 2))
       })
   }
 }
 
 cmd[process.argv[2]](process.argv.slice(3))
-

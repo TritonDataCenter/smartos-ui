@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
-const {join} = require('node:path')
-const {createReadStream, readdirSync, readFileSync} = require('node:fs')
+const { join } = require('node:path')
+const { createReadStream, readdirSync, readFileSync } = require('node:fs')
 const server = require('node:http').createServer()
 
 const port = 9090
 const root = join(__dirname, '..', 'data', 'db', 'vm')
 
 server.on('request', (req, res) => {
-  const [_, id] = req.url.split('/').filter(p => p)
+  const [, id] = req.url.split('/').filter(p => p)
 
   if (id) {
     return createReadStream(join(root, `${id}.json`)).on('error', e => {
@@ -25,8 +25,7 @@ server.on('request', (req, res) => {
   } catch (e) {
     console.error(e)
     res.writeHead(404, 'Not Found').end()
-  } 
-  
+  }
 })
 
 server.listen(port, () => console.log(`Starting mock vminfod on port ${port}`))

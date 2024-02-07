@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html class="h-full bg-gray-900">
+<html class="h-full bg-gray-900" lang="en">
 {% block head %}
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{% endblock %}</title>
         <link href="/css/main.css?v={{crate::VERSION}}" rel="stylesheet">
-        {%  block head_scripts %}
-        <script src="/js/main.js?v={{crate::VERSION}}"></script>
+        {% block scripts %}
+            <script src="/js/main.js?v={{crate::VERSION}}" type="module"></script>
         {% endblock %}
     </head>
 {% endblock %}
 {% block body %}
     <body class="h-full">
-    {% block content %}{% endblock %}
+        {% block content %}{% endblock %}
     </body>
 {% endblock %}
 </html>
