@@ -1,3 +1,4 @@
+{%- import "icons.j2" as icons -%}
 {% extends "layout/authed.j2" %}
 {% block title %}{{title}}{% endblock %}
 {% block content %}
@@ -24,15 +25,22 @@
   <div id="additional-tab" data-name="additional" class="hidden">
     <div class="editor-wrapper"></div>
     <div>
+      <p class="text-white py-4">
+        Consult the PROPERTIES section of the
+        <a class="underline decoration-solid text-blue-600 hover:text-blue-500" target="_blank" href="https://smartos.org/man/8/vmadm">VMADM(8)</a>
+        manual for possible values.
+      </p>
+    </div>
+    <div>
       <label for="merge" class="block text-sm font-medium leading-6 text-white">Merge Strategy</label>
-      <select id="merge" class="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+      <select id="merge" class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
         <option value="extend">Properties in Guided Form take precedence</option>
         <option value="replace">Additional Properties take precedence</option>
         <option value="ignore">Ignore Guided Form properties entirely</option>
       </select>
     </div>
   </div>
-  <div id="final-tab" data-name="final" class="hidden">
+  <div id="final-tab" data-name="final" data-read-only="true" class="hidden">
     <div class="editor-wrapper"></div>
   </div>
   <div id="guided-tab">
@@ -87,7 +95,18 @@
             </div>
 
             <div class="col-span-full">
-              <label for="brand" class="block text-sm font-medium leading-6 text-white">Brand</label>
+              <label for="brand" class="block text-sm font-medium leading-6 text-white">
+                Brand
+                <span class="has-tooltip cursor-pointer">
+                  {% call icons::info("h-4 w-h inline mb-1") %}
+                  <span class="tooltip rounded shadow-lg p-1 bg-slate-800 text-white -mt-8 p-4 max-w-80">
+                    "Brand" refers to the specific type of virtualization used for
+                    an image. Some image support different brands and some can only
+                    use a specific brand. When you select an image a reasonable
+                    default will be selected as the default.
+                  </span>
+                </span>
+              </label>
               <div class="mt-2">
                 <select
                   id="brand"
@@ -196,7 +215,7 @@
                         <p id="delegate_dataset-description" class="text-gray-500">
                           This property indicates whether we should delegate a ZFS dataset to an OS VM.
                           If true, the VM will get a dataset &lt;zoneroot dataset&gt;/data
-                          (by default: zones/&lt;uuid&gt;/data) added to it
+                          (by default: zones/&lt;uuid&gt;/data) added to it.
                         </p>
                       </div>
                     </div>
@@ -326,6 +345,7 @@
   <div class="mt-6 flex items-center justify-end gap-x-6">
     <div class="htmx-indicator" id="loader">{% include "include/svg/loading.svg" %}</div>
     <button
+      id="validate-button"
       type="button"
       data-hx-post="/provision/validate"
       data-hx-target="#validate-result"

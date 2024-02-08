@@ -1,3 +1,4 @@
+{%- import "icons.j2" as icons -%}
 {% extends "layout/main.j2" %}
 {% block title %}Dashboard{% endblock %}
 {% block body %}
@@ -22,7 +23,7 @@
                 <a href="/dashboard"
                   hx-get="/dashboard"
                   class="{% if title == "Dashboard" %}{{active}}{% else %}{{inactive}}{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer main-nav">
-                  {% include "include/svg/home.svg" %}
+                  {% call icons::home("") %}
                   Dashboard
                 </a>
               </li>
@@ -30,7 +31,7 @@
                 <a href="/instances"
                 hx-get="/instances"
                 class="{% if title == "Instances" %}{{active}}{% else %}{{inactive}}{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer main-nav">
-                  {% include "include/svg/servers.svg" %}
+                  {% call icons::servers("") %}
                   Instances
                 </a>
               </li>
@@ -38,7 +39,7 @@
                 <a href="/images"
                   hx-get="/images"
                   class="{% if title == "Images" %}{{active}}{% else %}{{inactive}}{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer main-nav">
-                  {% include "include/svg/box.svg" %}
+                  {% call icons::box("") %}
                   Images
                 </a>
               </li>
@@ -46,7 +47,7 @@
           </li>
           <li class="-mx-6 mt-auto">
             <a href="/logout" class="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-white hover:bg-gray-800">
-              {% include "include/svg/logout.svg" %}
+              {% call icons::logout("") %}
               Logout
             </a>
           </li>

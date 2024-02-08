@@ -1,6 +1,7 @@
 import { $, encodeFormParameters } from './global'
 import {
   EditorView,
+  EditorState,
   basicSetup,
   json,
   oneDark
@@ -70,15 +71,46 @@ window.updateEditors = () => {
     props.resolvers = resolvers
   }
 
+  // how to compute?
+  // flexible_disk_size:
+  //
+  //     This sets an upper bound for the amount of space that a bhyve instance
+  //     may use for its disks and snapshots of those disks. If this value is not
+  //     set, it will not be possible to create snapshots of the instance.
+  //
+  //     This value must be at least as large as the sum of all of the
+  //     disk.*.size values.
+  //
+  //     type: integer (number of MiB)
+  //     vmtype: bhyve
+  //     listable: yes
+  //     create: yes
+  //     update: yes (live update)
+  //
+  // if (props.brand === 'bhyve') {
+  //   props.flexible_disk_size = true
+  // }
+
+  if (props.brand === 'bhyve') {
+    props.bootrom = 'uefi'
+  }
+
   try {
     const content = editors.additional.state.doc.toString()
     if (content) {
       additional = JSON.parse(content)
+      editors.additional.dispatch({
+        changes: {
+          from: 0,
+          to: editors.additional.state.doc.length,
+          insert: JSON.stringify(additional, null, 2)
+        }
+      })
     } else {
       editors.additional.dispatch({
         changes: {
           from: 0,
-          to: editors.final.state.doc.length,
+          to: editors.additional.state.doc.length,
           insert: '{}'
         }
       })
@@ -124,6 +156,7 @@ export const setupProvisioningForm = () => {
   const $guidedButton = $('#guided-button')
   const $additionalButton = $('#additional-button')
   const $finalButton = $('#final-button')
+  const $validateButton = $('#validate-button')
   const $editorTabs = [$additionalTab, $finalTab]
   const $tabs = [$guidedTab, ...$editorTabs]
   const $buttons = [$guidedButton, $additionalButton, $finalButton]
@@ -144,8 +177,12 @@ export const setupProvisioningForm = () => {
     const { name } = $tab.dataset
     if (!$tab.querySelector('.cm-editor')) {
       const parent = $tab.querySelector('.editor-wrapper')
+      const extensions = [basicSetup, json(), oneDark]
+      if ($tab.dataset.readOnly) {
+        extensions.push(EditorState.readOnly.of(true))
+      }
       editors[name] = new EditorView({
-        extensions: [basicSetup, json(), oneDark],
+        extensions,
         parent
       })
     }
@@ -153,12 +190,14 @@ export const setupProvisioningForm = () => {
 
   $finalButton.addEventListener('click', () => {
     if (updateEditors()) {
+      $validateButton.click()
       clearStyle($tabs, $buttons)
       $finalTab.classList.remove('hidden')
       $finalButton.classList.remove(inactive)
       $finalButton.classList.add(active)
     }
   })
+
   $additionalButton.addEventListener('click', () => {
     if (updateEditors()) {
       clearStyle($tabs, $buttons)
@@ -167,6 +206,7 @@ export const setupProvisioningForm = () => {
       $additionalButton.classList.add(active)
     }
   })
+
   $guidedButton.addEventListener('click', () => {
     if (updateEditors()) {
       clearStyle($tabs, $buttons)

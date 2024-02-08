@@ -107,4 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
       setupProvisioningForm()
     }
   })
+
+  // if user does a full refresh or navigates to the provision page manually
+  // need to setup the forms here too.
+  if (document.location.pathname === '/provision') {
+    setupProvisioningForm()
+  }
 })

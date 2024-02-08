@@ -52,6 +52,10 @@ assets: ui/assets/main.css.gz ui/assets/main.js.gz
 clean-assets:
 	rm -f ui/assets/*.gz ui/assets/main.js ui/assets/main.css
 
+.PHONY: clean-mock-db
+clean-mock-db:
+	rm -f test/data/db/{img,vm}/*.json
+
 .PHONY: fmt-js
 fmt-js:
 	cd ui/assets && npm run fmt
