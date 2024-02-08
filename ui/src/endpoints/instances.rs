@@ -8,6 +8,7 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
+use std::collections::HashMap;
 use std::str::FromStr;
 
 use crate::endpoints::{
@@ -134,11 +135,11 @@ pub async fn get_index(
 
 #[derive(Template)]
 #[template(path = "provision.j2")]
-pub struct InstanceCreateTemplate<'a> {
+pub struct InstanceCreateTemplate {
     title: String,
-    images: Vec<&'a Image>,
+    images: HashMap<String, Vec<Image>>,
+    selected_image: Option<Image>,
     nictags: Vec<NicTag>,
-    default_image_message: &'a str,
     alias: String,
     brand: Brand,
     image_uuid: String,
@@ -155,7 +156,6 @@ pub struct ImageOption {
     pub id: String,
     pub title: String,
     pub name: String,
-    pub for_brand: Vec<String>,
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -195,6 +195,7 @@ pub async fn get_provision(
     let response = Response::builder();
 
     if Session::get_login(&ctx).is_some() {
+        let mut selected_image = None;
         let ProvisionQuery {
             alias,
             brand,
@@ -211,7 +212,6 @@ pub async fn get_provision(
         let actual_brand = Brand::from_str(&brand).unwrap_or_default();
 
         let title = String::from("Create Instance");
-        let mut default_image_message = "Select an Image";
 
         let nictags = ctx
             .context()
@@ -220,27 +220,39 @@ pub async fn get_provision(
             .await
             .map_err(to_internal_error)?;
 
-        let images: Vec<Image> = if actual_brand == Brand::Other {
-            default_image_message = "Select a Brand to choose an Image";
-            vec![]
-        } else {
-            ctx.context()
-                .client
-                .get_images()
-                .await
-                .map_err(to_internal_error)?
-        };
+        let mut image_list = HashMap::<String, Vec<Image>>::new();
+        let mut images = ctx
+            .context()
+            .client
+            .get_images()
+            .await
+            .map_err(to_internal_error)?;
 
-        let image_list = images
-            .iter()
-            .filter(|image| actual_brand.for_image_type(&image.manifest.r#type))
-            .collect();
+        while let Some(image) = images.pop() {
+            if image_uuid == image.manifest.uuid.to_string() {
+                selected_image = Some(image.clone())
+            }
+            let virt_type = if image.is_for_hvm() {
+                "Hardware Virtualization"
+            } else {
+                "Native Virtualization"
+            };
+            let key = format!(
+                "{} ({} {})",
+                virt_type, image.manifest.os, image.manifest.r#type
+            );
+            if let Some(image_vec) = image_list.get_mut(&key) {
+                image_vec.push(image);
+            } else {
+                image_list.insert(key, vec![image]);
+            }
+        }
 
         let template = InstanceCreateTemplate {
             title,
             images: image_list,
+            selected_image,
             nictags,
-            default_image_message,
             alias,
             brand: actual_brand,
             image_uuid,

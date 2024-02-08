@@ -63,6 +63,12 @@ pub struct Image {
     pub import_status: Option<ImportStatus>,
 }
 
+impl Image {
+    pub fn is_for_hvm(&self) -> bool {
+        self.manifest.r#type == "zvol"
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Source {
     pub url: Url,
