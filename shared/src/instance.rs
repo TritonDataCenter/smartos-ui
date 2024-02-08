@@ -16,24 +16,16 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Deserialize, Serialize, Debug, JsonSchema)]
-pub struct CreatePayload {
-    pub alias: Option<String>,
-    pub brand: String,
-    pub resolvers: Vec<String>,
-    pub ram: u64,
-    pub max_lwps: u64,
-    pub autoboot: bool,
-    pub nics: Vec<Nic>,
-    pub image_uuid: Uuid,
-    pub quota: u64,
-}
-
-// Used for sending the instance json for vmadm validate create and vmadm create
+/// Used for sending the instance json for `vmadm validate` and `vmadm create`
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
 pub struct InstancePayload {
-    // String containing instance JSON
+    /// String containing instance JSON
     pub payload: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PayloadContainer {
+    pub uuid: Uuid,
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -49,9 +41,9 @@ pub struct Instance {
     //pub autoboot: bool,
     pub brand: Brand,
     //pub limit_priv: String,
-    pub v: u64,
-    pub create_timestamp: String, // OffsetDataTime
-    pub image_uuid: Uuid,
+    //pub v: u64,
+    //pub create_timestamp: String, // OffsetDataTime
+    pub image_uuid: Option<Uuid>,
     //pub cpu_shares: u64,
     //pub max_lwps: u64,
     // pub max_msg_ids: u64,
@@ -73,11 +65,11 @@ pub struct Instance {
     pub uuid: Uuid,
     //pub zone_state: String, // Enum
     //pub zonepath: String,
-    pub hvm: bool,
+    //pub hvm: bool,
     //pub zoneid: u64,
     //pub zonedid: u64,
-    pub last_modified: String, // OffsetDateTime
-    pub firewall_enabled: bool,
+    // pub last_modified: String, // OffsetDateTime
+    //pub firewall_enabled: bool,
     //pub server_uuid: String,
     //pub platform_buildstamp: String,
     pub state: String,
@@ -88,7 +80,7 @@ pub struct Instance {
     // pub internal_metadata: Struct1,
     // pub routes: Struct1,
     // pub tags: Struct1,
-    pub quota: u64,
+    pub quota: Option<u64>,
     // pub zfs_root_recsize: u64,
     // pub zfs_filesystem: String,
     // pub zpool: String,

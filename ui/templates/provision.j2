@@ -347,6 +347,8 @@
     <button
       id="validate-button"
       type="button"
+      data-hx-disabled-elt="this"
+      data-hx-indicator="#loader"
       data-hx-post="/provision/validate"
       data-hx-target="#validate-result"
       hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
@@ -354,9 +356,12 @@
       Validate
     </button>
     <button
+      id="create-button"
       type="button"
-      hx-disabled-elt="this"
-      hx-indicator="#loader"
+      data-hx-disabled-elt="this"
+      data-hx-indicator="#loader"
+      data-hx-post="/provision"
+      hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
       class="rounded-md bg-blue-500 px-3 py-2 text-sm font-semibold shadow-sm hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">
     Create
     </button>

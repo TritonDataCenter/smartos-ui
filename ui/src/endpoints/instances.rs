@@ -17,7 +17,9 @@ use crate::endpoints::{
 };
 use crate::session::Session;
 
-use smartos_shared::instance::{Brand, Instance, InstancePayload};
+use smartos_shared::instance::{
+    Brand, Instance, InstancePayload, PayloadContainer,
+};
 use smartos_shared::nictag::NicTag;
 
 use askama::Template;
@@ -26,6 +28,8 @@ use http::StatusCode;
 use hyper::{Body, Response};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
+use smartos_shared::http_server::to_bad_request;
 use smartos_shared::image::Image;
 use uuid::Uuid;
 
@@ -119,7 +123,12 @@ pub async fn get_index(
             .map_err(to_internal_error)?;
         let total_ram =
             instances.iter().fold(0, |acc, i| i.max_physical_memory + acc);
-        let total_quota = instances.iter().fold(0, |acc, i| i.quota + acc);
+        let total_quota = instances.iter().fold(0, |acc, i| {
+            if let Some(quota) = i.quota {
+                return quota + acc;
+            }
+            acc
+        });
         let template = InstancesTemplate {
             total_ram,
             total_quota,
@@ -151,11 +160,6 @@ pub struct InstanceCreateTemplate {
     nic_gateways: String,
     resolvers: String,
     vcpus: String,
-}
-pub struct ImageOption {
-    pub id: String,
-    pub title: String,
-    pub name: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -283,45 +287,38 @@ pub struct CreateRequestBody {
     pub gateway: String,
 }
 
-// Needs to be updated to handle simple string payload
-// #[endpoint {
-// method = POST,
-// path = "/provision",
-// }]
-// pub async fn post_provision(
-//     ctx: RequestContext<Context>,
-//     request_body: TypedBody<CreateRequestBody>,
-// ) -> Result<Response<Body>, HttpError> {
-//     let response = Response::builder();
-//     let req = request_body.into_inner();
-//     if Session::get_login(&ctx).is_some() {
-//         let exec_req = CreatePayload {
-//             alias: req.alias,
-//             brand: String::from("joyent"),
-//             resolvers: vec![String::from("8.8.8.8"), String::from("8.8.4.4")],
-//             ram: req.ram.unwrap_or_default(),
-//             max_lwps: 4096,
-//             autoboot: true,
-//             nics: vec![Nic {
-//                 nic_tag: req.nic_tag,
-//                 ips: vec![req.ip],
-//                 gateways: vec![req.gateway],
-//                 primary: true,
-//             }],
-//             image_uuid: req.image_uuid,
-//             quota: req.quota.unwrap_or_default(),
-//         };
-//         ctx.context()
-//             .client
-//             .create_instance(exec_req)
-//             .await
-//             .map_err(to_internal_error)?;
-//
-//         return HXLocation::common(response, "/instances");
-//     }
-//
-//     redirect_login(response, &ctx)
-// }
+#[endpoint {
+method = POST,
+path = "/provision",
+content_type = "application/x-www-form-urlencoded"
+}]
+pub async fn post_provision(
+    ctx: RequestContext<Context>,
+    request_body: TypedBody<InstancePayload>,
+) -> Result<Response<Body>, HttpError> {
+    let response = Response::builder();
+
+    if Session::get_login(&ctx).is_some() {
+        let req = request_body.into_inner();
+
+        let PayloadContainer { uuid } =
+            serde_json::from_str(&req.payload).map_err(to_bad_request)?;
+
+        ctx.context().client.provision(req).await.map_err(to_internal_error)?;
+        let mut location = HXLocation::new_with_common("/instances");
+        location.values = Some(json!({
+            "longRunning": true,
+            "allowedPaths": [],
+            "notification": {
+                "heading": "Instance created",
+                "body": format!("Instance {} has been created.", uuid)
+            }
+        }));
+        return location.serve(response);
+    }
+
+    redirect_login(response, &ctx)
+}
 
 #[derive(Template)]
 #[template(path = "validate_create_result.j2")]
@@ -340,8 +337,8 @@ pub async fn post_provision_validate(
     request_body: TypedBody<InstancePayload>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    let req = request_body.into_inner();
     if Session::get_login(&ctx).is_some() {
+        let req = request_body.into_inner();
         let validation = ctx
             .context()
             .client

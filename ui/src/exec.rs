@@ -9,8 +9,7 @@
  */
 
 use smartos_shared::{
-    image::Image, instance::CreatePayload, instance::Instance, nictag::NicTag,
-    sysinfo::Sysinfo,
+    image::Image, instance::Instance, nictag::NicTag, sysinfo::Sysinfo,
 };
 
 use reqwest::{Client as HTTPClient, RequestBuilder};
@@ -82,11 +81,11 @@ impl Client {
         self.exec.import_image(id, params).await
     }
 
-    pub async fn create_instance(
+    pub async fn provision(
         &self,
-        payload: CreatePayload,
+        payload: InstancePayload,
     ) -> Result<(), reqwest::Error> {
-        self.exec.create_instance(payload).await
+        self.exec.provision(payload).await
     }
 
     pub async fn validate_create(
@@ -220,12 +219,12 @@ impl ExecClient {
         self.get("source").send().await?.error_for_status()?.json().await
     }
 
-    pub async fn create_instance(
+    pub async fn provision(
         &self,
-        payload: CreatePayload,
+        payload: InstancePayload,
     ) -> Result<(), reqwest::Error> {
         let req = serde_json::to_string(&payload).expect("failed");
-        self.post("instance").body(req).send().await?.error_for_status()?;
+        self.post("provision").body(req).send().await?.error_for_status()?;
         Ok(())
     }
 

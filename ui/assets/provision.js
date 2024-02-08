@@ -1,4 +1,5 @@
 import { $, encodeFormParameters } from './global'
+import { v4 as uuidv4 } from 'uuid'
 import {
   EditorView,
   EditorState,
@@ -91,9 +92,10 @@ window.updateEditors = () => {
   //   props.flexible_disk_size = true
   // }
 
-  if (props.brand === 'bhyve') {
-    props.bootrom = 'uefi'
-  }
+  // Specifying bootrom, causes vmadm validate to complain about image size...
+  // if (props.brand === 'bhyve') {
+  //   props.bootrom = 'uefi'
+  // }
 
   try {
     const content = editors.additional.state.doc.toString()
@@ -146,7 +148,23 @@ window.updateEditors = () => {
 
 window.getFinalEditor = () => {
   window.updateEditors()
-  return window.editors.final.state.doc.toString()
+  // We need a UUID on the instance payload so we can keep track of it
+  // vmadm will generate one if it's not provided so if the user didn't add one
+  // generate it here so we know what it is.
+  let payload = window.editors.final.state.doc.toString()
+  try {
+    const instancePayload = JSON.parse(payload)
+    if (!instancePayload.uuid) {
+      instancePayload.uuid = uuidv4()
+      payload = JSON.stringify(instancePayload)
+    }
+  } catch (e) {
+    console.error(e)
+    alert('Failed parsing final properties for instance.')
+    return
+  }
+
+  return payload
 }
 
 export const setupProvisioningForm = () => {

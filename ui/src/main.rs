@@ -81,7 +81,7 @@ async fn main() -> Result<(), String> {
 
     // /provision
     api.register(endpoints::instances::get_provision)?;
-    //api.register(endpoints::instances::post_provision)?;
+    api.register(endpoints::instances::post_provision)?;
     api.register(endpoints::instances::post_provision_validate)?;
 
     // /images

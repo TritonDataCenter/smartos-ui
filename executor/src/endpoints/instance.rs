@@ -12,67 +12,81 @@ use std::process::Stdio;
 
 use crate::endpoints::{Context, PathParams};
 use smartos_shared::instance::{
-    CreatePayload, InstancePayload, InstanceValidateResponse,
+    InstancePayload, InstanceValidateResponse, PayloadContainer,
 };
 
 use dropshot::{endpoint, HttpError, Path, RequestContext, TypedBody};
 use hyper::{Body, Response, StatusCode};
-use smartos_shared::http_server::to_internal_error;
+use slog::{debug, error, info};
+use smartos_shared::http_server::{
+    empty_ok, to_bad_request, to_internal_error,
+};
+
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
 
 #[endpoint {
 method = POST,
-path = "/instance",
+path = "/provision",
 }]
-pub async fn post_index(
-    _: RequestContext<Context>,
-    request_body: TypedBody<CreatePayload>,
+pub async fn post_provision_index(
+    ctx: RequestContext<Context>,
+    request_body: TypedBody<InstancePayload>,
 ) -> Result<Response<Body>, HttpError> {
     let req = request_body.into_inner();
-    println!("req: {:#?}", req);
 
-    let payload = serde_json::to_string(&req).expect("failed");
+    let PayloadContainer { uuid } =
+        serde_json::from_str(&req.payload).map_err(to_bad_request)?;
 
-    println!("payload string: {}", payload);
+    info!(ctx.log, "Instance UUID: {}", uuid);
 
-    let mut process = Command::new("vmadm")
-        .args(["create"])
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .expect("vmadm command failed to start");
+    // We need to spawn tokio tasks for long-running processes
+    // https://github.com/oxidecomputer/dropshot/issues/695
+    tokio::spawn(async move {
+        info!(ctx.log, "Starting vmadm create task for {}", uuid);
+        let args = ["create"];
+        debug!(ctx.log, "Executing vmadm {:?}", &args);
+        let mut process = Command::new("vmadm")
+            .args(args)
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .map_err(to_internal_error)?;
 
-    println!("spawned");
+        if let Some(mut stdin) = process.stdin.take() {
+            stdin
+                .write_all(req.payload.as_bytes())
+                .await
+                .map_err(to_internal_error)?;
+            drop(stdin);
+        } else {
+            return Err(to_internal_error("Failed to acquire stdin pipe"));
+        }
 
-    let mut stdin = process.stdin.take().expect("Failed to open stdin");
+        let out =
+            process.wait_with_output().await.map_err(to_internal_error)?;
 
-    println!("stdin.take");
+        if out.status.success() {
+            let stdout =
+                String::from_utf8(out.stdout).map_err(to_internal_error)?;
+            info!(ctx.log, "Instance {} create success: {}", uuid, stdout);
+            return empty_ok();
+        }
 
-    stdin
-        .write_all(payload.as_bytes())
-        .await
-        .expect("Failed to write to stdin");
-    println!("write all bytes");
+        let stderr =
+            String::from_utf8(out.stderr).map_err(to_internal_error)?;
+        error!(ctx.log, "Instance {} create failed: {}", uuid, stderr);
 
-    drop(stdin);
-
-    let out = process.wait_with_output().await.expect("Failed to read stdout");
-
-    let stdout = String::from_utf8(out.stdout).unwrap_or_default();
-    println!("stdout: {}", stdout);
-
-    let stderr = String::from_utf8(out.stderr).unwrap_or_default();
-    println!("stderr: {}", stderr);
-
-    println!("status: {}", out.status);
-
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .header("Content-Type", "application/json")
-        .body(Body::empty())
-        .unwrap())
+        Err(to_internal_error(stderr))
+    })
+    .await
+    .unwrap_or_else(|e| {
+        Err(HttpError::for_internal_error(format!(
+            "Failed awaiting \"post_provision_index\": {:#}",
+            e
+        )))
+    })
 }
 
 #[endpoint {
@@ -103,7 +117,6 @@ pub async fn post_validate_create(
     drop(stdin);
 
     let out = process.wait_with_output().await.map_err(to_internal_error)?;
-    //let stdout = String::from_utf8(out.stdout).unwrap_or_default();
     let stderr = String::from_utf8(out.stderr).unwrap_or_default();
 
     let response = InstanceValidateResponse {
@@ -133,24 +146,6 @@ pub async fn delete_by_id(
 
     let _ = Command::new("vmadm")
         .args(["delete", &req.id.to_string()])
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .expect("vmadm command failed to start");
-
-    Ok(Response::builder().status(StatusCode::OK).body(Body::empty()).unwrap())
-}
-
-#[endpoint {
-method = POST,
-path = "/validate",
-}]
-pub async fn post_validate(
-    _: RequestContext<Context>,
-) -> Result<Response<Body>, HttpError> {
-    let _ = Command::new("vmadm")
-        .args(["validate"])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())

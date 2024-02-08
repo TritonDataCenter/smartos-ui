@@ -17,6 +17,8 @@ function getPayload () {
 const cmd = {
   create: () => {
     const vm = getPayload()
+    vm.max_physical_memory = vm.ram
+    vm.state = 'running'
     const fileName = join(root, `${vm.uuid}.json`)
     setTimeout(() => writeFileSync(fileName, JSON.stringify(vm)), 5000)
   },

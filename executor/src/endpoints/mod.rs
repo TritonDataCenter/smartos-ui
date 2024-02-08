@@ -42,7 +42,6 @@ pub struct Context {
     pub config: Config,
     pub cache: Arc<Mutex<HashMap<String, CacheEntry>>>,
     pub import_queue: Arc<Mutex<HashMap<Uuid, Image>>>,
-    //pub instance_create_queue: Arc<Mutex<Vec<Instance>>>
 }
 
 impl Context {
