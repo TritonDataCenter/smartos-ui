@@ -1,7 +1,6 @@
-import 'htmx.org'
+import htmx from 'htmx.org'
 import { $, $$, encodeFormParameters } from './global'
-
-const htmx = window.htmx
+import { setupProvisioningForm } from './provision'
 
 // Adapted from: https://htmx.org/extensions/json-enc
 htmx.defineExtension('json-enc-typed', {
@@ -11,7 +10,6 @@ htmx.defineExtension('json-enc-typed', {
     }
   },
   encodeParameters: (xhr, parameters, $form) => {
-    console.log('encodeParameters', xhr, parameters, $form)
     const $targets = $form.querySelectorAll('[name]')
     xhr.overrideMimeType('application/json')
     return JSON.stringify(encodeFormParameters($targets, parameters))
@@ -97,6 +95,16 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (longRunning && alwaysNotify) {
         notify(notification)
       }
+    }
+  })
+
+  // The provisioning form as a bit of extra javascript to setup the JSON
+  // editors, merge additional properties and build NIC objects
+  // this has to be initialized dynamically as the elements we rely on come
+  // and go in the DOM
+  htmx.on('htmx:afterSettle', ({ detail: { pathInfo: { requestPath } } }) => {
+    if (requestPath === '/provision') {
+      setupProvisioningForm()
     }
   })
 })

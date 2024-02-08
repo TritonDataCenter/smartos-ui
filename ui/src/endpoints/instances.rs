@@ -16,9 +16,7 @@ use crate::endpoints::{
 };
 use crate::session::Session;
 
-use smartos_shared::instance::{
-    Brand, CreatePayload, Instance, InstancePayload, Nic,
-};
+use smartos_shared::instance::{Brand, Instance, InstancePayload};
 use smartos_shared::nictag::NicTag;
 
 use askama::Template;
@@ -273,44 +271,45 @@ pub struct CreateRequestBody {
     pub gateway: String,
 }
 
-#[endpoint {
-method = POST,
-path = "/provision",
-}]
-pub async fn post_provision(
-    ctx: RequestContext<Context>,
-    request_body: TypedBody<CreateRequestBody>,
-) -> Result<Response<Body>, HttpError> {
-    let response = Response::builder();
-    let req = request_body.into_inner();
-    if Session::get_login(&ctx).is_some() {
-        let exec_req = CreatePayload {
-            alias: req.alias,
-            brand: String::from("joyent"),
-            resolvers: vec![String::from("8.8.8.8"), String::from("8.8.4.4")],
-            ram: req.ram.unwrap_or_default(),
-            max_lwps: 4096,
-            autoboot: true,
-            nics: vec![Nic {
-                nic_tag: req.nic_tag,
-                ips: vec![req.ip],
-                gateways: vec![req.gateway],
-                primary: true,
-            }],
-            image_uuid: req.image_uuid,
-            quota: req.quota.unwrap_or_default(),
-        };
-        ctx.context()
-            .client
-            .create_instance(exec_req)
-            .await
-            .map_err(to_internal_error)?;
-
-        return HXLocation::common(response, "/instances");
-    }
-
-    redirect_login(response, &ctx)
-}
+// Needs to be updated to handle simple string payload
+// #[endpoint {
+// method = POST,
+// path = "/provision",
+// }]
+// pub async fn post_provision(
+//     ctx: RequestContext<Context>,
+//     request_body: TypedBody<CreateRequestBody>,
+// ) -> Result<Response<Body>, HttpError> {
+//     let response = Response::builder();
+//     let req = request_body.into_inner();
+//     if Session::get_login(&ctx).is_some() {
+//         let exec_req = CreatePayload {
+//             alias: req.alias,
+//             brand: String::from("joyent"),
+//             resolvers: vec![String::from("8.8.8.8"), String::from("8.8.4.4")],
+//             ram: req.ram.unwrap_or_default(),
+//             max_lwps: 4096,
+//             autoboot: true,
+//             nics: vec![Nic {
+//                 nic_tag: req.nic_tag,
+//                 ips: vec![req.ip],
+//                 gateways: vec![req.gateway],
+//                 primary: true,
+//             }],
+//             image_uuid: req.image_uuid,
+//             quota: req.quota.unwrap_or_default(),
+//         };
+//         ctx.context()
+//             .client
+//             .create_instance(exec_req)
+//             .await
+//             .map_err(to_internal_error)?;
+//
+//         return HXLocation::common(response, "/instances");
+//     }
+//
+//     redirect_login(response, &ctx)
+// }
 
 #[derive(Template)]
 #[template(path = "validate_create_result.j2")]

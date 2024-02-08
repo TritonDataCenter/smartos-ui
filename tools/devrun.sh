@@ -15,4 +15,4 @@ LOG_FILE=/tmp/smartos_executor.log \
 LOG_FILE=/tmp/smartos_ui.log \
 	./target/debug/smartos_ui &
 
-tail -f /tmp/smartos_{ui,executor}.log | bunyan
+tail -f /tmp/smartos_{ui,executor}.log | ./ui/assets/node_modules/.bin/bunyan

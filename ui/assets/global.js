@@ -2,10 +2,11 @@
 export const $ = selector => document.querySelector(selector)
 export const $$ = selector => document.querySelectorAll(selector)
 
-// Will interrogate for input types for a given <form> and attempt to massage
+// Will interrogate input types for a given <form> and attempt to massage
 // them into basic JSON types.
 // A data attr named data-enctype="TYPE" can be used on any element with a name
-// attr for type hinting (e.g. for <select> elements that have no type attr)
+// attr for preferred type hinting this is especially useful for <select>
+// elements that have no type attr
 export const encodeFormParameters = ($targets, props = {}) => {
   $targets.forEach($element => {
     let value
@@ -17,19 +18,6 @@ export const encodeFormParameters = ($targets, props = {}) => {
           console.error(`Failed parsing number for "${$element.name}"`,
             $element.name, e)
           value = 0
-        }
-        break
-      case 'boolean':
-        if ($element.type === 'checkbox' && $element.checked) {
-          value = $element.checked
-        } else {
-          switch ($element.value.toLowerCase()) {
-            case 'yes':
-            case 'true':
-            case 'on':
-              value = true
-              break
-          }
         }
         break
       case 'checkbox':

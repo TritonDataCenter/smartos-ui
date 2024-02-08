@@ -10,6 +10,12 @@
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+#[cfg(debug_assertions)]
+pub const DEBUG: bool = true;
+
+#[cfg(not(debug_assertions))]
+pub const DEBUG: bool = false;
+
 pub mod endpoints;
 pub mod exec;
 pub mod privilege;

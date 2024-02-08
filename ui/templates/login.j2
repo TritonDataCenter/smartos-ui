@@ -22,7 +22,7 @@
             </div>
             {%  endif %}
             <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                <form action="/login" class="space-y-6" method="POST">
+                <form id="login" action="/login" class="space-y-6" method="POST">
                     <div>
                         <label for="user" class="block text-sm font-medium leading-6 text-white">User</label>
                         <div class="mt-2">
@@ -44,11 +44,16 @@
             </div>
         </div>
     </div>
+    {% if crate::DEBUG %}
     <script type="application/javascript">
     document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('user').value = 'root'
-        document.getElementById('password').value = 'root'
+        if (document.location.host === 'localhost:8080') {
+            document.getElementById('user').value = 'root'
+            document.getElementById('password').value = 'root'
+            document.getElementById('login').submit()
+        }
     })
     </script>
+    {%  endif %}
 </body>
 {% endblock %}

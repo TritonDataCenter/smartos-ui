@@ -1,14 +1,12 @@
-import { EditorView, basicSetup } from 'codemirror'
-import { json } from '@codemirror/lang-json'
-import { oneDark } from '@codemirror/theme-one-dark'
-
 import { $, encodeFormParameters } from './global'
+import {
+  EditorView,
+  basicSetup,
+  json,
+  oneDark
+} from '@tpaul/codemirror6-json-rolledup'
 
-const alert = window.alert
-
-// Accessed by hx- attrs later
 window.editors = {}
-
 window.updateEditors = () => {
   const editors = window.editors
   const $form = $('#content form')
@@ -98,7 +96,7 @@ window.updateEditors = () => {
         break
     }
   } catch (e) {
-    alert('Failed to serialize JSON in additional properties.')
+    window.alert('Failed to serialize JSON in additional properties.')
     console.error(e)
     return false
   }
@@ -119,7 +117,7 @@ window.getFinalEditor = () => {
   return window.editors.final.state.doc.toString()
 }
 
-(function initProvisionForm () {
+export const setupProvisioningForm = () => {
   const $guidedTab = $('#guided-tab')
   const $additionalTab = $('#additional-tab')
   const $finalTab = $('#final-tab')
@@ -144,7 +142,7 @@ window.getFinalEditor = () => {
   $editorTabs.forEach($tab => {
     const editors = window.editors
     const { name } = $tab.dataset
-    if (!editors[name]) {
+    if (!$tab.querySelector('.cm-editor')) {
       const parent = $tab.querySelector('.editor-wrapper')
       editors[name] = new EditorView({
         extensions: [basicSetup, json(), oneDark],
@@ -177,4 +175,4 @@ window.getFinalEditor = () => {
       $guidedButton.classList.add(active)
     }
   })
-})()
+}

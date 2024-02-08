@@ -5,6 +5,8 @@
 /cache
 etc/config.toml
 ui/assets/*.gz
+ui/assets/main.js
+ui/assets/main.css
 ui/assets/node_modules
 test/data/db/img/*
 !test/data/db/img/.gitkeep
