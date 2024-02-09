@@ -1,3 +1,4 @@
+{%- import "icons.j2" as icons -%}
 {% extends "layout/authed.j2" %}
 {% block title %}{{title}}{% endblock %}
 {% block content %}
@@ -6,6 +7,7 @@
   <header class="top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/5 bg-gray-900 px-4 shadow-sm sm:px-6 lg:px-8">
     <h1 class="text-base font-semibold leading-7 text-white">Images</h1>
     <div class="flex flex-1 items-center justify-end gap-x-6 mb-10 my-10">
+      <div class="htmx-indicator" id="loader">{% include "include/svg/loading.svg" %}</div>
       <a
         href="/import"
         hx-get="/import"
@@ -14,67 +16,67 @@
         hx-indicator="#loader"
         title="Import Image"
         class="cursor-pointer rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-          {%  include "include/svg/import.svg" %}
-          <div class="htmx-indicator" id="loader">{% include "include/svg/loading.svg" %}</div>
+          {% call icons::import("h-6 w-6 inline") %}
+          <span class="align-middle">Import</span>
       </a>
     </div>
   </header>
 
   <main>
 
-  <div class="px-4 sm:px-6 lg:px-8">
-    <div class="mt-8 flow-root">
-      <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle">
-          <table class="mt-6 w-full whitespace-nowrap text-left">
-            <colgroup>
-              <col class="w-full sm:w-4/12">
-              <col class="lg:w-1/12">
-              <col class="lg:w-4/12">
-              <col class="lg:w-2/12">
-              <col class="lg:w-2/12">
-            </colgroup>
-            <thead class="border-b border-white/10 text-sm leading-6 text-white">
-              <tr>
-                <th scope="col" class="sticky top-0 z-10 py-2 pl-4 pr-8 font-semibold sm:table-cell bg-gray-900">Name</th>
-                <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold sm:table-cell bg-gray-900">UUID</th>
-                <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold sm:table-cell bg-gray-900">Version</th>
-                <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">State</th>
-                <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">Type</th>
-                <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold md:table-cell bg-gray-900">OS</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-white/5">
-              {% for image in images %}
-              <tr hx-get="/images/{{image.manifest.uuid}}" hx-target="#main" hx-select="#content" class="hover:bg-gray-800 cursor-pointer">
-                <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
-                  <div class="flex items-center gap-x-4">
-                    <div class="truncate text-sm font-medium leading-6 text-white">{{image.manifest.name}}</div>
-                  </div>
-                </td>
-                <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
-                  {{image.manifest.uuid}}
-                </td>
-                <td class="py-4 pl-0 pr-4 sm:table-cell sm:pr-8">
-                  <div class="flex gap-x-3">
-                    <div class="text-sm leading-6 text-gray-400">{{image.manifest.version}}</div>
-                  </div>
-                </td>
-                <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.state}}</td>
-                <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.type}}</td>
-                <td class="py-4 pl-0 pr-4 text-sm leading-6 sm:pr-8 lg:pr-20">
-                  <div class="flex items-center justify-end gap-x-2 sm:justify-start">
-                    <div class="text-white sm:block">{{image.manifest.os}}</div>
-                  </div>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+    <div class="px-4 sm:px-6 lg:px-8">
+      <div class="mt-8 flow-root">
+        <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
+          <div class="inline-block min-w-full py-2 align-middle">
+            <table class="mt-6 w-full whitespace-nowrap text-left">
+              <colgroup>
+                <col class="w-full sm:w-4/12">
+                <col class="lg:w-1/12">
+                <col class="lg:w-4/12">
+                <col class="lg:w-2/12">
+                <col class="lg:w-2/12">
+              </colgroup>
+              <thead class="border-b border-white/10 text-sm leading-6 text-white">
+                <tr>
+                  <th scope="col" class="sticky top-0 z-10 py-2 pl-4 pr-8 font-semibold sm:table-cell bg-gray-900">Name</th>
+                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold sm:table-cell bg-gray-900">UUID</th>
+                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold sm:table-cell bg-gray-900">Version</th>
+                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">State</th>
+                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">Type</th>
+                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold md:table-cell bg-gray-900">OS</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5">
+                {% for image in images %}
+                <tr hx-get="/images/{{image.manifest.uuid}}" hx-target="#main" hx-select="#content" class="hover:bg-gray-800 cursor-pointer">
+                  <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
+                    <div class="flex items-center gap-x-4">
+                      <div class="truncate text-sm font-medium leading-6 text-white">{{image.manifest.name}}</div>
+                    </div>
+                  </td>
+                  <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
+                    {{image.manifest.uuid}}
+                  </td>
+                  <td class="py-4 pl-0 pr-4 sm:table-cell sm:pr-8">
+                    <div class="flex gap-x-3">
+                      <div class="text-sm leading-6 text-gray-400">{{image.manifest.version}}</div>
+                    </div>
+                  </td>
+                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.state}}</td>
+                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.type}}</td>
+                  <td class="py-4 pl-0 pr-4 text-sm leading-6 sm:pr-8 lg:pr-20">
+                    <div class="flex items-center justify-end gap-x-2 sm:justify-start">
+                      <div class="text-white sm:block">{{image.manifest.os}}</div>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
   </main>
 
