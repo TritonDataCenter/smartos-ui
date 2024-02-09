@@ -51,7 +51,7 @@
     "bootfile": "unix",
     "fstype": "ufs",
     "os_console": "text",
-    "root_shadow": "$5$GKhgbVFT$V6CfywlkA1mYkdTX.2/FdsXNi8Js7uwDAyQSem8AS3",
+    "root_shadow": "$5$GKhgbVFT$V6CfywlkA1mYkdTX.2/FdsXNi8Js7uwDAyQSem8AS3.",
     "screen__cols": "126",
     "screen__rows": "47",
     "screen_font": "8x16",

@@ -49,7 +49,7 @@ ui/assets/main.js.gz: ui/assets/main.js
 assets: ui/assets/main.css.gz ui/assets/main.js.gz
 
 .PHONY: clean-assets
-clean-assets:
+clean::
 	rm -f ui/assets/*.gz ui/assets/main.js ui/assets/main.css
 
 .PHONY: clean-mock-db
@@ -75,6 +75,10 @@ debug: assets $(RS_FILES) | $(CARGO_EXEC)
 fmt: | $(CARGO_EXEC)
 	$(CARGO) fmt
 
+.PHONY: clippy
+clippy: | $(CARGO_EXEC)
+	$(CARGO) clippy
+
 .PHONY: license-check
 license-check: | $(CARGO_EXEC)
 	$(CARGO) install cargo-license
@@ -87,6 +91,9 @@ update: | $(CARGO_EXEC)
 .PHONY: devrun
 devrun: debug
 	./tools/devrun.sh
+
+.PHONY: check
+check:: fmt fmt-js clippy
 
 include ./deps/eng/tools/mk/Makefile.deps
 include ./deps/eng/tools/mk/Makefile.targ

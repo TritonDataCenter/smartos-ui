@@ -8,7 +8,7 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::str::FromStr;
 
 use crate::endpoints::{
@@ -18,7 +18,7 @@ use crate::endpoints::{
 use crate::session::Session;
 
 use smartos_shared::instance::{
-    Brand, Instance, InstancePayload, PayloadContainer,
+    Brand, InstancePayload, InstanceView, PayloadContainer,
 };
 use smartos_shared::nictag::NicTag;
 
@@ -37,7 +37,7 @@ use uuid::Uuid;
 #[template(path = "instance.j2")]
 pub struct InstanceTemplate {
     title: String,
-    instance: Instance,
+    instance: InstanceView,
 }
 
 #[endpoint {
@@ -103,7 +103,7 @@ pub struct InstancesTemplate<'a> {
     total_ram: u64,
     total_quota: u64,
     title: &'a str,
-    instances: Vec<Instance>,
+    instances: Vec<InstanceView>,
 }
 
 #[endpoint {
@@ -121,14 +121,9 @@ pub async fn get_index(
             .get_instances()
             .await
             .map_err(to_internal_error)?;
-        let total_ram =
-            instances.iter().fold(0, |acc, i| i.max_physical_memory + acc);
-        let total_quota = instances.iter().fold(0, |acc, i| {
-            if let Some(quota) = i.quota {
-                return quota + acc;
-            }
-            acc
-        });
+
+        let total_ram = instances.iter().fold(0, |acc, i| i.ram + acc);
+        let total_quota = instances.iter().fold(0, |acc, i| i.disk_usage + acc);
         let template = InstancesTemplate {
             total_ram,
             total_quota,
@@ -146,7 +141,7 @@ pub async fn get_index(
 #[template(path = "provision.j2")]
 pub struct InstanceCreateTemplate {
     title: String,
-    images: HashMap<String, Vec<Image>>,
+    images: BTreeMap<String, Vec<Image>>,
     selected_image: Option<Image>,
     nictags: Vec<NicTag>,
     alias: String,
@@ -224,7 +219,7 @@ pub async fn get_provision(
             .await
             .map_err(to_internal_error)?;
 
-        let mut image_list = HashMap::<String, Vec<Image>>::new();
+        let mut image_list = BTreeMap::<String, Vec<Image>>::new();
         let mut images = ctx
             .context()
             .client
@@ -308,7 +303,8 @@ pub async fn post_provision(
         let mut location = HXLocation::new_with_common("/instances");
         location.values = Some(json!({
             "longRunning": true,
-            "allowedPaths": [],
+            "allowedPaths": ["/provision"],
+            "alwaysNotify": true,
             "notification": {
                 "heading": "Instance created",
                 "body": format!("Instance {} has been created.", uuid)

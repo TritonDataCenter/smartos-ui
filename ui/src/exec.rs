@@ -14,7 +14,9 @@ use smartos_shared::{
 
 use reqwest::{Client as HTTPClient, RequestBuilder};
 use smartos_shared::image::{ImageImportParams, Source};
-use smartos_shared::instance::{InstancePayload, InstanceValidateResponse};
+use smartos_shared::instance::{
+    InstancePayload, InstanceValidateResponse, InstanceView,
+};
 use tokio::try_join;
 use uuid::Uuid;
 
@@ -38,14 +40,16 @@ impl Client {
         try_join!(self.vminfo.get_instances(), self.exec.get_images(),)?;
         Ok(())
     }
-    pub async fn get_instances(&self) -> Result<Vec<Instance>, reqwest::Error> {
+    pub async fn get_instances(
+        &self,
+    ) -> Result<Vec<InstanceView>, reqwest::Error> {
         self.vminfo.get_instances().await
     }
 
     pub async fn get_instance(
         &self,
         id: &Uuid,
-    ) -> Result<Instance, reqwest::Error> {
+    ) -> Result<InstanceView, reqwest::Error> {
         self.vminfo.get_instance(id).await
     }
     pub async fn get_sysinfo(&self) -> Result<Sysinfo, reqwest::Error> {
@@ -130,20 +134,30 @@ impl VminfodClient {
         self.http.get(format!("{}/{path}", self.url))
     }
 
-    pub async fn get_instances(&self) -> Result<Vec<Instance>, reqwest::Error> {
-        self.get("vms").send().await?.error_for_status()?.json().await
+    pub async fn get_instances(
+        &self,
+    ) -> Result<Vec<InstanceView>, reqwest::Error> {
+        let instances: Vec<Instance> =
+            self.get("vms").send().await?.error_for_status()?.json().await?;
+        let mut views: Vec<InstanceView> = Vec::default();
+        for i in instances {
+            views.push(i.try_into().expect("failed"))
+        }
+        Ok(views)
     }
 
     pub async fn get_instance(
         &self,
         id: &Uuid,
-    ) -> Result<Instance, reqwest::Error> {
-        self.get(format!("vms/{}", &id.as_hyphenated()).as_str())
+    ) -> Result<InstanceView, reqwest::Error> {
+        let instance: Instance = self
+            .get(format!("vms/{}", &id.as_hyphenated()).as_str())
             .send()
             .await?
             .error_for_status()?
             .json()
-            .await
+            .await?;
+        Ok(instance.try_into().expect("failed"))
     }
 }
 

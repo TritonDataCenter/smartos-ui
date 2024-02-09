@@ -8,9 +8,9 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 pub struct Sysinfo {
     #[serde(rename = "Live Image")]
     pub live_image: String,
@@ -20,4 +20,11 @@ pub struct Sysinfo {
     pub mib_of_memory: String,
     #[serde(rename = "Zpool Size in GiB")]
     pub zpool_size_in_gib: u64,
+    #[serde(rename = "Boot Parameters")]
+    pub boot_parameters: BootParameters,
+}
+
+#[derive(Deserialize)]
+pub struct BootParameters {
+    pub root_shadow: String,
 }

@@ -8,13 +8,15 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
+use std::convert::TryFrom;
+use std::convert::TryInto;
 use std::fmt;
 use std::fmt::{Display, Error, Formatter};
 use std::str::FromStr;
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+use uuid::{Builder as UuidBuilder, Uuid};
 
 /// Used for sending the instance json for `vmadm validate` and `vmadm create`
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -34,71 +36,211 @@ pub struct InstanceValidateResponse {
     pub success: bool,
 }
 
-// Will probably need to overhaul this as an enum with #[serde(tag = "brand")]
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Instance {
-    //pub zonename: String,
-    //pub autoboot: bool,
-    pub brand: Brand,
-    //pub limit_priv: String,
-    //pub v: u64,
-    //pub create_timestamp: String, // OffsetDataTime
-    pub image_uuid: Option<Uuid>,
-    //pub cpu_shares: u64,
-    //pub max_lwps: u64,
-    // pub max_msg_ids: u64,
-    // pub max_sem_ids: u64,
-    // pub max_shm_ids: u64,
-    // pub max_shm_memory: u64,
-    //pub zfs_io_priority: u64,
-    pub max_physical_memory: u64,
-    //pub max_locked_memory: u64,
-    //pub max_swap: u64,
-    //pub billing_id: String,
-    //pub owner_uuid: Uuid,
-    //pub tmpfs: u64,
-    //pub dns_domain: String,
-    //pub resolvers: Vec<String>,
-    pub alias: Option<String>,
-    //pub nics: Vec<Nic>,
-    //pub datasets: Option<Vec<String>>,
+pub struct Disk {
+    pub boot: Option<bool>,
+    pub image_uuid: Uuid,
+    pub image_size: u64,
+}
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Generic {
     pub uuid: Uuid,
-    //pub zone_state: String, // Enum
-    //pub zonepath: String,
-    //pub hvm: bool,
-    //pub zoneid: u64,
-    //pub zonedid: u64,
-    // pub last_modified: String, // OffsetDateTime
-    //pub firewall_enabled: bool,
-    //pub server_uuid: String,
-    //pub platform_buildstamp: String,
+    pub alias: Option<String>,
     pub state: String,
-    // pub boot_timestamp: String, // OffsetDateTime
-    // pub init_restarts: u64,
-    // pub pid: u64,
-    // pub customer_metadata: Struct1,
-    // pub internal_metadata: Struct1,
-    // pub routes: Struct1,
-    // pub tags: Struct1,
-    pub quota: Option<u64>,
-    // pub zfs_root_recsize: u64,
-    // pub zfs_filesystem: String,
-    // pub zpool: String,
-    // pub zfs_data_recsize: Option<u64>,
-    //pub snapshots: Vec<_>,
+    pub quota: u64,
+    pub max_physical_memory: u64,
+    pub resolvers: Option<Vec<String>>,
 }
 
-#[derive(Deserialize, Serialize, Debug, JsonSchema)]
-pub struct Nic {
-    //pub interface: String,
-    //pub mac: String,
-    pub nic_tag: String,
-    //pub gateway: String,
-    pub gateways: Vec<String>,
-    //pub netmask: String,
-    //pub ip: String,
-    pub ips: Vec<String>,
-    pub primary: bool,
+#[derive(Serialize, Deserialize, Debug)]
+pub struct HVM {
+    pub ram: u64,
+    pub disks: Vec<Disk>,
+}
+
+impl HVM {
+    pub fn get_disk_usage(&self) -> u64 {
+        self.disks.iter().fold(0, |acc, d| d.image_size + acc)
+    }
+    pub fn get_boot_image_uuid(&self) -> Uuid {
+        if let Some(boot_disk) = self.disks.iter().find(|d| d.boot.is_some()) {
+            boot_disk.image_uuid
+        } else {
+            UuidBuilder::nil().into_uuid()
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Native {
+    pub image_uuid: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Bhyve {
+    #[serde(flatten)]
+    generic: Generic,
+    #[serde(flatten)]
+    hvm: HVM,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct KVM {
+    #[serde(flatten)]
+    generic: Generic,
+    #[serde(flatten)]
+    hvm: HVM,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Joyent {
+    #[serde(flatten)]
+    generic: Generic,
+    #[serde(flatten)]
+    native: Native,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct JoyentMinimal {
+    #[serde(flatten)]
+    generic: Generic,
+    #[serde(flatten)]
+    native: Native,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct LX {
+    pub kernel_version: String,
+    #[serde(flatten)]
+    generic: Generic,
+    #[serde(flatten)]
+    native: Native,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct InstanceView {
+    pub uuid: Uuid,
+    pub alias: Option<String>,
+    pub brand: Brand,
+    pub state: String,
+    pub ram: u64,
+    pub disk_usage: u64,
+    pub hvm: bool,
+    pub image_uuid: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(tag = "brand")]
+pub enum Instance {
+    #[serde(rename = "joyent")]
+    Joyent(Joyent),
+    #[serde(rename = "joyent-minimal")]
+    JoyentMinimal(JoyentMinimal),
+    #[serde(rename = "bhyve")]
+    Bhyve(Bhyve),
+    #[serde(rename = "kvm")]
+    KVM(KVM),
+    #[serde(rename = "lx")]
+    LX(LX),
+}
+
+impl TryFrom<Instance> for InstanceView {
+    type Error = ();
+
+    fn try_from(value: Instance) -> Result<Self, Self::Error> {
+        match value {
+            Instance::Joyent(i) => i.try_into(),
+            Instance::JoyentMinimal(i) => i.try_into(),
+            Instance::Bhyve(i) => i.try_into(),
+            Instance::KVM(i) => i.try_into(),
+            Instance::LX(i) => i.try_into(),
+        }
+    }
+}
+
+impl TryFrom<KVM> for InstanceView {
+    type Error = ();
+
+    fn try_from(value: KVM) -> Result<Self, Self::Error> {
+        Ok(InstanceView {
+            uuid: value.generic.uuid,
+            alias: value.generic.alias,
+            brand: Brand::KVM,
+            ram: value.hvm.ram,
+            hvm: true,
+            state: value.generic.state,
+            disk_usage: value.hvm.get_disk_usage(),
+            image_uuid: value.hvm.get_boot_image_uuid(),
+        })
+    }
+}
+
+impl TryFrom<Bhyve> for InstanceView {
+    type Error = ();
+
+    fn try_from(value: Bhyve) -> Result<Self, Self::Error> {
+        Ok(InstanceView {
+            uuid: value.generic.uuid,
+            alias: value.generic.alias,
+            brand: Brand::Bhyve,
+            ram: value.hvm.ram,
+            hvm: true,
+            state: value.generic.state,
+            disk_usage: value.hvm.get_disk_usage(),
+            image_uuid: value.hvm.get_boot_image_uuid(),
+        })
+    }
+}
+
+impl TryFrom<JoyentMinimal> for InstanceView {
+    type Error = ();
+
+    fn try_from(value: JoyentMinimal) -> Result<Self, Self::Error> {
+        Ok(InstanceView {
+            uuid: value.generic.uuid,
+            alias: value.generic.alias,
+            brand: Brand::JoyentMinimal,
+            ram: value.generic.max_physical_memory,
+            hvm: false,
+            state: value.generic.state,
+            disk_usage: value.generic.quota * 1024,
+            image_uuid: value.native.image_uuid,
+        })
+    }
+}
+
+impl TryFrom<Joyent> for InstanceView {
+    type Error = ();
+
+    fn try_from(value: Joyent) -> Result<Self, Self::Error> {
+        Ok(InstanceView {
+            uuid: value.generic.uuid,
+            alias: value.generic.alias,
+            brand: Brand::Joyent,
+            ram: value.generic.max_physical_memory,
+            hvm: false,
+            state: value.generic.state,
+            disk_usage: value.generic.quota * 1024,
+            image_uuid: value.native.image_uuid,
+        })
+    }
+}
+
+impl TryFrom<LX> for InstanceView {
+    type Error = ();
+
+    fn try_from(value: LX) -> Result<Self, Self::Error> {
+        Ok(InstanceView {
+            uuid: value.generic.uuid,
+            alias: value.generic.alias,
+            brand: Brand::LX,
+            ram: value.generic.max_physical_memory,
+            hvm: false,
+            state: value.generic.state,
+            disk_usage: value.generic.quota * 1024,
+            image_uuid: value.native.image_uuid,
+        })
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, JsonSchema, Eq, PartialEq)]

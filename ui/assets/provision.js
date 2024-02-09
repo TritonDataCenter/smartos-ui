@@ -160,7 +160,7 @@ window.getFinalEditor = () => {
     }
   } catch (e) {
     console.error(e)
-    alert('Failed parsing final properties for instance.')
+    window.alert('Failed parsing final properties for instance.')
     return
   }
 

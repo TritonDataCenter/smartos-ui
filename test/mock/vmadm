@@ -14,13 +14,42 @@ function getPayload () {
   }
 }
 
+function getImageSize (uuid) {
+  const imgRoot = join(__dirname, '..', 'data', 'db', 'img')
+  try {
+    const img = JSON.parse(readFileSync(join(imgRoot, `${uuid}.json`), 'utf-8'))
+    return img.manifest.image_size
+  } catch (e) {
+    console.error(e)
+    process.exit(1)
+  }
+}
+
 const cmd = {
   create: () => {
     const vm = getPayload()
-    vm.max_physical_memory = vm.ram
+    vm.ram = vm.ram || vm.max_physical_memory || 256
     vm.state = 'running'
+    vm.quota = (vm.quota === null || vm.quota === undefined) ? 0 : vm.quota
+    switch (vm.brand) {
+      case 'joyent':
+      case 'joyent-minimal':
+        vm.max_physical_memory = vm.ram
+        break
+      case 'lx':
+        vm.max_physical_memory = vm.ram
+        vm.kernel_version = vm.kernel_version || '0.0.0'
+        break
+      case 'bhyve':
+      case 'kvm':
+        vm.max_physical_memory = vm.max_physical_memory || vm.ram + 1024
+        vm.disks.forEach(d => {
+          d.image_size = getImageSize(d.image_uuid)
+        })
+        break
+    }
     const fileName = join(root, `${vm.uuid}.json`)
-    setTimeout(() => writeFileSync(fileName, JSON.stringify(vm)), 5000)
+    setTimeout(() => writeFileSync(fileName, JSON.stringify(vm)), 2000)
   },
   validate: ([subcmd]) => {
     const { brand } = getPayload()

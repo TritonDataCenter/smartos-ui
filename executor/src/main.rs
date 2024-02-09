@@ -36,6 +36,7 @@ async fn main() -> Result<(), String> {
 
     let mut api = ApiDescription::new();
     api.register(endpoints::sysinfo::get_index)?;
+    api.register(endpoints::pwhash::get_index)?;
     api.register(endpoints::image::get_index)?;
     api.register(endpoints::image::get_by_id)?;
     api.register(endpoints::image::delete_by_id)?;
@@ -46,7 +47,6 @@ async fn main() -> Result<(), String> {
     api.register(endpoints::instance::post_validate_create)?;
     api.register(endpoints::instance::delete_by_id)?;
     api.register(endpoints::nictag::get_index)?;
-    api.register(endpoints::pwhash::get_index)?;
     info!(log, "{} v{}", name, version);
 
     let server = HttpServerStarter::new(
