@@ -1,3 +1,4 @@
+{%- import "icons.j2" as icons -%}
 {% extends "layout/main.j2" %}
 {% block title %}Login{% endblock %}
 {% block scripts %}{% endblock %}
@@ -6,14 +7,14 @@
     <div class="content">
         <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
             <div class="mt-10 sm:mx-auto sm:max-w-sm flex items-center">
-                {% include "include/svg/smartos.svg" %}
+                {% call icons::smartos("h-10 w-10") %}
                 <h1 class="text-white pl-4 text-3xl">SmartOS</h1>
             </div>
             {% if message.is_some() %}
-            <div class="rounded-md bg-red-50 p-4 mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+            <div class="rounded-md bg-white p-4 mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
                 <div class="flex">
                     <div class="flex-shrink-0">
-                        {% include "include/svg/error.svg" %}
+                    {% call icons::error("h-6 w-6 text-red-500") %}
                     </div>
                     <div class="ml-3">
                         <h3 class="text-sm font-medium text-red-800">{{message.unwrap_or_default()}}</h3>
@@ -38,7 +39,7 @@
                         </div>
                     </div>
                     <div>
-                        <button type="submit" class="flex w-full justify-center rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">Sign in</button>
+                        <button type="submit" class="flex w-full justify-center btn btn-primary">Sign in</button>
                     </div>
                 </form>
             </div>

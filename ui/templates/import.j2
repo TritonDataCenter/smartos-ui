@@ -1,3 +1,4 @@
+{%- import "icons.j2" as icons -%}
 {% extends "layout/authed.j2" %}
 {% block title %}{{title}}{% endblock %}
 {% block content %}
@@ -48,18 +49,23 @@
           <td>
             <form
               method="POST"
-              hx-ext="json-enc-typed"
-              hx-post="/import/{{image.manifest.uuid}}"
+              data-hx-post="/import/{{image.manifest.uuid}}"
               action="/import/{{image.manifest.uuid}}">
               <input type="hidden" name="url" value="{{image.source}}" />
               <input type="hidden" name="name" value="{{image.manifest.name}}" />
               <input type="hidden" name="version" value="{{image.manifest.version}}" />
               <input type="hidden" name="type" value="{{image.manifest.type}}" />
               <input type="hidden" name="os" value="{{image.manifest.os}}" />
-              <div class="htmx-indicator" id="loader-{{image.manifest.uuid}}">{% include "include/svg/loading.svg" %}</div>
-              <button type="submit" hx-disabled-elt="this" hx-indicator="#loader-{{image.manifest.uuid}}" class="rounded-md bg-blue-500 px-3 py-2 text-sm font-semibold shadow-sm hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">
-                Import
-              </button>
+              <div>
+                <div class="htmx-indicator" id="loader-{{image.manifest.uuid}}">{% call icons::loading("h-6 w-6") %}</div>
+                <button
+                  type="submit"
+                  data-hx-disabled-elt="this"
+                  data-hx-indicator="#loader-{{image.manifest.uuid}}"
+                  class="btn btn-primary">
+                  {% call icons::import("h-6 w-6 inline") %}
+                </button>
+              </div>
             </form>
           </td>
         </tr>

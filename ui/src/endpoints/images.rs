@@ -167,6 +167,7 @@ pub async fn get_import_index(
 #[endpoint {
 method = POST,
 path = "/import/{id}",
+content_type = "application/x-www-form-urlencoded"
 }]
 pub async fn post_import_index(
     ctx: RequestContext<Context>,

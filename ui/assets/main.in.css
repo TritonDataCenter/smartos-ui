@@ -46,6 +46,41 @@
       @apply visible z-50;
     }
 
+    /*
+     * A consistently-styled, generic button
+     */
+    .btn {
+        @apply cursor-pointer;
+        @apply rounded-md;
+        @apply px-3;
+        @apply py-2;
+        @apply text-sm;
+        @apply font-semibold;
+        @apply shadow-sm;
+        @apply focus-visible:outline;
+        @apply focus-visible:outline-2;
+        @apply focus-visible:outline-offset-2;
+    }
+
+    /*
+     * A blue button with black text
+     */
+    .btn-primary {
+        @apply text-black;
+        @apply bg-blue-600;
+        @apply hover:bg-blue-500;
+        @apply focus-visible:outline-blue-600;
+    }
+
+    /*
+     * A red button with white text
+     */
+    .btn-warn {
+        @apply text-white;
+        @apply bg-red-500;
+        @apply hover:bg-red-400;
+        @apply focus-visible:outline-red-500;
+    }
 }
 
 /* Misc custom classes */

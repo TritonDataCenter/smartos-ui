@@ -12,16 +12,16 @@
     <!-- Sidebar component, swap this element with another sidebar if you like -->
     <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-black/10 px-6 ring-1 ring-white/5">
       <div class="flex h-16 shrink-0 items-center">
-        {% include "include/svg/smartos.svg" %}
+        {% call icons::smartos("h-10 w-10") %}
         <h1 class="text-white pl-4">SmartOS</h1>
       </div>
-      <nav class="flex flex-1 flex-col" hx-sync="this:replace" hx-target="#main" hx-select="#content">
+      <nav class="flex flex-1 flex-col" data-hx-sync="this:replace" data-hx-target="#main" data-hx-select="#content">
         <ul class="flex flex-1 flex-col gap-y-7">
           <li>
             <ul class="-mx-2 space-y-1">
               <li>
                 <a href="/dashboard"
-                  hx-get="/dashboard"
+                  data-hx-get="/dashboard"
                   class="{% if title == "Dashboard" %}{{active}}{% else %}{{inactive}}{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer main-nav">
                   {% call icons::home("") %}
                   Dashboard
@@ -29,7 +29,7 @@
               </li>
               <li>
                 <a href="/instances"
-                hx-get="/instances"
+                data-hx-get="/instances"
                 class="{% if title == "Instances" %}{{active}}{% else %}{{inactive}}{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer main-nav">
                   {% call icons::servers("") %}
                   Instances
@@ -37,7 +37,7 @@
               </li>
               <li>
                 <a href="/images"
-                  hx-get="/images"
+                  data-hx-get="/images"
                   class="{% if title == "Images" %}{{active}}{% else %}{{inactive}}{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer main-nav">
                   {% call icons::box("") %}
                   Images

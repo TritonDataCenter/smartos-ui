@@ -10,6 +10,7 @@
 
 pub mod assets;
 pub mod dashboard;
+pub mod filters;
 pub mod images;
 pub mod instances;
 pub mod login;
@@ -34,7 +35,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
 
-pub fn to_internal_error<T: std::fmt::Display>(e: T) -> HttpError {
+pub fn to_internal_error<T: fmt::Display>(e: T) -> HttpError {
     HttpError::for_internal_error(e.to_string())
 }
 

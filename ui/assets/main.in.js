@@ -1,27 +1,6 @@
 import htmx from 'htmx.org'
-import { $, $$, encodeFormParameters } from './global'
+import { $, $$ } from './global'
 import { setupProvisioningForm } from './provision'
-
-// Adapted from: https://htmx.org/extensions/json-enc
-htmx.defineExtension('json-enc-typed', {
-  onEvent: (name, event) => {
-    if (name === 'htmx:configRequest') {
-      event.detail.headers['Content-Type'] = 'application/json'
-    }
-  },
-  encodeParameters: (xhr, parameters, $form) => {
-    const $targets = $form.querySelectorAll('[name]')
-    xhr.overrideMimeType('application/json')
-    return JSON.stringify(encodeFormParameters($targets, parameters))
-  }
-})
-
-htmx.on('htmx:configRequest', ({ detail }) => {
-  // When submitting a single input, the json-enc-typed extension isn't called
-  if (detail.elt.dataset && detail.elt.dataset.hxExt === 'json-enc-typed') {
-    detail.parameters = encodeFormParameters([detail.elt], detail.parameters)
-  }
-})
 
 document.addEventListener('DOMContentLoaded', () => {
   const $notify = $('#notify')

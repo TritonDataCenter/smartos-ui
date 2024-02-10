@@ -6,7 +6,7 @@
   <header>
     <div class="grid grid-cols-1 bg-gray-700/10 sm:grid-cols-2 lg:grid-cols-4">
       <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8">
-        <p class="text-sm font-medium leading-6 text-gray-400">VMs</p>
+        <p class="text-sm font-medium leading-6 text-gray-400">Virtual Machines</p>
         <p class="mt-2 flex items-baseline gap-x-2">
           <span class="text-4xl font-semibold tracking-tight text-white">{{instances.len()}}</span>
         </p>
@@ -14,44 +14,42 @@
       <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
         <p class="text-sm font-medium leading-6 text-gray-400">Provisioned Memory</p>
         <p class="mt-2 flex items-baseline gap-x-2">
-          <span class="text-4xl font-semibold tracking-tight text-white">{{total_ram}}</span>
-          <span class="text-sm text-gray-400">MiB</span>
+          <span class="text-4xl font-semibold tracking-tight text-white">{{total_ram|mib_to_gib}}</span>
+          <span class="text-sm text-gray-400">GiB</span>
         </p>
       </div>
       <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 lg:border-l">
         <p class="text-sm font-medium leading-6 text-gray-400">Provisioned Storage</p>
         <p class="mt-2 flex items-baseline gap-x-2">
-          <span class="text-4xl font-semibold tracking-tight text-white">{{total_quota}}</span>
+          <span class="text-4xl font-semibold tracking-tight text-white">{{total_quota|mib_to_gib}}</span>
           <span class="text-sm text-gray-400">GiB</span>
         </p>
       </div>
     </div>
   </header>
 
-  <div class="border-t border-white/10 pt-11">
-
+  <div class="border-t border-white/10">
     <div>
       <div class="flex py-6">
         <div class="flex lg:flex-1">
-          <h2 class="px-4 text-base font-semibold leading-7 text-white sm:px-6 lg:px-8">
+          <h2 class="text-base font-semibold leading-7 text-white px-6">
             Instances
           </h2>
         </div>
-        <div class="flex flex-1 items-center justify-end gap-x-6">
+        <div class="flex flex-1 items-center justify-end gap-x-6 px-6">
           <a
             href="/provision"
             data-hx-get="/provision"
             data-hx-target="#main"
             data-hx-select="#content"
             title="Create a new Instance"
-            class="cursor-pointer rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+            class="btn btn-primary">
             {% call icons::plus_circle("h-6 w-6 inline") %}
             <span class="align-middle">Create</span>
           </a>
         </div>
       </div>
     </div>
-
 
     <table class="mt-6 w-full whitespace-nowrap text-left">
       <colgroup>
@@ -66,14 +64,18 @@
           <th scope="col" class="py-2 pl-4 pr-8 font-semibold sm:pl-6 lg:pl-8">Alias</th>
           <th scope="col" class="hidden py-2 pl-0 pr-4 text-right font-semibold sm:table-cell sm:pr-6 lg:pr-8">Brand</th>
           <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold sm:table-cell">Image</th>
-          <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">RAM</th>
-          <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Storage</th>
+          <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">RAM <sup>MiB</sup></th>
+          <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Storage Quota<sup>GiB</sup></th>
           <th scope="col" class="py-2 pl-0 pr-4 text-right font-semibold sm:pr-8 sm:text-left lg:pr-20">Status</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-white/5">
         {% for instance in instances %}
-        <tr hx-get="/instances/{{instance.uuid}}" hx-target="#main" hx-select="#content" class="hover:bg-gray-800 cursor-pointer">
+        <tr
+          data-hx-get="/instances/{{instance.uuid}}"
+          data-hx-target="#main"
+          data-hx-select="#content"
+          class="hover:bg-gray-800 cursor-pointer">
           <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
             <div class="flex items-center gap-x-4">
               <div class="truncate text-sm font-medium leading-6 text-white">{{instance.alias.as_deref().unwrap_or("-")}}</div>
@@ -88,7 +90,7 @@
             </div>
           </td>
           <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{instance.ram}}</td>
-          <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{instance.disk_usage}}</td>
+          <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{instance.disk_usage|mib_to_gib}}</td>
           <td class="py-4 pl-0 pr-4 text-sm leading-6 sm:pr-8 lg:pr-20">
             <div class="flex items-center justify-end gap-x-2 sm:justify-start">
               {% if instance.state == "running" %}

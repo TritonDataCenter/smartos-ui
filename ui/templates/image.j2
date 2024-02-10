@@ -1,3 +1,4 @@
+{%- import "icons.j2" as icons -%}
 {% extends "layout/authed.j2" %}
 {% block title %}{{title}}{% endblock %}
 {% block content %}
@@ -31,14 +32,15 @@
     </div>
     <div class="mt-6 flex items-center justify-end gap-x-6">
       <button
-        hx-delete="/images/{{image.manifest.uuid}}"
-        hx-target="#main"
-        hx-select="#content"
-        hx-confirm="Are you sure you want to delete this image?"
+        data-hx-delete="/images/{{image.manifest.uuid}}"
+        data-hx-target="#main"
+        data-hx-select="#content"
+        data-hx-confirm="Are you sure you want to delete this image?"
         title="Delete this instance"
         type="submit"
-        class="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
-        {%  include "include/svg/trash.svg" %}
+        class="btn btn-warn">
+        {% call icons::trash("h-6 w-6 inline") %}
+        <span class="align-middle">Delete Image</span>
       </button>
     </div>
   </form>

@@ -2,7 +2,7 @@
 {% extends "layout/authed.j2" %}
 {% block title %}{{title}}{% endblock %}
 {% block content %}
-<div id="content" class="px-6">
+<div id="content" class="px-8">
 
   <div>
     <div class="hidden sm:block">
@@ -44,7 +44,7 @@
     <div class="editor-wrapper"></div>
   </div>
   <div id="guided-tab">
-    <form id="provision" class="mx-auto" method="POST" action="/provision" hx-post="/provision">
+    <form id="provision" class="mx-auto" method="POST" action="/provision" data-hx-post="/provision">
       <div class="space-y-12">
         <div class="border-b border-white/10 pb-12">
           <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -67,14 +67,12 @@
               <label for="image_uuid" class="block text-sm font-medium leading-6 text-white">Image</label>
               <div class="mt-2">
                 <select
-                  data-pattern='^[a-f\d]{8}-[a-f\d]{4}-4[a-f\d]{3}-[89ab][a-f\d]{3}-[a-f\d]{12}$'
-                  data-invalid-message="image_uuid must be a UUID"
                   id="image_uuid"
                   name="image_uuid"
                   data-hx-get="/provision"
                   data-hx-target="#provision"
                   data-hx-select="#provision"
-                  hx-include="#provision [name]"
+                  data-hx-include="#provision [name]"
                   data-hx-swap="outerHTML"
                   class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
                   <option value="">Select an Image</option>
@@ -265,7 +263,7 @@
                   data-hx-get="/provision"
                   data-hx-target="#provision"
                   data-hx-select="#provision"
-                  hx-include="#provision [name]"
+                  data-hx-include="#provision [name]"
                   data-hx-swap="outerHTML"
                   class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
                   <option value="">
@@ -343,7 +341,7 @@
   <div id="validate-result"></div>
 
   <div class="mt-6 flex items-center justify-end gap-x-6">
-    <div class="htmx-indicator" id="loader">{% include "include/svg/loading.svg" %}</div>
+    <div class="htmx-indicator" id="loader">{% call icons::loading("h-6 w-6") %}</div>
     <button
       id="validate-button"
       type="button"
@@ -351,7 +349,7 @@
       data-hx-indicator="#loader"
       data-hx-post="/provision/validate"
       data-hx-target="#validate-result"
-      hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
+      data-hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
       class="text-sm font-semibold leading-6 text-white">
       Validate
     </button>
@@ -361,8 +359,8 @@
       data-hx-disabled-elt="this"
       data-hx-indicator="#loader"
       data-hx-post="/provision"
-      hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
-      class="rounded-md bg-blue-500 px-3 py-2 text-sm font-semibold shadow-sm hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">
+      data-hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
+      class="btn btn-primary">
     Create
     </button>
   </div>

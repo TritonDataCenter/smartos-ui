@@ -12,8 +12,8 @@ use std::collections::BTreeMap;
 use std::str::FromStr;
 
 use crate::endpoints::{
-    htmx_response, redirect_login, to_internal_error, Context, HXLocation,
-    PathParams,
+    filters, htmx_response, redirect_login, to_internal_error, Context,
+    HXLocation, PathParams,
 };
 use crate::session::Session;
 
@@ -22,6 +22,7 @@ use smartos_shared::instance::{
 };
 use smartos_shared::nictag::NicTag;
 
+use crate::endpoints::filters::format_name;
 use askama::Template;
 use dropshot::{endpoint, HttpError, Path, Query, RequestContext, TypedBody};
 use http::StatusCode;
@@ -238,7 +239,9 @@ pub async fn get_provision(
             };
             let key = format!(
                 "{} ({} {})",
-                virt_type, image.manifest.os, image.manifest.r#type
+                virt_type,
+                format_name(&image.manifest.os).unwrap_or_default(),
+                format_name(&image.manifest.r#type).unwrap_or_default()
             );
             if let Some(image_vec) = image_list.get_mut(&key) {
                 image_vec.push(image);

@@ -8,7 +8,7 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 
 #[derive(Deserialize)]
 pub struct Sysinfo {
@@ -16,8 +16,8 @@ pub struct Sysinfo {
     pub live_image: String,
     #[serde(rename = "CPU Count")]
     pub cpu_count: u64,
-    #[serde(rename = "MiB of Memory")]
-    pub mib_of_memory: String,
+    #[serde(rename = "MiB of Memory", deserialize_with = "string_to_u64")]
+    pub mib_of_memory: u64,
     #[serde(rename = "Zpool Size in GiB")]
     pub zpool_size_in_gib: u64,
     #[serde(rename = "Boot Parameters")]
@@ -27,4 +27,16 @@ pub struct Sysinfo {
 #[derive(Deserialize)]
 pub struct BootParameters {
     pub root_shadow: String,
+}
+
+/// A Serde Deserializer to convert a string to u64
+fn string_to_u64<'de, D>(deserializer: D) -> Result<u64, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let result: u64 = String::deserialize(deserializer)?
+        .as_str()
+        .parse()
+        .map_err(serde::de::Error::custom)?;
+    Ok(result)
 }
