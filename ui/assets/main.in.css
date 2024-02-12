@@ -63,6 +63,21 @@
     }
 
     /*
+     * Button with an icon and text looks better with slight right padding
+     */
+    .btn > .btn-text {
+        @apply pr-1;
+    }
+
+    /*
+     * A button with no background except on hover
+     */
+    .btn-clear {
+        @apply text-white;
+        @apply hover:bg-gray-800;
+    }
+
+    /*
      * A blue button with black text
      */
     .btn-primary {
@@ -81,9 +96,41 @@
         @apply hover:bg-red-400;
         @apply focus-visible:outline-red-500;
     }
+
+    .sticky-header > th {
+        @apply bg-gray-800;
+    }
 }
 
 /* Misc custom classes */
 .notify-icons svg {
+    display:none;
+}
+
+.htmx-indicator {
+    opacity: 1 !important;
+}
+
+.htmx-indicator .loader-icon {
+    display:none;
+}
+
+.htmx-request .default-icon {
+    display:inline;
+}
+
+.htmx-request .htmx-indicator .loader-icon {
+    display:inline;
+}
+
+.htmx-request .htmx-indicator .default-icon {
+    display:none;
+}
+
+.htmx-request.htmx-indicator .loader-icon {
+    display:inline;
+}
+
+.htmx-request.htmx-indicator .default-icon {
     display:none;
 }

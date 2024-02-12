@@ -12,13 +12,22 @@ use smartos_shared::{
     image::Image, instance::Instance, nictag::NicTag, sysinfo::Sysinfo,
 };
 
+use http::StatusCode;
 use reqwest::{Client as HTTPClient, RequestBuilder};
+use schemars::JsonSchema;
+use serde::Serialize;
 use smartos_shared::image::{ImageImportParams, Source};
 use smartos_shared::instance::{
     InstancePayload, InstanceValidateResponse, InstanceView,
 };
 use tokio::try_join;
 use uuid::Uuid;
+
+#[derive(Serialize, JsonSchema)]
+pub struct PingResponse {
+    pub executor: bool,
+    pub vminfod: bool,
+}
 
 pub struct Client {
     exec: ExecClient,
@@ -113,6 +122,15 @@ impl Client {
     pub async fn get_pwhash(&self) -> Result<String, reqwest::Error> {
         self.exec.get_pwhash().await
     }
+
+    pub async fn ping(&self) -> Result<PingResponse, reqwest::Error> {
+        // TODO: run these together and join
+        let executor =
+            self.exec.ping().await.is_ok_and(|status| status.is_success());
+        let vminfod =
+            self.vminfo.ping().await.is_ok_and(|status| status.is_success());
+        Ok(PingResponse { executor, vminfod })
+    }
 }
 
 pub struct VminfodClient {
@@ -158,6 +176,10 @@ impl VminfodClient {
             .json()
             .await?;
         Ok(instance.try_into().expect("failed"))
+    }
+
+    pub async fn ping(&self) -> Result<StatusCode, reqwest::Error> {
+        Ok(self.get("ping").send().await?.error_for_status()?.status())
     }
 }
 
@@ -273,5 +295,9 @@ impl ExecClient {
 
     pub async fn get_pwhash(&self) -> Result<String, reqwest::Error> {
         self.get("pwhash").send().await?.error_for_status()?.text().await
+    }
+
+    pub async fn ping(&self) -> Result<StatusCode, reqwest::Error> {
+        Ok(self.get("ping").send().await?.error_for_status()?.status())
     }
 }

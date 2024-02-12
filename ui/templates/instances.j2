@@ -11,6 +11,13 @@
           <span class="text-4xl font-semibold tracking-tight text-white">{{instances.len()}}</span>
         </p>
       </div>
+      <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8">
+        <p class="text-sm font-medium leading-6 text-gray-400">Provisioned CPU</p>
+        <p class="mt-2 flex items-baseline gap-x-2">
+          <span class="text-4xl font-semibold tracking-tight text-white">{{total_cpu}}</span>
+          <span class="text-sm text-gray-400">vCPUs + Shares</span>
+        </p>
+      </div>
       <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
         <p class="text-sm font-medium leading-6 text-gray-400">Provisioned Memory</p>
         <p class="mt-2 flex items-baseline gap-x-2">
@@ -64,8 +71,9 @@
           <th scope="col" class="py-2 pl-4 pr-8 font-semibold sm:pl-6 lg:pl-8">Alias</th>
           <th scope="col" class="hidden py-2 pl-0 pr-4 text-right font-semibold sm:table-cell sm:pr-6 lg:pr-8">Brand</th>
           <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold sm:table-cell">Image</th>
+          <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">CPU</th>
           <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">RAM <sup>MiB</sup></th>
-          <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Storage Quota<sup>GiB</sup></th>
+          <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Storage Quota <sup>GiB</sup></th>
           <th scope="col" class="py-2 pl-0 pr-4 text-right font-semibold sm:pr-8 sm:text-left lg:pr-20">Status</th>
         </tr>
       </thead>
@@ -86,8 +94,32 @@
           </td>
           <td class="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8">
             <div class="flex gap-x-3">
-                <div class="font-mono text-sm leading-6 text-gray-400">{{instance.image_uuid}}</div>
+                <div class="font-mono text-sm leading-6 text-gray-400">
+                  <a
+                    title="View image details"
+                    class="hover:underline hover:decoration-solid"
+                    data-hx-target="#main"
+                    data-hx-select="#content"
+                    data-hx-get="/images/{{instance.image_uuid}}"
+                    href="/images/{{instance.image_uuid}}">
+                    {{instance.image_uuid}}
+                  </a>
+                </div>
             </div>
+          </td>
+          <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+            {% if instance.hvm %}
+              {{instance.cpu}}
+            {% else %}
+                {{instance.cpu * 100.0 }}
+            {% endif %}
+            <span class="text-xs text-gray-500">
+              {% if instance.hvm %}
+                vCPUs
+              {% else %}
+                Shares
+              {% endif %}
+            </span>
           </td>
           <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{instance.ram}}</td>
           <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{instance.disk_usage|mib_to_gib}}</td>

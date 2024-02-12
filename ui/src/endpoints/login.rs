@@ -11,6 +11,7 @@
 use crate::endpoints::{to_internal_error, Context};
 use crate::session::Session;
 
+use crate::exec::PingResponse;
 use askama::Template;
 use dropshot::{
     endpoint, HttpError, HttpResponseTemporaryRedirect, RequestContext,
@@ -24,6 +25,8 @@ use serde::{Deserialize, Serialize};
 #[template(path = "login.j2")]
 struct LoginTemplate<'a> {
     message: Option<&'a str>,
+    executor: bool,
+    vminfod: bool,
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -62,7 +65,11 @@ pub async fn post_index(
         ctx.context().client.warm_cache().await.map_err(to_internal_error)?;
         return Session::create(&ctx, user);
     }
-    let login = LoginTemplate { message: Some("Invalid username or password") };
+    let login = LoginTemplate {
+        message: Some("Invalid username or password"),
+        executor: true,
+        vminfod: true,
+    };
     let result = login.render().map_err(to_internal_error)?;
     Ok(Response::builder().status(StatusCode::FORBIDDEN).body(result.into())?)
 }
@@ -73,9 +80,11 @@ method = GET,
 path = "/login"
 }]
 pub async fn get_index(
-    _: RequestContext<Context>,
+    ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    let login = LoginTemplate { message: None };
+    let PingResponse { executor, vminfod } =
+        ctx.context().client.ping().await.map_err(to_internal_error)?;
+    let login = LoginTemplate { message: None, executor, vminfod };
     let result = login.render().map_err(to_internal_error)?;
     Ok(Response::builder()
         .status(StatusCode::OK)

@@ -62,6 +62,9 @@ async fn main() -> Result<(), String> {
     api.register(endpoints::login::post_index)?;
     api.register(endpoints::login::get_logout)?;
 
+    // /ping
+    api.register(endpoints::get_ping)?;
+
     // /dashboard
     api.register(endpoints::dashboard::get_index)?;
 

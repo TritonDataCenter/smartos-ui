@@ -3,76 +3,119 @@
 {% block title %}{{title}}{% endblock %}
 {% block content %}
 <div id="content">
-  <div>
-    <table class="mt-6 w-full whitespace-nowrap text-left">
-      <colgroup>
-        <col class="w-full sm:w-4/12">
-        <col class="lg:w-1/12">
-        <col class="lg:w-4/12">
-        <col class="lg:w-2/12">
-        <col class="lg:w-2/12">
-      </colgroup>
-      <thead class="border-b border-white/10 text-sm leading-6 text-white">
-        <tr>
-          <th scope="col" class="py-2 pl-4 pr-8 font-semibold sm:pl-6 lg:pl-8">Name</th>
-          <th scope="col" class="hidden py-2 pl-0 pr-4 text-right font-semibold sm:table-cell sm:pr-6 lg:pr-8">UUID</th>
-          <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold sm:table-cell">Version</th>
-          <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">State</th>
-          <th scope="col" class="hidden py-2 pl-0 pr-8 font-semibold md:table-cell lg:pr-20">Type</th>
-          <th scope="col" class="py-2 pl-0 pr-4 text-right font-semibold sm:pr-8 sm:text-left lg:pr-20">OS</th>
-          <th scope="col" class="py-2 pl-0 pr-4 text-right font-semibold sm:pr-8 sm:text-left lg:pr-20"></th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-white/5">
-        {% for image in images %}
-        <tr class="hover:bg-gray-800 cursor-pointer">
-          <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
-            <div class="flex items-center gap-x-4">
-              <div class="truncate text-sm font-medium leading-6 text-white">{{image.manifest.name}}</div>
-            </div>
-          </td>
-          <td class="hidden py-4 pl-0 pr-4 text-right text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
-            <time datetime="2023-01-23T11:00">{{image.manifest.uuid}}</time>
-          </td>
-          <td class="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8">
-            <div class="flex gap-x-3">
-              <div class="font-mono text-sm leading-6 text-gray-400">{{image.manifest.version}}</div>
-            </div>
-          </td>
-          <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.state}}</td>
-          <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.type}}</td>
-          <td class="py-4 pl-0 pr-4 text-sm leading-6 sm:pr-8 lg:pr-20">
-            <div class="flex items-center justify-end gap-x-2 sm:justify-start">
-              <div class="hidden text-white sm:block">{{image.manifest.os}}</div>
-            </div>
-          </td>
-          <td>
-            <form
-              method="POST"
-              data-hx-post="/import/{{image.manifest.uuid}}"
-              action="/import/{{image.manifest.uuid}}">
-              <input type="hidden" name="url" value="{{image.source}}" />
-              <input type="hidden" name="name" value="{{image.manifest.name}}" />
-              <input type="hidden" name="version" value="{{image.manifest.version}}" />
-              <input type="hidden" name="type" value="{{image.manifest.type}}" />
-              <input type="hidden" name="os" value="{{image.manifest.os}}" />
-              <div>
-                <div class="htmx-indicator" id="loader-{{image.manifest.uuid}}">{% call icons::loading("h-6 w-6") %}</div>
-                <button
-                  type="submit"
-                  data-hx-disabled-elt="this"
-                  data-hx-indicator="#loader-{{image.manifest.uuid}}"
-                  class="btn btn-primary">
-                  {% call icons::import("h-6 w-6 inline") %}
-                </button>
-              </div>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+
+  <header class="top-0 z-40 flex h-18 shrink-0 items-center gap-x-6 border-b border-white/10 bg-gray-900 px-4 shadow-sm sm:px-6 lg:px-8">
+    <h1 class="text-base font-semibold leading-7 text-xl text-white">
+      {% call icons::import("inline w-8 h-8") %}
+      <span class="align-middle pl-2">Available Images</span>
+    </h1>
+    <div class="flex flex-1 items-center justify-end gap-x-6 mb-10 my-10">
+      <a
+        href="/import"
+        data-hx-get="/import"
+        data-hx-target="#main"
+        data-hx-select="#content"
+        data-hx-indicator="#import-loader"
+        data-hx-disabled-elt="this"
+        title="Import Image"
+        class="btn btn-primary">
+          <span class="htmx-indicator" id="import-loader">
+            <span class="loader-icon">
+              {% call icons::loading("h-6 w-6 inline pr-1") %}
+            </span>
+            <span class="default-icon">
+              {% call icons::import("h-6 w-6 inline") %}
+            </span>
+          </span>
+          <span class="align-middle btn-text">Import</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="px-4 sm:px-6 lg:px-8">
+      <div class="flow-root">
+        <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
+          <div class="inline-block min-w-full py-2 align-middle">
+            <table class="w-full whitespace-nowrap text-left">
+              <colgroup>
+                <col class="w-full sm:w-4/12">
+                <col class="lg:w-1/12">
+                <col class="lg:w-4/12">
+                <col class="lg:w-2/12">
+                <col class="lg:w-2/12">
+              </colgroup>
+              <thead class="border-b border-white/10 text-sm leading-6 text-white">
+                <tr class="sticky-header">
+                  <th scope="col" class="sticky top-0 z-10 py-2 pl-4 pr-8 sm:pl-6 lg:pl-8 font-semibold sm:table-cell bg-gray-900">Name</th>
+                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold sm:table-cell bg-gray-900">UUID</th>
+                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold sm:table-cell bg-gray-900">Version</th>
+                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">State</th>
+                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">Type</th>
+                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold md:table-cell bg-gray-900">OS</th>
+                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold md:table-cell bg-gray-900"></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5">
+                {% for image in images %}
+                <tr
+                  class="hover:bg-gray-800">
+                  <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
+                    <div class="flex items-center gap-x-4">
+                      <div class="truncate text-sm font-medium leading-6 text-white">{{image.manifest.name}}</div>
+                    </div>
+                  </td>
+                  <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
+                    {{image.manifest.uuid}}
+                  </td>
+                  <td class="py-4 pl-0 pr-4 sm:table-cell sm:pr-8">
+                    <div class="flex gap-x-3">
+                      <div class="text-sm leading-6 text-gray-400">{{image.manifest.version}}</div>
+                    </div>
+                  </td>
+                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.state}}</td>
+                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.type|format_name}}</td>
+                  <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:pr-8 lg:pr-20">{{image.manifest.os|format_name}}</td>
+                  <td class="py-4 pl-0 pr-4 text-sm leading-6 sm:pr-8 lg:pr-20">
+                    <form
+                      method="POST"
+                      data-hx-post="/import/{{image.manifest.uuid}}"
+                      action="/import/{{image.manifest.uuid}}">
+                      <input type="hidden" name="url" value="{{image.source}}" />
+                      <input type="hidden" name="name" value="{{image.manifest.name}}" />
+                      <input type="hidden" name="version" value="{{image.manifest.version}}" />
+                      <input type="hidden" name="type" value="{{image.manifest.type}}" />
+                      <input type="hidden" name="os" value="{{image.manifest.os}}" />
+                      <div>
+                        <button
+                          type="submit"
+                          data-hx-disabled-elt="this"
+                          data-hx-indicator="#import-loader-{{image.manifest.uuid}}"
+                          class="btn btn-primary"
+                          title="Import this image"
+                          class="btn btn-primary">
+                            <span class="htmx-indicator" id="import-loader-{{image.manifest.uuid}}">
+                              <span class="loader-icon">
+                                {% call icons::loading("h-6 w-6 inline pr-1") %}
+                              </span>
+                              <span class="default-icon">
+                                {% call icons::import("h-6 w-6 inline") %}
+                              </span>
+                            </span>
+                        </button>
+                      </div>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
 </div>
 
 

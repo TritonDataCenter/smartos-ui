@@ -4,57 +4,76 @@
 {% block scripts %}{% endblock %}
 {% block body %}
 <body class="h-full">
-    <div class="content">
-        <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-            <div class="mt-10 sm:mx-auto sm:max-w-sm flex items-center">
-                {% call icons::smartos("h-10 w-10") %}
-                <h1 class="text-white pl-4 text-3xl">SmartOS</h1>
-            </div>
-            {% if message.is_some() %}
-            <div class="rounded-md bg-white p-4 mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                    {% call icons::error("h-6 w-6 text-red-500") %}
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-red-800">{{message.unwrap_or_default()}}</h3>
-                    </div>
+    {% if !executor || !vminfod %}
+        <div class="rounded-md bg-white p-4 mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                {% call icons::error("h-6 w-6 text-red-500") %}
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">
+                        {#
+                            TODO: Handle this automatically with hx-trigger="every ..."
+                        #}
+                        Backend services not yet ready.
+                        Refresh the page and try again.
+                    </h3>
                 </div>
             </div>
-            {%  endif %}
-            <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                <form id="login" action="/login" class="space-y-6" method="POST">
-                    <div>
-                        <label for="user" class="block text-sm font-medium leading-6 text-white">User</label>
-                        <div class="mt-2">
-                            <input id="user" name="user" type="text" required class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
+        </div>
+    {% else %}
+        <div class="content">
+            <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+                <div class="mt-10 sm:mx-auto sm:max-w-sm flex items-center">
+                    {% call icons::smartos("h-10 w-10") %}
+                    <h1 class="text-white pl-4 text-3xl">SmartOS</h1>
+                </div>
+                {% if message.is_some() %}
+                <div class="rounded-md bg-white p-4 mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                        {% call icons::error("h-6 w-6 text-red-500") %}
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">{{message.unwrap_or_default()}}</h3>
                         </div>
                     </div>
-                    <div>
-                        <div class="flex items-center justify-between">
-                            <label for="password" class="block text-sm font-medium leading-6 text-white">Password</label>
+                </div>
+                {%  endif %}
+                <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+                    <form id="login" action="/login" class="space-y-6" method="POST">
+                        <div>
+                            <label for="user" class="block text-sm font-medium leading-6 text-white">User</label>
+                            <div class="mt-2">
+                                <input id="user" name="user" type="text" required class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
+                            </div>
                         </div>
-                        <div class="mt-2">
-                            <input id="password" name="password" type="password" required class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <label for="password" class="block text-sm font-medium leading-6 text-white">Password</label>
+                            </div>
+                            <div class="mt-2">
+                                <input id="password" name="password" type="password" required class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <button type="submit" class="flex w-full justify-center btn btn-primary">Sign in</button>
-                    </div>
-                </form>
+                        <div>
+                            <button type="submit" class="flex w-full justify-center btn btn-primary">Sign in</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-    {% if crate::DEBUG %}
-    <script type="application/javascript">
-    document.addEventListener('DOMContentLoaded', () => {
-        if (document.location.host === 'localhost:8080') {
-            document.getElementById('user').value = 'root'
-            document.getElementById('password').value = 'root'
-            document.getElementById('login').submit()
-        }
-    })
-    </script>
+        {% if crate::DEBUG %}
+        <script type="application/javascript">
+        document.addEventListener('DOMContentLoaded', () => {
+            if (document.location.host === 'localhost:8080') {
+                document.getElementById('user').value = 'root'
+                document.getElementById('password').value = 'root'
+                document.getElementById('login').submit()
+            }
+        })
+        </script>
+        {%  endif %}
     {%  endif %}
 </body>
 {% endblock %}

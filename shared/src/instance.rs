@@ -50,12 +50,14 @@ pub struct Generic {
     pub quota: u64,
     pub max_physical_memory: u64,
     pub resolvers: Option<Vec<String>>,
+    pub cpu_shares: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct HVM {
     pub ram: u64,
     pub disks: Vec<Disk>,
+    pub vcpus: u64,
 }
 
 impl HVM {
@@ -127,6 +129,7 @@ pub struct InstanceView {
     pub disk_usage: u64,
     pub hvm: bool,
     pub image_uuid: Uuid,
+    pub cpu: f32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -171,6 +174,7 @@ impl TryFrom<KVM> for InstanceView {
             state: value.generic.state,
             disk_usage: value.hvm.get_disk_usage(),
             image_uuid: value.hvm.get_boot_image_uuid(),
+            cpu: value.hvm.vcpus as f32,
         })
     }
 }
@@ -188,6 +192,7 @@ impl TryFrom<Bhyve> for InstanceView {
             state: value.generic.state,
             disk_usage: value.hvm.get_disk_usage(),
             image_uuid: value.hvm.get_boot_image_uuid(),
+            cpu: value.hvm.vcpus as f32,
         })
     }
 }
@@ -205,6 +210,7 @@ impl TryFrom<JoyentMinimal> for InstanceView {
             state: value.generic.state,
             disk_usage: value.generic.quota * 1024,
             image_uuid: value.native.image_uuid,
+            cpu: value.generic.cpu_shares as f32 / 100.0,
         })
     }
 }
@@ -222,6 +228,7 @@ impl TryFrom<Joyent> for InstanceView {
             state: value.generic.state,
             disk_usage: value.generic.quota * 1024,
             image_uuid: value.native.image_uuid,
+            cpu: value.generic.cpu_shares as f32 / 100.0,
         })
     }
 }
@@ -239,6 +246,7 @@ impl TryFrom<LX> for InstanceView {
             state: value.generic.state,
             disk_usage: value.generic.quota * 1024,
             image_uuid: value.native.image_uuid,
+            cpu: value.generic.cpu_shares as f32 / 100.0,
         })
     }
 }

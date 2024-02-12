@@ -19,13 +19,13 @@ use std::collections::HashMap;
 use std::fmt;
 use std::sync::{Arc, Mutex};
 
-use crate::exec::Client;
+use crate::exec::{Client, PingResponse};
 use crate::session::{Session, UserSession};
 use smartos_shared::config::Config;
 
 use dropshot::{
-    endpoint, http_response_see_other, HttpError, HttpResponseSeeOther,
-    RequestContext,
+    endpoint, http_response_see_other, HttpError, HttpResponseOk,
+    HttpResponseSeeOther, RequestContext,
 };
 use http::response::Builder;
 use hyper::{Body, Response, StatusCode};
@@ -225,4 +225,16 @@ pub async fn get_index(
     let location =
         if Session::is_valid(&ctx) { "/dashboard" } else { "/login" };
     http_response_see_other(location.to_string())
+}
+
+#[endpoint {
+method = GET,
+path = "/ping"
+}]
+pub async fn get_ping(
+    ctx: RequestContext<Context>,
+) -> Result<HttpResponseOk<PingResponse>, HttpError> {
+    let response =
+        ctx.context().client.ping().await.map_err(to_internal_error)?;
+    Ok(HttpResponseOk(response))
 }

@@ -17,7 +17,7 @@ pub fn format_name<S: Display>(s: S) -> Result<String> {
     let found = match name.as_str() {
         "linux" => String::from("Linux"),
         "smartos" => String::from("SmartOS"),
-        "zvol" => String::from("ZVol"),
+        "zvol" => String::from("ZFS Volume"),
         "lx-dataset" => String::from("LX Dataset"),
         "zone-dataset" => String::from("Zone Dataset"),
         _ => String::new(),

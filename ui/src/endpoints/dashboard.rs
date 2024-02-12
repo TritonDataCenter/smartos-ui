@@ -13,6 +13,7 @@ use crate::endpoints::{
     htmx_response, redirect_login, to_internal_error, Context,
 };
 use crate::session::Session;
+
 use smartos_shared::sysinfo::Sysinfo;
 
 use askama::Template;

@@ -31,6 +31,11 @@ const cmd = {
     vm.ram = vm.ram || vm.max_physical_memory || 256
     vm.state = 'running'
     vm.quota = (vm.quota === null || vm.quota === undefined) ? 0 : vm.quota
+    vm.cpu_shares = vm.cpu_shares || 100
+    if (!vm.brand) {
+      console.error('{"bad_brand": "undefined"}')
+      process.exit(1)
+    }
     switch (vm.brand) {
       case 'joyent':
       case 'joyent-minimal':
@@ -42,6 +47,7 @@ const cmd = {
         break
       case 'bhyve':
       case 'kvm':
+        vm.vcpus = vm.vcpus || 1
         vm.max_physical_memory = vm.max_physical_memory || vm.ram + 1024
         vm.disks.forEach(d => {
           d.image_size = getImageSize(d.image_uuid)

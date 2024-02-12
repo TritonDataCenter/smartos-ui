@@ -8,11 +8,13 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
+use crate::endpoints::filters;
 use crate::endpoints::{
     htmx_response, redirect_login, to_internal_error, Context, HXLocation,
     PathParams,
 };
 use crate::session::Session;
+
 use smartos_shared::image::{Image, ImageImportParams};
 
 use askama::Template;

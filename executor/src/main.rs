@@ -47,6 +47,8 @@ async fn main() -> Result<(), String> {
     api.register(endpoints::instance::post_validate_create)?;
     api.register(endpoints::instance::delete_by_id)?;
     api.register(endpoints::nictag::get_index)?;
+    api.register(endpoints::get_ping)?;
+
     info!(log, "{} v{}", name, version);
 
     let server = HttpServerStarter::new(

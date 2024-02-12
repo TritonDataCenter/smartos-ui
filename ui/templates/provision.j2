@@ -429,29 +429,47 @@
 
   <div id="validate-result" class="mt-6"></div>
 
-  <div class="mt-6 flex items-center justify-end gap-x-6">
-    <div class="htmx-indicator" id="loader">{% call icons::loading("h-6 w-6") %}</div>
+  <div class="mt-6 mb-6 flex items-center justify-end gap-x-6">
+
     <button
       id="validate-button"
       type="button"
       data-hx-disabled-elt="this"
-      data-hx-indicator="#loader"
+      data-hx-indicator="#validate-loader"
       data-hx-post="/provision/validate"
       data-hx-target="#validate-result"
       data-hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
-      class="text-sm font-semibold leading-6 text-white">
-      Validate
+      class="btn btn-clear">
+      <span class="htmx-indicator" id="validate-loader">
+        <span class="loader-icon">
+          {% call icons::loading("h-6 w-6 inline pr-1") %}
+        </span>
+        <span class="default-icon">
+          {% call icons::doc_check("h-6 w-6 inline") %}
+        </span>
+      </span>
+      <span class="align-middle btn-text">Validate</span>
     </button>
+
     <button
       id="create-button"
       type="button"
       data-hx-disabled-elt="this"
-      data-hx-indicator="#loader"
+      data-hx-indicator="#create-loader"
       data-hx-post="/provision"
       data-hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
       class="btn btn-primary">
-    Create
+      <span class="htmx-indicator" id="create-loader">
+        <span class="loader-icon">
+          {% call icons::loading("h-6 w-6 inline pr-1") %}
+        </span>
+        <span class="default-icon">
+          {% call icons::plus_circle("h-6 w-6 inline") %}
+        </span>
+      </span>
+      <span class="align-middle btn-text">Create</span>
     </button>
+
   </div>
 </div>
 {% endblock %}

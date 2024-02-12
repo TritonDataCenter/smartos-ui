@@ -16,12 +16,12 @@ use std::sync::{Arc, Mutex};
 use smartos_shared::config::Config;
 use time::{Duration, OffsetDateTime};
 
-use dropshot::{HttpError, RequestContext};
+use dropshot::{endpoint, HttpError, RequestContext};
 use hyper::{Body, Response, StatusCode};
 use schemars::JsonSchema;
 use serde::Deserialize;
 use slog::{debug, error};
-use smartos_shared::http_server::to_internal_error;
+use smartos_shared::http_server::{empty_ok, to_internal_error};
 use smartos_shared::image::Image;
 use tokio::process::Command;
 use uuid::Uuid;
@@ -178,4 +178,14 @@ where
         .status(StatusCode::OK)
         .body(stdout.into())
         .map_err(to_internal_error)
+}
+
+#[endpoint {
+method = GET,
+path = "/ping"
+}]
+pub async fn get_ping(
+    _: RequestContext<Context>,
+) -> Result<Response<Body>, HttpError> {
+    empty_ok()
 }

@@ -3,32 +3,41 @@
 {% block title %}{{title}}{% endblock %}
 {% block content %}
 <div id="content">
-  <!-- Sticky search header -->
-  <header class="top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/5 bg-gray-900 px-4 shadow-sm sm:px-6 lg:px-8">
-    <h1 class="text-base font-semibold leading-7 text-white">Images</h1>
+
+  <header class="top-0 z-40 flex h-18 shrink-0 items-center gap-x-6 border-b border-white/10 bg-gray-900 px-4 shadow-sm sm:px-6 lg:px-8">
+    <h1 class="text-base font-semibold leading-7 text-xl text-white">
+      {% call icons::box("inline w-8 h-8") %}
+      <span class="align-middle pl-2">Installed Images</span>
+    </h1>
     <div class="flex flex-1 items-center justify-end gap-x-6 mb-10 my-10">
-      <div class="htmx-indicator" id="loader">{% call icons::loading("h-6 w-6") %}</div>
       <a
         href="/import"
         data-hx-get="/import"
         data-hx-target="#main"
         data-hx-select="#content"
-        data-hx-indicator="#loader"
+        data-hx-indicator="#import-loader"
+        data-hx-disabled-elt="this"
         title="Import Image"
         class="btn btn-primary">
-          {% call icons::import("h-6 w-6 inline") %}
-          <span class="align-middle">Import</span>
+          <span class="htmx-indicator" id="import-loader">
+            <span class="loader-icon">
+              {% call icons::loading("h-6 w-6 inline pr-1") %}
+            </span>
+            <span class="default-icon">
+              {% call icons::import("h-6 w-6 inline") %}
+            </span>
+          </span>
+          <span class="align-middle btn-text">Import</span>
       </a>
     </div>
   </header>
 
   <main>
-
     <div class="px-4 sm:px-6 lg:px-8">
-      <div class="mt-8 flow-root">
+      <div class="flow-root">
         <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
           <div class="inline-block min-w-full py-2 align-middle">
-            <table class="mt-6 w-full whitespace-nowrap text-left">
+            <table class="w-full whitespace-nowrap text-left">
               <colgroup>
                 <col class="w-full sm:w-4/12">
                 <col class="lg:w-1/12">
@@ -37,8 +46,8 @@
                 <col class="lg:w-2/12">
               </colgroup>
               <thead class="border-b border-white/10 text-sm leading-6 text-white">
-                <tr>
-                  <th scope="col" class="sticky top-0 z-10 py-2 pl-4 pr-8 font-semibold sm:table-cell bg-gray-900">Name</th>
+                <tr class="sticky-header">
+                  <th scope="col" class="sticky top-0 z-10 py-2 pl-4 pr-8 sm:pl-6 lg:pl-8 font-semibold sm:table-cell bg-gray-900">Name</th>
                   <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold sm:table-cell bg-gray-900">UUID</th>
                   <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold sm:table-cell bg-gray-900">Version</th>
                   <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">State</th>
@@ -67,12 +76,8 @@
                     </div>
                   </td>
                   <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.state}}</td>
-                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.type}}</td>
-                  <td class="py-4 pl-0 pr-4 text-sm leading-6 sm:pr-8 lg:pr-20">
-                    <div class="flex items-center justify-end gap-x-2 sm:justify-start">
-                      <div class="text-white sm:block">{{image.manifest.os}}</div>
-                    </div>
-                  </td>
+                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.type|format_name}}</td>
+                  <td class="py-4 pl-0 pr-4 text-sm text-gray-400 leading-6 sm:pr-8 lg:pr-20">{{image.manifest.os|format_name}}</td>
                 </tr>
                 {% endfor %}
               </tbody>

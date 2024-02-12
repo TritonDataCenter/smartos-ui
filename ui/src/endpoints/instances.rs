@@ -103,6 +103,7 @@ pub async fn delete_by_id(
 pub struct InstancesTemplate<'a> {
     total_ram: u64,
     total_quota: u64,
+    total_cpu: f32,
     title: &'a str,
     instances: Vec<InstanceView>,
 }
@@ -125,9 +126,11 @@ pub async fn get_index(
 
         let total_ram = instances.iter().fold(0, |acc, i| i.ram + acc);
         let total_quota = instances.iter().fold(0, |acc, i| i.disk_usage + acc);
+        let total_cpu = instances.iter().fold(0.0, |acc, i| i.cpu + acc);
         let template = InstancesTemplate {
             total_ram,
             total_quota,
+            total_cpu,
             title: "Instances",
             instances,
         };
