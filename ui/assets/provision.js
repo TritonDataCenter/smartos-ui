@@ -8,6 +8,9 @@ import {
   oneDark
 } from '@tpaul/codemirror6-json-rolledup'
 
+// HTMLX needs access to the editors
+window.editors = {}
+
 // Will interrogate input types for a given <form> and attempt to massage
 // them into basic JSON types.
 // A data attr named data-enctype="TYPE" can be used on any element with a name
@@ -45,7 +48,6 @@ function encodeFormParameters ($targets, props = {}) {
   return props
 }
 
-window.editors = {}
 window.updateEditors = () => {
   const editors = window.editors
   const $form = $('#content form')
@@ -56,29 +58,46 @@ window.updateEditors = () => {
   const isHvm = (['bhyve', 'kvm'].indexOf(props.brand) !== -1)
   const nic = {}
   const nicTag = $('[name=nic_tag').value
-  const nicSetup = $('[name=nic_setup').value
-
-  if (nicSetup === 'manual') {
-    const ips = $('[name=nic_ips').value
-      .split(',')
-      .filter(i => i)
-      .map(i => i.trim())
-    if (ips.length) {
-      nic.ips = ips
-    }
-    const gateways = $('[name=nic_gateways').value
-      .split(',')
-      .filter(i => i)
-      .map(i => i.trim())
-    if (gateways.length) {
-      nic.gateways = gateways
-    }
-  } else if (nicSetup === 'dhcp') {
-    nic.ips = ['dhcp', 'addrconf']
-  }
+  const $ipv4Setup = $('[name=ipv4_setup')
+  const $ipv6Setup = $('[name=ipv6_setup')
 
   if (nicTag) {
     nic.nic_tag = nicTag
+    nic.ips = []
+  }
+
+  if (nicTag && $ipv4Setup && $ipv4Setup.value === 'static') {
+    let ip = $('[name=ipv4_ip').value.trim()
+    const gateway = $('[name=ipv4_gateway').value.trim()
+    const prefix = $('[name=ipv4_prefix').value.trim()
+
+    if (ip) {
+      if (prefix) {
+        ip = `${ip}/${prefix}`
+      }
+      nic.ips.push(ip)
+    }
+
+    if (gateway) {
+      nic.gateways = [gateway]
+    }
+  } else if (nicTag && $ipv4Setup && $ipv4Setup.value === 'auto') {
+    nic.ips = ['dhcp', 'addrconf']
+  }
+
+  if (nicTag && $ipv6Setup && $ipv6Setup.value === 'static') {
+    let ip = $('[name=ipv6_ip').value.trim()
+    const prefix = $('[name=ipv6_prefix').value.trim()
+    if (ip) {
+      if (prefix) {
+        ip = `${ip}/${prefix}`
+      }
+      nic.ips.push(ip)
+    }
+  } else if (nicTag && $ipv6Setup && $ipv6Setup.value === 'auto') {
+    if (nic.ips.indexOf('dhcp') === -1) {
+      nic.ips.push(...['dhcp', 'addrconf'])
+    }
   }
 
   if (Object.keys(nic).length) {

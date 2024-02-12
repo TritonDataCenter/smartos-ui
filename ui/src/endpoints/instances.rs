@@ -151,9 +151,13 @@ pub struct InstanceCreateTemplate {
     ram: String,
     quota: String,
     nic_tag: String,
-    nic_setup: String,
-    nic_ips: String,
-    nic_gateways: String,
+    ipv4_setup: String,
+    ipv4_ip: String,
+    ipv4_gateway: String,
+    ipv4_prefix: String,
+    ipv6_setup: String,
+    ipv6_ip: String,
+    ipv6_prefix: String,
     resolvers: String,
     vcpus: String,
 }
@@ -173,11 +177,19 @@ pub struct ProvisionQuery {
     #[serde(default)]
     nic_tag: String,
     #[serde(default)]
-    nic_setup: String,
+    ipv4_setup: String,
     #[serde(default)]
-    nic_ips: String,
+    ipv4_ip: String,
     #[serde(default)]
-    nic_gateways: String,
+    ipv4_prefix: String,
+    #[serde(default)]
+    ipv4_gateway: String,
+    #[serde(default)]
+    ipv6_setup: String,
+    #[serde(default)]
+    ipv6_ip: String,
+    #[serde(default)]
+    ipv6_prefix: String,
     #[serde(default)]
     resolvers: String,
     #[serde(default)]
@@ -203,9 +215,13 @@ pub async fn get_provision(
             ram,
             quota,
             nic_tag,
-            nic_setup,
-            nic_ips,
-            nic_gateways,
+            ipv4_setup,
+            ipv4_ip,
+            ipv4_prefix,
+            ipv4_gateway,
+            ipv6_setup,
+            ipv6_ip,
+            ipv6_prefix,
             resolvers,
             vcpus,
         } = query.into_inner();
@@ -261,9 +277,13 @@ pub async fn get_provision(
             ram,
             quota,
             nic_tag,
-            nic_setup,
-            nic_ips,
-            nic_gateways,
+            ipv4_setup,
+            ipv4_ip,
+            ipv4_gateway,
+            ipv4_prefix,
+            ipv6_setup,
+            ipv6_ip,
+            ipv6_prefix,
             resolvers,
             vcpus,
         };
