@@ -92,20 +92,8 @@
           <td class="hidden py-4 pl-0 pr-4 text-right text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
             <time datetime="2023-01-23T11:00">{{instance.brand}}</time>
           </td>
-          <td class="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8">
-            <div class="flex gap-x-3">
-                <div class="font-mono text-sm leading-6 text-gray-400">
-                  <a
-                    title="View image details"
-                    class="hover:underline hover:decoration-solid"
-                    data-hx-target="#main"
-                    data-hx-select="#content"
-                    data-hx-get="/images/{{instance.image_uuid}}"
-                    href="/images/{{instance.image_uuid}}">
-                    {{instance.image_uuid}}
-                  </a>
-                </div>
-            </div>
+          <td class="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
+              {{instance.image_uuid}}
           </td>
           <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
             {% if instance.hvm %}

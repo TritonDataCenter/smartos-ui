@@ -4,7 +4,7 @@
 {% block content %}
 <div id="content">
 
-  <header class="top-0 z-40 flex h-18 shrink-0 items-center gap-x-6 border-b border-white/10 bg-gray-900 px-4 shadow-sm sm:px-6 lg:px-8">
+  <header class="header-bg top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/10 bg-gray-900 px-4 shadow-sm sm:px-6 lg:px-8">
     <h1 class="text-base font-semibold leading-7 text-xl text-white">
       {% call icons::import("inline w-8 h-8") %}
       <span class="align-middle pl-2">Available Images</span>
@@ -91,9 +91,8 @@
                           type="submit"
                           data-hx-disabled-elt="this"
                           data-hx-indicator="#import-loader-{{image.manifest.uuid}}"
-                          class="btn btn-primary"
                           title="Import this image"
-                          class="btn btn-primary">
+                          class="btn btn-clear">
                             <span class="htmx-indicator" id="import-loader-{{image.manifest.uuid}}">
                               <span class="loader-icon">
                                 {% call icons::loading("h-6 w-6 inline pr-1") %}
