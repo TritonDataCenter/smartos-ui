@@ -5,13 +5,22 @@ const { readFileSync, writeFileSync, unlinkSync } = require('node:fs')
 
 const root = join(__dirname, '..', 'data', 'db', 'vm')
 
-function getPayload () {
+function fatal (msg) {
+  console.error(msg)
+  process.exit(1)
+}
+
+function getPayload (uuid) {
   try {
-    return JSON.parse(readFileSync('/dev/stdin', 'utf-8'))
+    const file = uuid ? join(root, `${uuid}.json`) : '/dev/stdin'
+    return JSON.parse(readFileSync(file, 'utf-8'))
   } catch (e) {
-    console.error(e)
-    process.exit(1)
+    fatal(e)
   }
+}
+
+function setPayload (vm) {
+  writeFileSync(join(root, `${vm.uuid}.json`), JSON.stringify(vm))
 }
 
 function getImageSize (uuid) {
@@ -20,8 +29,7 @@ function getImageSize (uuid) {
     const img = JSON.parse(readFileSync(join(imgRoot, `${uuid}.json`), 'utf-8'))
     return img.manifest.image_size
   } catch (e) {
-    console.error(e)
-    process.exit(1)
+    fatal(e)
   }
 }
 
@@ -33,8 +41,7 @@ const cmd = {
     vm.quota = (vm.quota === null || vm.quota === undefined) ? 0 : vm.quota
     vm.cpu_shares = vm.cpu_shares || 100
     if (!vm.brand) {
-      console.error('{"bad_brand": "undefined"}')
-      process.exit(1)
+      fatal('{"bad_brand": "undefined"}')
     }
     switch (vm.brand) {
       case 'joyent':
@@ -60,17 +67,34 @@ const cmd = {
   validate: ([subcmd]) => {
     const { brand } = getPayload()
     if (!brand) {
-      console.error('{"bad_brand": "undefined"}')
-      process.exit(1)
+      fatal('{"bad_brand": "undefined"}')
     }
     if (subcmd === 'create') {
-      // vmadm writes success message to stderr
       return console.error(`VALID 'create' payload for ${brand} brand VMs.`)
     }
-    console.error(`${subcmd} is currently unsupported in the mock scripts`)
-    process.exit(1)
+    fatal(`${subcmd} is currently unsupported in the mock scripts`)
   },
-  delete: ([uuid]) => unlinkSync(join(root, `${uuid}.json`))
+  delete: ([uuid]) => unlinkSync(join(root, `${uuid}.json`)),
+  start: ([uuid]) => {
+    const vm = getPayload(uuid)
+    if (vm.state === 'running') {
+      return console.error(`Unable to start VM ${uuid}: VM ${uuid} is already 'running'`)
+    } else {
+      vm.state = 'running'
+    }
+    setPayload(vm)
+    console.error(`Successfully started VM ${uuid}`)
+  },
+  stop: ([uuid]) => {
+    const vm = getPayload(uuid)
+    if (vm.state === 'stopped') {
+      return console.error(`VM ${uuid} is already not 'running' (currently: stopped)`)
+    } else {
+      vm.state = 'stopped'
+    }
+    setPayload(vm)
+    console.error(`Successfully completed stop for VM ${uuid}`)
+  }
 }
 
 cmd[process.argv[2]](process.argv.slice(3))

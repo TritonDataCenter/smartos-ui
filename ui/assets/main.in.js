@@ -66,14 +66,15 @@ document.addEventListener('DOMContentLoaded', () => {
   htmx.on('htmx:beforeRequest', event => {
     const { detail: { etc: { values } } } = event
     if (values) {
-      const { longRunning, allowedPaths, notification, alwaysNotify } = values
+      const { allowedPaths, notification } = values
       const { pathname } = document.location
-      if (longRunning && allowedPaths.indexOf(pathname) === -1) {
+
+      // Don't redirect, just show notification
+      if (allowedPaths.indexOf(pathname) === -1) {
         event.preventDefault()
-        return notify(notification)
-      } else if (longRunning && alwaysNotify) {
-        notify(notification)
       }
+
+      notify(notification)
     }
   })
 

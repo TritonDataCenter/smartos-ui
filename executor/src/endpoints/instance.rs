@@ -10,7 +10,7 @@
 
 use std::process::Stdio;
 
-use crate::endpoints::{Context, PathParams};
+use crate::endpoints::{exec, Context, PathParams};
 use smartos_shared::instance::{
     InstancePayload, InstanceValidateResponse, PayloadContainer,
 };
@@ -139,18 +139,48 @@ method = DELETE,
 path = "/instance/{id}",
 }]
 pub async fn delete_by_id(
-    _: RequestContext<Context>,
+    ctx: RequestContext<Context>,
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
     let req = path_params.into_inner();
+    let (_, stderr) =
+        exec(&ctx, "vmadm", ["delete", &req.id.to_string()]).await?;
+    Response::builder()
+        .status(StatusCode::OK)
+        .body(stderr.into())
+        .map_err(to_internal_error)
+}
 
-    let _ = Command::new("vmadm")
-        .args(["delete", &req.id.to_string()])
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .expect("vmadm command failed to start");
+#[endpoint {
+method = POST,
+path = "/instance/{id}/stop",
+}]
+pub async fn stop_by_id(
+    ctx: RequestContext<Context>,
+    path_params: Path<PathParams>,
+) -> Result<Response<Body>, HttpError> {
+    let req = path_params.into_inner();
+    let (_, stderr) =
+        exec(&ctx, "vmadm", ["stop", &req.id.to_string()]).await?;
+    Response::builder()
+        .status(StatusCode::OK)
+        .body(stderr.into())
+        .map_err(to_internal_error)
+}
 
-    Ok(Response::builder().status(StatusCode::OK).body(Body::empty()).unwrap())
+#[endpoint {
+method = POST,
+path = "/instance/{id}/start",
+}]
+pub async fn start_by_id(
+    ctx: RequestContext<Context>,
+    path_params: Path<PathParams>,
+) -> Result<Response<Body>, HttpError> {
+    let req = path_params.into_inner();
+    let (_, stderr) =
+        exec(&ctx, "vmadm", ["start", &req.id.to_string()]).await?;
+    Response::builder()
+        .status(StatusCode::OK)
+        .body(stderr.into())
+        .map_err(to_internal_error)
 }

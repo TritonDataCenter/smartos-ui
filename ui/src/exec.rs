@@ -115,6 +115,20 @@ impl Client {
         self.exec.delete_instance(id).await
     }
 
+    pub async fn stop_instance(
+        &self,
+        id: &Uuid,
+    ) -> Result<String, reqwest::Error> {
+        self.exec.stop_instance(id).await
+    }
+
+    pub async fn start_instance(
+        &self,
+        id: &Uuid,
+    ) -> Result<String, reqwest::Error> {
+        self.exec.start_instance(id).await
+    }
+
     pub async fn get_nictags(&self) -> Result<Vec<NicTag>, reqwest::Error> {
         self.exec.get_nictags().await
     }
@@ -287,6 +301,30 @@ impl ExecClient {
             .await?
             .error_for_status()?;
         Ok(())
+    }
+
+    pub async fn start_instance(
+        &self,
+        id: &Uuid,
+    ) -> Result<String, reqwest::Error> {
+        self.post(format!("instance/{}/start", id.as_hyphenated()).as_str())
+            .send()
+            .await?
+            .error_for_status()?
+            .text()
+            .await
+    }
+
+    pub async fn stop_instance(
+        &self,
+        id: &Uuid,
+    ) -> Result<String, reqwest::Error> {
+        self.post(format!("instance/{}/stop", id.as_hyphenated()).as_str())
+            .send()
+            .await?
+            .error_for_status()?
+            .text()
+            .await
     }
 
     pub async fn get_nictags(&self) -> Result<Vec<NicTag>, reqwest::Error> {

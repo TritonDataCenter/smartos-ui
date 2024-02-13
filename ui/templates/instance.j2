@@ -31,6 +31,31 @@
       </div>
     </div>
     <div class="mt-6 flex items-center justify-end gap-x-6">
+      {{ instance.state }}
+      {% if instance.state == "running" %}
+        <button
+          data-hx-post="/instances/{{instance.uuid}}/stop"
+          data-hx-target="#main"
+          data-hx-select="#content"
+          data-hx-confirm="Are you sure you want to stop this instance?"
+          title="Start this instance"
+          type="submit"
+          class="btn btn-amber">
+          {% call icons::stop_circle("h-6 w-6 inline") %}
+          <span class="align-middle">Stop Instance</span>
+        </button>
+      {% else %}
+        <button
+          data-hx-post="/instances/{{instance.uuid}}/start"
+          data-hx-target="#main"
+          data-hx-select="#content"
+          title="Start this instance"
+          type="submit"
+          class="btn btn-primary">
+          {% call icons::play_circle("h-6 w-6 inline") %}
+          <span class="align-middle">Start Instance</span>
+        </button>
+      {% endif %}
       <button
         data-hx-delete="/instances/{{instance.uuid}}"
         data-hx-target="#main"

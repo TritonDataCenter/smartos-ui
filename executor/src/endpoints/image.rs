@@ -42,7 +42,8 @@ pub async fn get_index(
         }
         None => {
             debug!(ctx.log, "Cache miss for \"{key}\"");
-            (exec(&ctx, "imgadm", ["list", "-j"]).await?, false)
+            let (stdout, _) = exec(&ctx, "imgadm", ["list", "-j"]).await?;
+            (stdout, false)
         }
     };
 

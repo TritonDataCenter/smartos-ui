@@ -46,6 +46,8 @@ async fn main() -> Result<(), String> {
     api.register(endpoints::instance::post_provision_index)?;
     api.register(endpoints::instance::post_validate_create)?;
     api.register(endpoints::instance::delete_by_id)?;
+    api.register(endpoints::instance::stop_by_id)?;
+    api.register(endpoints::instance::start_by_id)?;
     api.register(endpoints::nictag::get_index)?;
     api.register(endpoints::get_ping)?;
 

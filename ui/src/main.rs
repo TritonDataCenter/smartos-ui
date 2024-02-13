@@ -81,6 +81,8 @@ async fn main() -> Result<(), String> {
     api.register(endpoints::instances::get_index)?;
     api.register(endpoints::instances::get_by_id)?;
     api.register(endpoints::instances::delete_by_id)?;
+    api.register(endpoints::instances::stop_by_id)?;
+    api.register(endpoints::instances::start_by_id)?;
 
     // /provision
     api.register(endpoints::instances::get_provision)?;

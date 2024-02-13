@@ -96,7 +96,7 @@ pub async fn exec<I, S>(
     ctx: &RequestContext<Context>,
     cmd: S,
     args: I,
-) -> Result<String, HttpError>
+) -> Result<(String, String), HttpError>
 where
     I: IntoIterator<Item = S> + std::fmt::Debug,
     S: AsRef<OsStr> + std::fmt::Display,
@@ -121,7 +121,10 @@ where
         return Err(HttpError::for_internal_error(stderr));
     }
 
-    String::from_utf8(out.stdout).map_err(to_internal_error)
+    Ok((
+        String::from_utf8(out.stdout).map_err(to_internal_error)?,
+        String::from_utf8(out.stderr).map_err(to_internal_error)?,
+    ))
 }
 
 pub async fn exec_and_cache<I, S>(

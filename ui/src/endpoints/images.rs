@@ -116,9 +116,7 @@ pub async fn delete_by_id(
 
         let mut location = HXLocation::new_with_common("/images");
         location.values = Some(json!({
-            "longRunning": true,
             "allowedPaths": [format!("/images/{}", id)],
-            "alwaysNotify": true,
             "notification": {
                 "heading": "Image deletion complete",
                 "body": format!("Image {} has been deleted", id)
@@ -188,7 +186,6 @@ pub async fn post_import_index(
 
         let mut location = HXLocation::new_with_common("/images");
         location.values = Some(json!({
-            "longRunning": true,
             "allowedPaths": [],
             "notification": {
                 "heading": "Image import complete",

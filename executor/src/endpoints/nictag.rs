@@ -23,7 +23,8 @@ path = "/nictag",
 pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    let stdout = exec(&ctx, "nictagadm", ["list", "-p", "-d", ","]).await?;
+    let (stdout, _) =
+        exec(&ctx, "nictagadm", ["list", "-p", "-d", ","]).await?;
 
     let mut tags: Vec<NicTag> = Vec::new();
 

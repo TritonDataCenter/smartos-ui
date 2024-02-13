@@ -98,6 +98,70 @@ pub async fn delete_by_id(
     redirect_login(response, &ctx)
 }
 
+#[endpoint {
+method = POST,
+path = "/instances/{id}/start",
+}]
+pub async fn start_by_id(
+    ctx: RequestContext<Context>,
+    path_params: Path<PathParams>,
+) -> Result<Response<Body>, HttpError> {
+    let response = Response::builder();
+    if Session::get_login(&ctx).is_some() {
+        let id = path_params.into_inner().id;
+        let start_response = ctx
+            .context()
+            .client
+            .start_instance(&id)
+            .await
+            .map_err(to_internal_error)?;
+
+        let mut location =
+            HXLocation::new_with_common(&format!("/instances/{}", &id));
+        location.values = Some(json!({
+            "allowedPaths": [format!("/instances/{}", &id)],
+            "notification": {
+                "heading": "Instance Start",
+                "body": start_response
+            }
+        }));
+        return location.serve(response);
+    }
+    redirect_login(response, &ctx)
+}
+
+#[endpoint {
+method = POST,
+path = "/instances/{id}/stop",
+}]
+pub async fn stop_by_id(
+    ctx: RequestContext<Context>,
+    path_params: Path<PathParams>,
+) -> Result<Response<Body>, HttpError> {
+    let response = Response::builder();
+    if Session::get_login(&ctx).is_some() {
+        let id = path_params.into_inner().id;
+        let stop_response = ctx
+            .context()
+            .client
+            .stop_instance(&id)
+            .await
+            .map_err(to_internal_error)?;
+
+        let mut location =
+            HXLocation::new_with_common(&format!("/instances/{}", &id));
+        location.values = Some(json!({
+            "allowedPaths": [format!("/instances/{}", &id)],
+            "notification": {
+                "heading": "Instance Stop",
+                "body": stop_response
+            }
+        }));
+        return location.serve(response);
+    }
+    redirect_login(response, &ctx)
+}
+
 #[derive(Template)]
 #[template(path = "instances.j2")]
 pub struct InstancesTemplate<'a> {
@@ -328,9 +392,7 @@ pub async fn post_provision(
         ctx.context().client.provision(req).await.map_err(to_internal_error)?;
         let mut location = HXLocation::new_with_common("/instances");
         location.values = Some(json!({
-            "longRunning": true,
             "allowedPaths": ["/provision"],
-            "alwaysNotify": true,
             "notification": {
                 "heading": "Instance created",
                 "body": format!("Instance {} has been created.", uuid)

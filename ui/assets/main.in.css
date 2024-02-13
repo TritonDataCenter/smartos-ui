@@ -97,12 +97,22 @@
         @apply focus-visible:outline-red-500;
     }
 
+    /*
+     * An amber button with white text
+     */
+    .btn-amber {
+        @apply text-white;
+        @apply bg-amber-500;
+        @apply hover:bg-amber-400;
+        @apply focus-visible:outline-amber-500;
+    }
+
     .sticky-header > th {
         @apply bg-gray-800;
     }
 
     .header-bg {
-        background: linear-gradient(90deg, rgba(36,184,235,0.5970588919161415) 0%, rgba(27,24,39,0.4696079115239846) 100%, rgba(34,34,34,1) 100%);
+        background: linear-gradient(90deg, rgba(36,184,235,0.397) 0%, rgba(27,24,39,0.269) 100%, rgba(34,34,34,1) 100%);
     }
 }
 
