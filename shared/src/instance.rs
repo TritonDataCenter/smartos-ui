@@ -44,13 +44,56 @@ pub struct Disk {
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Generic {
+    pub v: u8,
     pub uuid: Uuid,
     pub alias: Option<String>,
     pub state: String,
+    pub hvm: bool,
     pub quota: u64,
     pub max_physical_memory: u64,
     pub resolvers: Option<Vec<String>>,
     pub cpu_shares: u64,
+    pub firewall_enabled: bool,
+    pub autoboot: bool,
+    pub billing_id: String,
+    pub owner_uuid: Uuid,
+    // create_timestamp
+    // customer_metadata
+    // dns_domain
+    // internal_metadata
+    // last_modified
+    // limit_priv
+    // max_locked_memory
+    // max_lwps
+    // max_msg_ids
+    // max_sem_ids
+    // max_shm_ids
+    // max_shm_memory
+    // max_swap
+    // nics
+    // platform_buildstamp
+    // routes
+    // server_uuid
+    // snapshots
+    // tags
+    // zfs_filesystem
+    // zfs_io_priority
+    // zfs_root_recsize
+    // zone_state
+    // zonedid
+    // zoneid
+    // zonename
+    // zonepath
+    // zpool
+
+    // if started...
+    // boot_timestamp
+    // init_restarts
+    // pid
+
+    // if stopped...
+    // exit_status
+    // exit_timestamp
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -58,6 +101,7 @@ pub struct HVM {
     pub ram: u64,
     pub disks: Vec<Disk>,
     pub vcpus: u64,
+    // device
 }
 
 impl HVM {
@@ -76,47 +120,56 @@ impl HVM {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Native {
     pub image_uuid: Uuid,
+    // datasets
+    // tmpfs
+
+    // if dataset
+    // zfs_data_recsize
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Bhyve {
     #[serde(flatten)]
-    generic: Generic,
+    pub generic: Generic,
     #[serde(flatten)]
-    hvm: HVM,
+    pub hvm: HVM,
+    // com1
+    // com2
+    // zlog_mode
+    // zlog_name
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct KVM {
     #[serde(flatten)]
-    generic: Generic,
+    pub generic: Generic,
     #[serde(flatten)]
-    hvm: HVM,
+    pub hvm: HVM,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Joyent {
     #[serde(flatten)]
-    generic: Generic,
+    pub generic: Generic,
     #[serde(flatten)]
-    native: Native,
+    pub native: Native,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct JoyentMinimal {
     #[serde(flatten)]
-    generic: Generic,
+    pub generic: Generic,
     #[serde(flatten)]
-    native: Native,
+    pub native: Native,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct LX {
     pub kernel_version: String,
     #[serde(flatten)]
-    generic: Generic,
+    pub generic: Generic,
     #[serde(flatten)]
-    native: Native,
+    pub native: Native,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

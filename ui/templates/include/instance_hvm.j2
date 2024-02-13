@@ -1,0 +1,46 @@
+{%- import "macros/inputs.j2" as input -%}
+<div class="mx-auto px-8">
+  <div class="space-y-12">
+    <div class="pb-12">
+      <h2 class="text-base font-semibold leading-7 text-white">HVM Properties</h2>
+      <p class="mt-1 text-sm leading-6 text-gray-600">
+        Instance properties specific to a hardware virtual machine.
+      </p>
+
+      <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+        {% call input::text_view("RAM", instance.hvm.ram) %}
+        {% call input::text_view("vCPUs", instance.hvm.vcpus) %}
+        {% for disk in instance.hvm.disks %}
+
+        <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+          <span class="text-base font-semibold leading-7 text-white">Disk {{loop.index}}</span>
+        </div>
+
+        <div class="sm:col-span-2 sm:col-start-1">
+          <label for="disk_{{loop.index}}_image_uuid" class="block text-sm font-medium leading-6 text-white">Image UUID</label>
+          <div class="mt-2">
+            <input type="text" name="disk_{{loop.index}}_image_uuid" id="disk_{{loop.index}}_image_uuid" autocomplete="address-level2" class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              value={{disk.image_uuid}}>
+          </div>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label for="disk_{{loop.index}}_image_size" class="block text-sm font-medium leading-6 text-white">Image Size <sup>MiB</sup></label>
+          <div class="mt-2">
+            <input type="text" name="disk_{{loop.index}}_image_size" id="disk_{{loop.index}}_image_size" class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              value="{{disk.image_size}}">
+          </div>
+        </div>
+
+        {% call input::bool_view(
+          "Boot Disk",
+          "disk_{{loop.index}}_boot",
+          disk.boot.is_some(),
+          "Specifies whether this disk is bootable (only one disk should).")
+        %}
+
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>

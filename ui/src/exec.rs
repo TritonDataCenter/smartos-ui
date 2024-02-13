@@ -58,9 +58,17 @@ impl Client {
     pub async fn get_instance(
         &self,
         id: &Uuid,
-    ) -> Result<InstanceView, reqwest::Error> {
+    ) -> Result<Instance, reqwest::Error> {
         self.vminfo.get_instance(id).await
     }
+
+    pub async fn get_instance_view(
+        &self,
+        id: &Uuid,
+    ) -> Result<InstanceView, reqwest::Error> {
+        Ok(self.vminfo.get_instance(id).await?.try_into().expect("failed"))
+    }
+
     pub async fn get_sysinfo(&self) -> Result<Sysinfo, reqwest::Error> {
         self.exec.get_sysinfo().await
     }
@@ -181,15 +189,13 @@ impl VminfodClient {
     pub async fn get_instance(
         &self,
         id: &Uuid,
-    ) -> Result<InstanceView, reqwest::Error> {
-        let instance: Instance = self
-            .get(format!("vms/{}", &id.as_hyphenated()).as_str())
+    ) -> Result<Instance, reqwest::Error> {
+        self.get(format!("vms/{}", &id.as_hyphenated()).as_str())
             .send()
             .await?
             .error_for_status()?
             .json()
-            .await?;
-        Ok(instance.try_into().expect("failed"))
+            .await
     }
 
     pub async fn ping(&self) -> Result<StatusCode, reqwest::Error> {

@@ -36,6 +36,12 @@ function getImageSize (uuid) {
 const cmd = {
   create: () => {
     const vm = getPayload()
+    vm.v = 1
+    vm.hvm = false
+    vm.autoboot = vm.autoboot === undefined
+    vm.firewall_enabled = vm.firewall_enabled !== undefined
+    vm.billing_id = vm.billing_id || '00000000-0000-0000-0000-000000000000'
+    vm.owner_uuid = vm.owner_uuid || '00000000-0000-0000-0000-000000000000'
     vm.ram = vm.ram || vm.max_physical_memory || 256
     vm.state = 'running'
     vm.quota = (vm.quota === null || vm.quota === undefined) ? 0 : vm.quota
@@ -54,6 +60,7 @@ const cmd = {
         break
       case 'bhyve':
       case 'kvm':
+        vm.hvm = true
         vm.vcpus = vm.vcpus || 1
         vm.max_physical_memory = vm.max_physical_memory || vm.ram + 1024
         vm.disks.forEach(d => {

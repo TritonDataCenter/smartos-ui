@@ -1,0 +1,34 @@
+{%- import "macros/inputs.j2" as input -%}
+<div class="mx-auto px-8">
+  <div class="space-y-12">
+    <div class="pb-12">
+      <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+        {% call input::text_view("UUID", instance.generic.uuid) %}
+        {% call input::text_view("Alias", instance.generic.alias.as_deref().unwrap_or("")) %}
+        {% call input::text_view("Brand", brand) %}
+        {% call input::text_view("State", instance.generic.state) %}
+        {% call input::text_view("Quota", instance.generic.quota) %}
+        {% call input::text_view("Max Physical Memory", instance.generic.max_physical_memory) %}
+        {% match instance.generic.resolvers %}
+          {% when Some with (resolvers) %}
+            {% call input::text_view("Resolvers", resolvers.join(",")) %}
+          {% when None %}
+            {% call input::text_view("Resolvers", "") %}
+        {% endmatch %}
+        {% call input::text_view("CPU Shares", instance.generic.cpu_shares) %}
+        {% call input::text_view("Billing ID", instance.generic.billing_id) %}
+        {% call input::text_view("Owner UUID", instance.generic.owner_uuid) %}
+        {% call input::bool_view("Firewall Enabled",
+          "firewall_enabled",
+            instance.generic.firewall_enabled,
+            "Specifies whether the firewall is enabled, allowing firewall rules set by fwadm(8) to be applied.")
+        %}
+        {% call input::bool_view("Autoboot",
+          "autoboot",
+          instance.generic.autoboot,
+          "Specifies whether or not a VM is booted when the system is rebooted.")
+        %}
+      </div>
+    </div>
+  </div>
+</div>

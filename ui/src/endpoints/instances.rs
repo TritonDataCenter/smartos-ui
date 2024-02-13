@@ -18,7 +18,7 @@ use crate::endpoints::{
 use crate::session::Session;
 
 use smartos_shared::instance::{
-    Brand, InstancePayload, InstanceView, PayloadContainer,
+    Brand, Instance, InstancePayload, InstanceView, PayloadContainer,
 };
 use smartos_shared::nictag::NicTag;
 
@@ -38,7 +38,7 @@ use uuid::Uuid;
 #[template(path = "instance.j2")]
 pub struct InstanceTemplate {
     title: String,
-    instance: InstanceView,
+    instance_enum: Instance,
 }
 
 #[endpoint {
@@ -54,20 +54,16 @@ pub async fn get_by_id(
         return redirect_login(response, &ctx);
     }
     let id = path_params.into_inner().id;
-    let instance = ctx
+    let title = String::from("Instance"); // XXX alias or uuid
+
+    let instance_enum = ctx
         .context()
         .client
         .get_instance(&id)
         .await
         .map_err(to_internal_error)?;
 
-    let title = if let Some(alias) = &instance.alias {
-        format!("Instance: {}", alias)
-    } else {
-        format!("Instance: {}", instance.uuid)
-    };
-
-    let template = InstanceTemplate { title, instance };
+    let template = InstanceTemplate { title, instance_enum };
     let result = template.render().map_err(to_internal_error)?;
 
     htmx_response(response, &format!("/instances/{}", &id), result.into())
@@ -243,6 +239,7 @@ pub struct InstanceCreateTemplate {
     ipv6_prefix: String,
     resolvers: String,
     vcpus: String,
+    kernel_version: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -277,6 +274,8 @@ pub struct ProvisionQuery {
     resolvers: String,
     #[serde(default)]
     vcpus: String,
+    #[serde(default)]
+    kernel_version: String,
 }
 
 #[endpoint {
@@ -308,6 +307,7 @@ pub async fn get_provision(
         ipv6_prefix,
         resolvers,
         vcpus,
+        kernel_version,
     } = query.into_inner();
     let actual_brand = Brand::from_str(&brand).unwrap_or_default();
 
@@ -362,6 +362,7 @@ pub async fn get_provision(
         ipv6_prefix,
         resolvers,
         vcpus,
+        kernel_version,
     };
     let result = template.render().map_err(to_internal_error)?;
     htmx_response(response, "/provision", result.into())
