@@ -76,8 +76,8 @@
                     </div>
                   </td>
                   <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.state}}</td>
-                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.type|format_name}}</td>
-                  <td class="py-4 pl-0 pr-4 text-sm text-gray-400 leading-6 sm:pr-8 lg:pr-20">{{image.manifest.os|format_name}}</td>
+                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.type|format_word}}</td>
+                  <td class="py-4 pl-0 pr-4 text-sm text-gray-400 leading-6 sm:pr-8 lg:pr-20">{{image.manifest.os|format_word}}</td>
                 </tr>
                 {% endfor %}
               </tbody>

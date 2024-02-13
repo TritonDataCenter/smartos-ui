@@ -2,473 +2,482 @@
 {% extends "layout/authed.j2" %}
 {% block title %}{{title}}{% endblock %}
 {% block content %}
-<div id="content" class="px-8">
+<div id="content">
 
-  <div>
-    <div class="hidden sm:block">
-      <div class="border-b border-gray-200">
-        <nav id="tab-navs" class="-mb-px flex space-x-8" aria-label="Tabs">
-          <a href="#" id="guided-button" class="active-editor-tab whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium" aria-current="page">
-            Guided Form
-          </a>
-          <a href="#" id="additional-button" class="inactive-editor-tab whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
-            Additional Properties
-          </a>
-          <a href="#" id="final-button" class="inactive-editor-tab whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
-            Final Properties
-          </a>
-        </nav>
+  <header class="header-bg top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/10 px-4 shadow-sm sm:px-6 lg:px-8">
+    <h1 class="text-base font-semibold leading-7 text-xl text-white">
+      {% call icons::plus_circle("inline w-8 h-8") %}
+      <span class="align-middle pl-2">Provision</span>
+    </h1>
+    <div class="flex flex-1 items-center justify-end gap-x-6 mb-10 my-10">
+
+      <button
+        id="validate-button"
+        type="button"
+        data-hx-disabled-elt="this"
+        data-hx-indicator="#validate-loader"
+        data-hx-post="/provision/validate"
+        data-hx-target="#validate-result"
+        data-hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
+        class="btn btn-clear">
+        <span class="htmx-indicator" id="validate-loader">
+          <span class="loader-icon">
+            {% call icons::loading("h-6 w-6 inline pr-1") %}
+          </span>
+          <span class="default-icon">
+            {% call icons::doc_check("h-6 w-6 inline") %}
+          </span>
+        </span>
+        <span class="align-middle btn-text">Validate</span>
+      </button>
+
+      <button
+        id="create-button"
+        type="button"
+        data-hx-disabled-elt="this"
+        data-hx-indicator="#create-loader"
+        data-hx-post="/provision"
+        data-hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
+        class="btn btn-primary">
+        <span class="htmx-indicator" id="create-loader">
+          <span class="loader-icon">
+            {% call icons::loading("h-6 w-6 inline pr-1") %}
+          </span>
+          <span class="default-icon">
+            {% call icons::plus_circle("h-6 w-6 inline") %}
+          </span>
+        </span>
+        <span class="align-middle btn-text">Create</span>
+      </button>
+
+    </div>
+  </header>
+
+  <div class="px-8">
+    <div>
+      <div class="hidden sm:block">
+        <div class="border-b border-gray-200">
+          <nav id="tab-navs" class="-mb-px flex space-x-8" aria-label="Tabs">
+            <a href="#" id="guided-button" class="active-editor-tab whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium" aria-current="page">
+              Guided Form
+            </a>
+            <a href="#" id="additional-button" class="inactive-editor-tab whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
+              Additional Properties
+            </a>
+            <a href="#" id="final-button" class="inactive-editor-tab whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
+              Final Properties
+            </a>
+          </nav>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div id="additional-tab" data-name="additional" class="hidden">
-    <div class="editor-wrapper"></div>
-    <div>
-      <p class="text-white py-4">
-        Consult the PROPERTIES section of the
-        <a class="underline decoration-solid text-blue-600 hover:text-blue-500" target="_blank" href="https://smartos.org/man/8/vmadm">VMADM(8)</a>
-        manual for possible values.
-      </p>
+    <div id="additional-tab" data-name="additional" class="hidden">
+      <div class="editor-wrapper"></div>
+      <div>
+        <p class="text-white py-4">
+          Consult the PROPERTIES section of the
+          <a class="underline decoration-solid text-blue-600 hover:text-blue-500" target="_blank" href="https://smartos.org/man/8/vmadm">VMADM(8)</a>
+          manual for possible values.
+        </p>
+      </div>
+      <div>
+        <label for="merge" class="block text-sm font-medium leading-6 text-white">Merge Strategy</label>
+        <select id="merge" class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
+          <option value="extend">Properties in Guided Form take precedence</option>
+          <option value="replace">Additional Properties take precedence</option>
+          <option value="ignore">Ignore Guided Form properties entirely</option>
+        </select>
+      </div>
     </div>
-    <div>
-      <label for="merge" class="block text-sm font-medium leading-6 text-white">Merge Strategy</label>
-      <select id="merge" class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
-        <option value="extend">Properties in Guided Form take precedence</option>
-        <option value="replace">Additional Properties take precedence</option>
-        <option value="ignore">Ignore Guided Form properties entirely</option>
-      </select>
+    <div id="final-tab" data-name="final" data-read-only="true" class="hidden">
+      <div class="editor-wrapper"></div>
     </div>
-  </div>
-  <div id="final-tab" data-name="final" data-read-only="true" class="hidden">
-    <div class="editor-wrapper"></div>
-  </div>
-  <div id="guided-tab">
-    <form id="provision" class="mx-auto" method="POST" action="/provision" data-hx-post="/provision">
-      <div class="space-y-12">
-        <div class="border-b border-white/10 pb-12">
-          <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-            <div class="col-span-full">
-              <label for="alias" class="block text-sm font-medium leading-6 text-white">Alias</label>
-              <div class="mt-2">
-                <input
-                  type="text"
-                  name="alias"
-                  id="alias"
-                  title="An alias for a VM which is for display/lookup purposes only. Not required to be unique."
-                  placeholder="Name"
-                  maxlength="100"
-                  class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-                  value="{{alias}}">
-              </div>
-            </div>
-
-            <div id="images" class="col-span-full">
-              <label for="image_uuid" class="block text-sm font-medium leading-6 text-white">Image</label>
-              <div class="mt-2">
-                <select
-                  id="image_uuid"
-                  name="image_uuid"
-                  data-hx-get="/provision"
-                  data-hx-target="#provision"
-                  data-hx-select="#provision"
-                  data-hx-include="#provision [name]"
-                  data-hx-swap="outerHTML"
-                  class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
-                  <option value="">Select an Image</option>
-                  {% for (kind, list) in images %}
-                    <optgroup label="{{kind}}">
-                      {%  for image in list %}
-                        <option
-                          {% if image.manifest.uuid.to_string() == image_uuid %}selected{% endif %}
-                          value="{{image.manifest.uuid}}"
-                          title="{{image.manifest.description}}">
-                          {{image.manifest.name}} {{image.manifest.version}}
-                        </option>
-                      {% endfor %}
-                    </optgroup>
-                  {%  endfor %}
-                </select>
-              </div>
-            </div>
-
-            <div class="col-span-full">
-              <label for="brand" class="block text-sm font-medium leading-6 text-white">
-                Brand
-                <span class="has-tooltip cursor-pointer">
-                  {% call icons::info("h-4 w-h inline mb-1") %}
-                  <span class="tooltip rounded shadow-lg p-1 bg-slate-800 text-white -mt-8 p-4 max-w-80">
-                    "Brand" refers to the specific type of virtualization used for
-                    an image. Some image support different brands and some can only
-                    use a specific brand. When you select an image a reasonable
-                    default will be selected as the default.
-                  </span>
-                </span>
-              </label>
-              <div class="mt-2">
-                <select
-                  id="brand"
-                  name="brand"
-                  required
-                  class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
-                  {% if let Some(current_image) = selected_image %}
-                    {%  if current_image.manifest.type == "zvol" %}
-                      <option
-                        {% if brand.to_string() == "bhyve" %}selected{% endif %}
-                        value="bhyve"
-                        title="The bhyve hypervisor ported from FreeBSD. The recommended hypervisor for new HVM instances.">
-                        bhyve
-                      </option>
-                      <option
-                        {% if brand.to_string() == "kvm" %}selected{% endif %}
-                        value="kvm"
-                        title="The KVM hypervisor ported from Linux.">
-                        KVM
-                      </option>
-                    {% else if (current_image.manifest.type == "zone-dataset") %}
-                        <option
-                          {% if brand.to_string() == "joyent" %}selected{% endif %}
-                          value="joyent"
-                          title="Joyent Native Zone">
-                          Joyent
-                        </option>
-                        <option
-                          {% if brand.to_string() == "joyent-minimal" %}selected{% endif %}
-                          value="joyent-minimal"
-                          title="Joyent Minimal Native Zone">
-                          Joyent Minimal
-                        </option>
-                    {% else if (current_image.manifest.type == "lx-dataset") %}
-                      <option
-                        {% if brand.to_string() == "lx" %}selected{% endif %}
-                        value="lx"
-                        title="LX branded zone for running Linux binaries">
-                        LX
-                      </option>
-                    {% endif %}
-                  {% else %}
-                    <option value="">Select an image to choose a Brand</option>
-                  {% endif %}
-                </select>
-              </div>
-            </div>
-
-            <div class="col-span-full">
-              <label for="ram" class="block text-sm font-medium leading-6 text-white">RAM <sup>MiB</sup></label>
-              <div class="mt-2">
-                <input
-                  type="number"
-                  name="ram"
-                  id="ram"
-                  min="0"
-                  placeholder="1024"
-                  class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-                  value="{{ram}}">
-              </div>
-            </div>
-
-            <div class="col-span-full">
-              <label for="quota" class="block text-sm font-medium leading-6 text-white">Disk Quota <sup>GiB</sup></label>
-              <div class="mt-2">
-                <input
-                  type="number"
-                  name="quota"
-                  id="quota"
-                  min="0"
-                  placeholder="8"
-                  class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-                  value="{{quota}}">
-              </div>
-            </div>
-
-            {% if let Some(current_image) = selected_image %}
-              {% if current_image.is_for_hvm() %}
+    <div id="guided-tab">
+      <form id="provision" class="mx-auto" method="POST" action="/provision" data-hx-post="/provision">
+        <div class="space-y-12">
+          <div class="border-b border-white/10 pb-12">
+            <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
               <div class="col-span-full">
-                <label for="quota" class="block text-sm font-medium leading-6 text-white">vCPUs</label>
+                <label for="alias" class="block text-sm font-medium leading-6 text-white">Alias</label>
+                <div class="mt-2">
+                  <input
+                    type="text"
+                    name="alias"
+                    id="alias"
+                    title="An alias for a VM which is for display/lookup purposes only. Not required to be unique."
+                    placeholder="Name"
+                    maxlength="100"
+                    class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                    value="{{alias}}">
+                </div>
+              </div>
+
+              <div id="images" class="col-span-full">
+                <label for="image_uuid" class="block text-sm font-medium leading-6 text-white">Image</label>
+                <div class="mt-2">
+                  <select
+                    id="image_uuid"
+                    name="image_uuid"
+                    data-hx-get="/provision"
+                    data-hx-target="#provision"
+                    data-hx-select="#provision"
+                    data-hx-include="#provision [name]"
+                    data-hx-swap="outerHTML"
+                    class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
+                    <option value="">Select an Image</option>
+                    {% for (kind, list) in images %}
+                      <optgroup label="{{kind}}">
+                        {%  for image in list %}
+                          <option
+                            {% if image.manifest.uuid.to_string() == image_uuid %}selected{% endif %}
+                            value="{{image.manifest.uuid}}"
+                            title="{{image.manifest.description}}">
+                            {{image.manifest.name}} {{image.manifest.version}}
+                          </option>
+                        {% endfor %}
+                      </optgroup>
+                    {%  endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-span-full">
+                <label for="brand" class="block text-sm font-medium leading-6 text-white">
+                  Brand
+                  <span class="has-tooltip cursor-pointer">
+                    {% call icons::info("h-4 w-h inline mb-1") %}
+                    <span class="tooltip rounded shadow-lg p-1 bg-slate-800 text-white -mt-8 p-4 max-w-80">
+                      "Brand" refers to the specific type of virtualization used for
+                      an image. Some image support different brands and some can only
+                      use a specific brand. When you select an image a reasonable
+                      default will be selected as the default.
+                    </span>
+                  </span>
+                </label>
+                <div class="mt-2">
+                  <select
+                    id="brand"
+                    name="brand"
+                    required
+                    class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
+                    {% if let Some(current_image) = selected_image %}
+                      {%  if current_image.manifest.type == "zvol" %}
+                        <option
+                          {% if brand.to_string() == "bhyve" %}selected{% endif %}
+                          value="bhyve"
+                          title="The bhyve hypervisor ported from FreeBSD. The recommended hypervisor for new HVM instances.">
+                          bhyve
+                        </option>
+                        <option
+                          {% if brand.to_string() == "kvm" %}selected{% endif %}
+                          value="kvm"
+                          title="The KVM hypervisor ported from Linux.">
+                          KVM
+                        </option>
+                      {% else if (current_image.manifest.type == "zone-dataset") %}
+                          <option
+                            {% if brand.to_string() == "joyent" %}selected{% endif %}
+                            value="joyent"
+                            title="Joyent Native Zone">
+                            Joyent
+                          </option>
+                          <option
+                            {% if brand.to_string() == "joyent-minimal" %}selected{% endif %}
+                            value="joyent-minimal"
+                            title="Joyent Minimal Native Zone">
+                            Joyent Minimal
+                          </option>
+                      {% else if (current_image.manifest.type == "lx-dataset") %}
+                        <option
+                          {% if brand.to_string() == "lx" %}selected{% endif %}
+                          value="lx"
+                          title="LX branded zone for running Linux binaries">
+                          LX
+                        </option>
+                      {% endif %}
+                    {% else %}
+                      <option value="">Select an image to choose a Brand</option>
+                    {% endif %}
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-span-full">
+                <label for="ram" class="block text-sm font-medium leading-6 text-white">RAM <sup>MiB</sup></label>
                 <div class="mt-2">
                   <input
                     type="number"
-                    name="vcpus"
-                    id="vcpus"
+                    name="ram"
+                    id="ram"
                     min="0"
-                    placeholder="1"
+                    placeholder="1024"
                     class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-                    value="{{vcpus}}">
+                    value="{{ram}}">
                 </div>
               </div>
-              {% endif %}
-            {% endif %}
 
-            {% if let Some(current_image) = selected_image %}
-              {% if !current_image.is_for_hvm() %}
               <div class="col-span-full">
-                <fieldset>
-                  <div class="space-y-5">
-                    <div class="relative flex items-start">
-                      <div class="flex h-6 items-center">
-                        <input id="delegate_dataset" name="delegate_dataset" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                      </div>
-                      <div class="ml-3 text-sm leading-6">
-                        <label for="delegate_dataset" class="cursor-pointer font-medium text-white">Delegate Dataset</label>
-                        <p id="delegate_dataset-description" class="text-gray-500">
-                          This property indicates whether we should delegate a ZFS dataset to an OS VM.
-                          If true, the VM will get a dataset &lt;zoneroot dataset&gt;/data
-                          (by default: zones/&lt;uuid&gt;/data) added to it.
-                        </p>
+                <label for="quota" class="block text-sm font-medium leading-6 text-white">Disk Quota <sup>GiB</sup></label>
+                <div class="mt-2">
+                  <input
+                    type="number"
+                    name="quota"
+                    id="quota"
+                    min="0"
+                    placeholder="8"
+                    class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                    value="{{quota}}">
+                </div>
+              </div>
+
+              {% if let Some(current_image) = selected_image %}
+                {% if current_image.is_for_hvm() %}
+                <div class="col-span-full">
+                  <label for="quota" class="block text-sm font-medium leading-6 text-white">vCPUs</label>
+                  <div class="mt-2">
+                    <input
+                      type="number"
+                      name="vcpus"
+                      id="vcpus"
+                      min="0"
+                      placeholder="1"
+                      class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                      value="{{vcpus}}">
+                  </div>
+                </div>
+                {% endif %}
+              {% endif %}
+
+              {% if let Some(current_image) = selected_image %}
+                {% if !current_image.is_for_hvm() %}
+                <div class="col-span-full">
+                  <fieldset>
+                    <div class="space-y-5">
+                      <div class="relative flex items-start">
+                        <div class="flex h-6 items-center">
+                          <input id="delegate_dataset" name="delegate_dataset" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                        </div>
+                        <div class="ml-3 text-sm leading-6">
+                          <label for="delegate_dataset" class="cursor-pointer font-medium text-white">Delegate Dataset</label>
+                          <p id="delegate_dataset-description" class="text-gray-500">
+                            This property indicates whether we should delegate a ZFS dataset to an OS VM.
+                            If true, the VM will get a dataset &lt;zoneroot dataset&gt;/data
+                            (by default: zones/&lt;uuid&gt;/data) added to it.
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </fieldset>
-              </div>
+                  </fieldset>
+                </div>
+                {% endif %}
               {% endif %}
-            {% endif %}
 
+            </div>
           </div>
-        </div>
 
-        <div class="">
-          <h2 class="text-base font-semibold leading-7 text-white">Primary NIC</h2>
-          <p class="mt-1 text-sm leading-6 text-gray-400">Networking configuration for the primary NIC.</p>
+          <div class="">
+            <h2 class="text-base font-semibold leading-7 text-white">Primary NIC</h2>
+            <p class="mt-1 text-sm leading-6 text-gray-400">Networking configuration for the primary NIC.</p>
 
-          <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-8">
+            <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-8">
 
-            <div class="sm:col-span-2">
-              <label for="nic_tag" class="block text-sm font-medium leading-6 text-white">Nic Tag</label>
-              <div class="mt-2">
-                <select
-                  id="nic_tag"
-                  name="nic_tag"
-                  data-hx-get="/provision"
-                  data-hx-target="#provision"
-                  data-hx-select="#provision"
-                  data-hx-include="#provision [name]"
-                  data-hx-swap="outerHTML"
-                  class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
-                  {% for tag in nictags %}
-                  <option value="">
-                    Choose a NIC Tag
-                  </option>
-                    <option
-                      {% if tag.name == nic_tag %}selected{% endif %}
-                      value="{{tag.name}}"
-                      title="{{tag.link}} {{tag.mac_address}}">
-                      {{tag.name}}
+              <div class="sm:col-span-2">
+                <label for="nic_tag" class="block text-sm font-medium leading-6 text-white">Nic Tag</label>
+                <div class="mt-2">
+                  <select
+                    id="nic_tag"
+                    name="nic_tag"
+                    data-hx-get="/provision"
+                    data-hx-target="#provision"
+                    data-hx-select="#provision"
+                    data-hx-include="#provision [name]"
+                    data-hx-swap="outerHTML"
+                    class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
+                    {% for tag in nictags %}
+                    <option value="">
+                      Choose a NIC Tag
                     </option>
-                  {%  endfor %}
-                </select>
+                      <option
+                        {% if tag.name == nic_tag %}selected{% endif %}
+                        value="{{tag.name}}"
+                        title="{{tag.link}} {{tag.mac_address}}">
+                        {{tag.name}}
+                      </option>
+                    {%  endfor %}
+                  </select>
+                </div>
               </div>
             </div>
           </div>
+
+          {%  if nic_tag != "" %}
+            <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 grid-cols-10">
+              <div class="sm:col-span-2">
+                <label for="resolvers" class="block text-sm font-medium leading-6 text-white">Resolvers</label>
+                <div class="mt-2">
+                  <input
+                    type="text"
+                    id="resolvers"
+                    name="resolvers"
+                    placeholder="8.8.8.8, ..."
+                    value="{{resolvers}}"
+                    class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 grid-cols-10">
+
+              <div class="sm:col-span-2">
+                <label for="ipv4_setup" class="block text-sm font-medium leading-6 text-white">IPv4 Configuration</label>
+                <div class="mt-2">
+                  <select
+                    id="ipv4_setup"
+                    name="ipv4_setup"
+                    data-hx-get="/provision"
+                    data-hx-target="#provision"
+                    data-hx-select="#provision"
+                    data-hx-include="#provision [name]"
+                    data-hx-swap="outerHTML"
+                    class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
+                    <option value="">
+                      None
+                    </option>
+                    <option
+                      {% if ipv4_setup == "auto" %}selected{% endif %}
+                      value="auto" title="dhcp">
+                      Auto
+                    </option>
+                    <option
+                      {% if ipv4_setup == "static" %}selected{% endif %}
+                      value="static">
+                      Static
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              {%  if ipv4_setup == "static" %}
+                <div class="sm:col-span-3">
+                  <label for="ipv4_ip" class="block text-sm font-medium leading-6 text-white">IPv4 Address</label>
+                  <div class="mt-2">
+                    <input
+                      type="text"
+                      id="ipv4_ip"
+                      name="ipv4_ip"
+                      placeholder="192.168.0.100"
+                      pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+                      required
+                      value="{{ipv4_ip}}"
+                      class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
+                  </div>
+                </div>
+
+                <div class="sm:col-span-1">
+                  <label for="ipv4_prefix" class="block text-sm font-medium leading-6 text-white">Prefix</label>
+                  <div class="mt-2">
+                    <input
+                      type="number"
+                      id="ipv4_prefix"
+                      name="ipv4_prefix"
+                      placeholder="24"
+                      max="32"
+                      min="0"
+                      value="{{ipv4_prefix}}"
+                      class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
+                  </div>
+                </div>
+
+                <div class="sm:col-span-3">
+                  <label for="ipv4_gateway" class="block text-sm font-medium leading-6 text-white">Gateway</label>
+                  <div class="mt-2">
+                    <input
+                      type="text"
+                      id="ipv4_gateway"
+                      name="ipv4_gateway"
+                      pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+                      placeholder="192.168.0.1"
+                      value="{{ipv4_gateway}}"
+                      class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
+                  </div>
+                </div>
+
+                <div class="sm:col-span-1"></div>
+              {%  endif %}
+
+            </div>
+
+            <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 grid-cols-10">
+
+              <div class="sm:col-span-2">
+                <label for="ipv6_setup" class="block text-sm font-medium leading-6 text-white">IPv6 Configuration</label>
+                <div class="mt-2">
+                  <select
+                    id="ipv6_setup"
+                    name="ipv6_setup"
+                    data-hx-get="/provision"
+                    data-hx-target="#provision"
+                    data-hx-select="#provision"
+                    data-hx-include="#provision [name]"
+                    data-hx-swap="outerHTML"
+                    class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
+                    <option value="">
+                      None
+                    </option>
+                    <option
+                      {% if ipv6_setup == "auto" %}selected{% endif %}
+                      value="auto" title="dhcp">
+                      Auto
+                    </option>
+                    <option
+                      {% if ipv6_setup == "static" %}selected{% endif %}
+                      value="static">
+                      Static
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              {%  if ipv6_setup == "static" %}
+                <div class="sm:col-span-3">
+                  <label for="ipv6_ip" class="block text-sm font-medium leading-6 text-white">IPv6 Address</label>
+                  <div class="mt-2">
+                    <input
+                      type="text"
+                      id="ipv6_ip"
+                      name="ipv6_ip"
+                      placeholder="::1"
+                      value="{{ipv6_ip}}"
+                      class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
+                  </div>
+                </div>
+
+                <div class="sm:col-span-1">
+                  <label for="ipv6_prefix" class="block text-sm font-medium leading-6 text-white">Prefix</label>
+                  <div class="mt-2">
+                    <input
+                      type="number"
+                      id="ipv6_prefix"
+                      name="ipv6_prefix"
+                      placeholder="64"
+                      max="128"
+                      min="0"
+                      value="{{ipv6_prefix}}"
+                      class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
+                  </div>
+                </div>
+
+                <div class="sm:col-span-1"></div>
+              {%  endif %}
+
+            </div>
+          {%  endif %}
         </div>
+      </form>
+    </div>
 
-        {%  if nic_tag != "" %}
-          <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 grid-cols-10">
-            <div class="sm:col-span-2">
-              <label for="resolvers" class="block text-sm font-medium leading-6 text-white">Resolvers</label>
-              <div class="mt-2">
-                <input
-                  type="text"
-                  id="resolvers"
-                  name="resolvers"
-                  placeholder="8.8.8.8, ..."
-                  value="{{resolvers}}"
-                  class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 grid-cols-10">
-
-            <div class="sm:col-span-2">
-              <label for="ipv4_setup" class="block text-sm font-medium leading-6 text-white">IPv4 Configuration</label>
-              <div class="mt-2">
-                <select
-                  id="ipv4_setup"
-                  name="ipv4_setup"
-                  data-hx-get="/provision"
-                  data-hx-target="#provision"
-                  data-hx-select="#provision"
-                  data-hx-include="#provision [name]"
-                  data-hx-swap="outerHTML"
-                  class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
-                  <option value="">
-                    None
-                  </option>
-                  <option
-                    {% if ipv4_setup == "auto" %}selected{% endif %}
-                    value="auto" title="dhcp">
-                    Auto
-                  </option>
-                  <option
-                    {% if ipv4_setup == "static" %}selected{% endif %}
-                    value="static">
-                    Static
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            {%  if ipv4_setup == "static" %}
-              <div class="sm:col-span-3">
-                <label for="ipv4_ip" class="block text-sm font-medium leading-6 text-white">IPv4 Address</label>
-                <div class="mt-2">
-                  <input
-                    type="text"
-                    id="ipv4_ip"
-                    name="ipv4_ip"
-                    placeholder="192.168.0.100"
-                    pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
-                    required
-                    value="{{ipv4_ip}}"
-                    class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
-                </div>
-              </div>
-
-              <div class="sm:col-span-1">
-                <label for="ipv4_prefix" class="block text-sm font-medium leading-6 text-white">Prefix</label>
-                <div class="mt-2">
-                  <input
-                    type="number"
-                    id="ipv4_prefix"
-                    name="ipv4_prefix"
-                    placeholder="24"
-                    max="32"
-                    min="0"
-                    value="{{ipv4_prefix}}"
-                    class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
-                </div>
-              </div>
-
-              <div class="sm:col-span-3">
-                <label for="ipv4_gateway" class="block text-sm font-medium leading-6 text-white">Gateway</label>
-                <div class="mt-2">
-                  <input
-                    type="text"
-                    id="ipv4_gateway"
-                    name="ipv4_gateway"
-                    pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
-                    placeholder="192.168.0.1"
-                    value="{{ipv4_gateway}}"
-                    class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
-                </div>
-              </div>
-
-              <div class="sm:col-span-1"></div>
-            {%  endif %}
-
-          </div>
-
-          <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 grid-cols-10">
-
-            <div class="sm:col-span-2">
-              <label for="ipv6_setup" class="block text-sm font-medium leading-6 text-white">IPv6 Configuration</label>
-              <div class="mt-2">
-                <select
-                  id="ipv6_setup"
-                  name="ipv6_setup"
-                  data-hx-get="/provision"
-                  data-hx-target="#provision"
-                  data-hx-select="#provision"
-                  data-hx-include="#provision [name]"
-                  data-hx-swap="outerHTML"
-                  class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
-                  <option value="">
-                    None
-                  </option>
-                  <option
-                    {% if ipv6_setup == "auto" %}selected{% endif %}
-                    value="auto" title="dhcp">
-                    Auto
-                  </option>
-                  <option
-                    {% if ipv6_setup == "static" %}selected{% endif %}
-                    value="static">
-                    Static
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            {%  if ipv6_setup == "static" %}
-              <div class="sm:col-span-3">
-                <label for="ipv6_ip" class="block text-sm font-medium leading-6 text-white">IPv6 Address</label>
-                <div class="mt-2">
-                  <input
-                    type="text"
-                    id="ipv6_ip"
-                    name="ipv6_ip"
-                    placeholder="::1"
-                    value="{{ipv6_ip}}"
-                    class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
-                </div>
-              </div>
-
-              <div class="sm:col-span-1">
-                <label for="ipv6_prefix" class="block text-sm font-medium leading-6 text-white">Prefix</label>
-                <div class="mt-2">
-                  <input
-                    type="number"
-                    id="ipv6_prefix"
-                    name="ipv6_prefix"
-                    placeholder="64"
-                    max="128"
-                    min="0"
-                    value="{{ipv6_prefix}}"
-                    class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
-                </div>
-              </div>
-
-              <div class="sm:col-span-1"></div>
-            {%  endif %}
-
-          </div>
-        {%  endif %}
-      </div>
-    </form>
-  </div>
-
-  <div id="validate-result" class="mt-6"></div>
-
-  <div class="mt-6 mb-6 flex items-center justify-end gap-x-6">
-
-    <button
-      id="validate-button"
-      type="button"
-      data-hx-disabled-elt="this"
-      data-hx-indicator="#validate-loader"
-      data-hx-post="/provision/validate"
-      data-hx-target="#validate-result"
-      data-hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
-      class="btn btn-clear">
-      <span class="htmx-indicator" id="validate-loader">
-        <span class="loader-icon">
-          {% call icons::loading("h-6 w-6 inline pr-1") %}
-        </span>
-        <span class="default-icon">
-          {% call icons::doc_check("h-6 w-6 inline") %}
-        </span>
-      </span>
-      <span class="align-middle btn-text">Validate</span>
-    </button>
-
-    <button
-      id="create-button"
-      type="button"
-      data-hx-disabled-elt="this"
-      data-hx-indicator="#create-loader"
-      data-hx-post="/provision"
-      data-hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
-      class="btn btn-primary">
-      <span class="htmx-indicator" id="create-loader">
-        <span class="loader-icon">
-          {% call icons::loading("h-6 w-6 inline pr-1") %}
-        </span>
-        <span class="default-icon">
-          {% call icons::plus_circle("h-6 w-6 inline") %}
-        </span>
-      </span>
-      <span class="align-middle btn-text">Create</span>
-    </button>
+    <div id="validate-result" class="mt-6"></div>
 
   </div>
 </div>

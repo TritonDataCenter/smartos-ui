@@ -22,7 +22,7 @@ use smartos_shared::instance::{
 };
 use smartos_shared::nictag::NicTag;
 
-use crate::endpoints::filters::format_name;
+use crate::endpoints::filters::format_word;
 use askama::Template;
 use dropshot::{endpoint, HttpError, Path, Query, RequestContext, TypedBody};
 use http::StatusCode;
@@ -50,31 +50,27 @@ pub async fn get_by_id(
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if Session::get_login(&ctx).is_some() {
-        let id = path_params.into_inner().id;
-        let instance = ctx
-            .context()
-            .client
-            .get_instance(&id)
-            .await
-            .map_err(to_internal_error)?;
-
-        let title = if let Some(alias) = &instance.alias {
-            format!("Instance: {}", alias)
-        } else {
-            format!("Instance: {}", instance.uuid)
-        };
-
-        let template = InstanceTemplate { title, instance };
-        let result = template.render().map_err(to_internal_error)?;
-        return htmx_response(
-            response,
-            &format!("/instances/{}", &id),
-            result.into(),
-        );
+    if !Session::is_valid(&ctx) {
+        return redirect_login(response, &ctx);
     }
+    let id = path_params.into_inner().id;
+    let instance = ctx
+        .context()
+        .client
+        .get_instance(&id)
+        .await
+        .map_err(to_internal_error)?;
 
-    redirect_login(response, &ctx)
+    let title = if let Some(alias) = &instance.alias {
+        format!("Instance: {}", alias)
+    } else {
+        format!("Instance: {}", instance.uuid)
+    };
+
+    let template = InstanceTemplate { title, instance };
+    let result = template.render().map_err(to_internal_error)?;
+
+    htmx_response(response, &format!("/instances/{}", &id), result.into())
 }
 
 #[endpoint {
@@ -86,16 +82,30 @@ pub async fn delete_by_id(
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if Session::get_login(&ctx).is_some() {
-        ctx.context()
-            .client
-            .delete_instance(&path_params.into_inner().id)
-            .await
-            .map_err(to_internal_error)?;
-
-        return HXLocation::common(response, "/instances");
+    if !Session::is_valid(&ctx) {
+        return redirect_login(response, &ctx);
     }
-    redirect_login(response, &ctx)
+
+    let id = path_params.into_inner().id;
+
+    let delete_response = ctx
+        .context()
+        .client
+        .delete_instance(&id)
+        .await
+        .map_err(to_internal_error)?;
+
+    let mut location = HXLocation::new_with_common("/instances");
+
+    location.values = Some(json!({
+        "allowedPaths": [format!("/instances/{}", &id)],
+        "notification": {
+            "heading": "Instance Delete",
+            "body": delete_response
+        }
+    }));
+
+    location.serve(response)
 }
 
 #[endpoint {
@@ -107,27 +117,29 @@ pub async fn start_by_id(
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if Session::get_login(&ctx).is_some() {
-        let id = path_params.into_inner().id;
-        let start_response = ctx
-            .context()
-            .client
-            .start_instance(&id)
-            .await
-            .map_err(to_internal_error)?;
-
-        let mut location =
-            HXLocation::new_with_common(&format!("/instances/{}", &id));
-        location.values = Some(json!({
-            "allowedPaths": [format!("/instances/{}", &id)],
-            "notification": {
-                "heading": "Instance Start",
-                "body": start_response
-            }
-        }));
-        return location.serve(response);
+    if !Session::is_valid(&ctx) {
+        return redirect_login(response, &ctx);
     }
-    redirect_login(response, &ctx)
+
+    let id = path_params.into_inner().id;
+    let start_response = ctx
+        .context()
+        .client
+        .start_instance(&id)
+        .await
+        .map_err(to_internal_error)?;
+
+    let mut location =
+        HXLocation::new_with_common(&format!("/instances/{}", &id));
+
+    location.values = Some(json!({
+        "allowedPaths": [format!("/instances/{}", &id)],
+        "notification": {
+            "heading": "Instance Start",
+            "body": start_response
+        }
+    }));
+    location.serve(response)
 }
 
 #[endpoint {
@@ -139,27 +151,30 @@ pub async fn stop_by_id(
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if Session::get_login(&ctx).is_some() {
-        let id = path_params.into_inner().id;
-        let stop_response = ctx
-            .context()
-            .client
-            .stop_instance(&id)
-            .await
-            .map_err(to_internal_error)?;
-
-        let mut location =
-            HXLocation::new_with_common(&format!("/instances/{}", &id));
-        location.values = Some(json!({
-            "allowedPaths": [format!("/instances/{}", &id)],
-            "notification": {
-                "heading": "Instance Stop",
-                "body": stop_response
-            }
-        }));
-        return location.serve(response);
+    if !Session::is_valid(&ctx) {
+        return redirect_login(response, &ctx);
     }
-    redirect_login(response, &ctx)
+
+    let id = path_params.into_inner().id;
+    let stop_response = ctx
+        .context()
+        .client
+        .stop_instance(&id)
+        .await
+        .map_err(to_internal_error)?;
+
+    let mut location =
+        HXLocation::new_with_common(&format!("/instances/{}", &id));
+
+    location.values = Some(json!({
+        "allowedPaths": [format!("/instances/{}", &id)],
+        "notification": {
+            "heading": "Instance Stop",
+            "body": stop_response
+        }
+    }));
+
+    location.serve(response)
 }
 
 #[derive(Template)]
@@ -180,29 +195,30 @@ pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if Session::get_login(&ctx).is_some() {
-        let instances = ctx
-            .context()
-            .client
-            .get_instances()
-            .await
-            .map_err(to_internal_error)?;
-
-        let total_ram = instances.iter().fold(0, |acc, i| i.ram + acc);
-        let total_quota = instances.iter().fold(0, |acc, i| i.disk_usage + acc);
-        let total_cpu = instances.iter().fold(0.0, |acc, i| i.cpu + acc);
-        let template = InstancesTemplate {
-            total_ram,
-            total_quota,
-            total_cpu,
-            title: "Instances",
-            instances,
-        };
-        let result = template.render().map_err(to_internal_error)?;
-        return htmx_response(response, "/instances", result.into());
+    if !Session::is_valid(&ctx) {
+        return redirect_login(response, &ctx);
     }
 
-    redirect_login(response, &ctx)
+    let instances = ctx
+        .context()
+        .client
+        .get_instances()
+        .await
+        .map_err(to_internal_error)?;
+
+    let total_ram = instances.iter().fold(0, |acc, i| i.ram + acc);
+    let total_quota = instances.iter().fold(0, |acc, i| i.disk_usage + acc);
+    let total_cpu = instances.iter().fold(0.0, |acc, i| i.cpu + acc);
+    let template = InstancesTemplate {
+        total_ram,
+        total_quota,
+        total_cpu,
+        title: "Instances",
+        instances,
+    };
+    let result = template.render().map_err(to_internal_error)?;
+
+    htmx_response(response, "/instances", result.into())
 }
 
 #[derive(Template)]
@@ -272,93 +288,83 @@ pub async fn get_provision(
     query: Query<ProvisionQuery>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
+    if !Session::is_valid(&ctx) {
+        return redirect_login(response, &ctx);
+    }
+    let mut selected_image = None;
+    let ProvisionQuery {
+        alias,
+        brand,
+        image_uuid,
+        ram,
+        quota,
+        nic_tag,
+        ipv4_setup,
+        ipv4_ip,
+        ipv4_prefix,
+        ipv4_gateway,
+        ipv6_setup,
+        ipv6_ip,
+        ipv6_prefix,
+        resolvers,
+        vcpus,
+    } = query.into_inner();
+    let actual_brand = Brand::from_str(&brand).unwrap_or_default();
 
-    if Session::get_login(&ctx).is_some() {
-        let mut selected_image = None;
-        let ProvisionQuery {
-            alias,
-            brand,
-            image_uuid,
-            ram,
-            quota,
-            nic_tag,
-            ipv4_setup,
-            ipv4_ip,
-            ipv4_prefix,
-            ipv4_gateway,
-            ipv6_setup,
-            ipv6_ip,
-            ipv6_prefix,
-            resolvers,
-            vcpus,
-        } = query.into_inner();
-        let actual_brand = Brand::from_str(&brand).unwrap_or_default();
+    let title = String::from("Create Instance");
 
-        let title = String::from("Create Instance");
+    let nictags =
+        ctx.context().client.get_nictags().await.map_err(to_internal_error)?;
 
-        let nictags = ctx
-            .context()
-            .client
-            .get_nictags()
-            .await
-            .map_err(to_internal_error)?;
+    let mut image_list = BTreeMap::<String, Vec<Image>>::new();
+    let mut images =
+        ctx.context().client.get_images().await.map_err(to_internal_error)?;
 
-        let mut image_list = BTreeMap::<String, Vec<Image>>::new();
-        let mut images = ctx
-            .context()
-            .client
-            .get_images()
-            .await
-            .map_err(to_internal_error)?;
-
-        while let Some(image) = images.pop() {
-            if image_uuid == image.manifest.uuid.to_string() {
-                selected_image = Some(image.clone())
-            }
-            let virt_type = if image.is_for_hvm() {
-                "Hardware Virtualization"
-            } else {
-                "Native Virtualization"
-            };
-            let key = format!(
-                "{} ({} {})",
-                virt_type,
-                format_name(&image.manifest.os).unwrap_or_default(),
-                format_name(&image.manifest.r#type).unwrap_or_default()
-            );
-            if let Some(image_vec) = image_list.get_mut(&key) {
-                image_vec.push(image);
-            } else {
-                image_list.insert(key, vec![image]);
-            }
+    while let Some(image) = images.pop() {
+        if image_uuid == image.manifest.uuid.to_string() {
+            selected_image = Some(image.clone())
         }
-
-        let template = InstanceCreateTemplate {
-            title,
-            images: image_list,
-            selected_image,
-            nictags,
-            alias,
-            brand: actual_brand,
-            image_uuid,
-            ram,
-            quota,
-            nic_tag,
-            ipv4_setup,
-            ipv4_ip,
-            ipv4_gateway,
-            ipv4_prefix,
-            ipv6_setup,
-            ipv6_ip,
-            ipv6_prefix,
-            resolvers,
-            vcpus,
+        let virt_type = if image.is_for_hvm() {
+            "Hardware Virtualization"
+        } else {
+            "Native Virtualization"
         };
-        let result = template.render().map_err(to_internal_error)?;
-        return htmx_response(response, "/provision", result.into());
+        let key = format!(
+            "{} ({} {})",
+            virt_type,
+            format_word(&image.manifest.os).unwrap_or_default(),
+            format_word(&image.manifest.r#type).unwrap_or_default()
+        );
+        if let Some(image_vec) = image_list.get_mut(&key) {
+            image_vec.push(image);
+        } else {
+            image_list.insert(key, vec![image]);
+        }
     }
 
-    redirect_login(response, &ctx)
+    let template = InstanceCreateTemplate {
+        title,
+        images: image_list,
+        selected_image,
+        nictags,
+        alias,
+        brand: actual_brand,
+        image_uuid,
+        ram,
+        quota,
+        nic_tag,
+        ipv4_setup,
+        ipv4_ip,
+        ipv4_gateway,
+        ipv4_prefix,
+        ipv6_setup,
+        ipv6_ip,
+        ipv6_prefix,
+        resolvers,
+        vcpus,
+    };
+    let result = template.render().map_err(to_internal_error)?;
+    htmx_response(response, "/provision", result.into())
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -382,26 +388,25 @@ pub async fn post_provision(
     request_body: TypedBody<InstancePayload>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-
-    if Session::get_login(&ctx).is_some() {
-        let req = request_body.into_inner();
-
-        let PayloadContainer { uuid } =
-            serde_json::from_str(&req.payload).map_err(to_bad_request)?;
-
-        ctx.context().client.provision(req).await.map_err(to_internal_error)?;
-        let mut location = HXLocation::new_with_common("/instances");
-        location.values = Some(json!({
-            "allowedPaths": ["/provision"],
-            "notification": {
-                "heading": "Instance created",
-                "body": format!("Instance {} has been created.", uuid)
-            }
-        }));
-        return location.serve(response);
+    if !Session::is_valid(&ctx) {
+        return redirect_login(response, &ctx);
     }
 
-    redirect_login(response, &ctx)
+    let req = request_body.into_inner();
+
+    let PayloadContainer { uuid } =
+        serde_json::from_str(&req.payload).map_err(to_bad_request)?;
+
+    ctx.context().client.provision(req).await.map_err(to_internal_error)?;
+    let mut location = HXLocation::new_with_common("/instances");
+    location.values = Some(json!({
+        "allowedPaths": ["/provision"],
+        "notification": {
+            "heading": "Instance created",
+            "body": format!("Instance {} has been created.", uuid)
+        }
+    }));
+    location.serve(response)
 }
 
 #[derive(Template)]
@@ -421,24 +426,24 @@ pub async fn post_provision_validate(
     request_body: TypedBody<InstancePayload>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if Session::get_login(&ctx).is_some() {
-        let req = request_body.into_inner();
-        let validation = ctx
-            .context()
-            .client
-            .validate_create(req)
-            .await
-            .map_err(to_internal_error)?;
-        let template = ValidateTemplate {
-            success: validation.success,
-            message: validation.message,
-        };
-        let result = template.render().map_err(to_internal_error)?;
-        return response
-            .status(StatusCode::OK)
-            .body(result.into())
-            .map_err(to_internal_error);
+    if !Session::is_valid(&ctx) {
+        return redirect_login(response, &ctx);
     }
 
-    redirect_login(response, &ctx)
+    let req = request_body.into_inner();
+    let validation = ctx
+        .context()
+        .client
+        .validate_create(req)
+        .await
+        .map_err(to_internal_error)?;
+    let template = ValidateTemplate {
+        success: validation.success,
+        message: validation.message,
+    };
+    let result = template.render().map_err(to_internal_error)?;
+    response
+        .status(StatusCode::OK)
+        .body(result.into())
+        .map_err(to_internal_error)
 }

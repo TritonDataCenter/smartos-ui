@@ -86,8 +86,10 @@ pub async fn get_index(
         ctx.context().client.ping().await.map_err(to_internal_error)?;
     let login = LoginTemplate { message: None, executor, vminfod };
     let result = login.render().map_err(to_internal_error)?;
-    Ok(Response::builder()
+
+    Response::builder()
         .status(StatusCode::OK)
         .header("Content-Type", "text/html")
-        .body(result.into())?)
+        .body(result.into())
+        .map_err(to_internal_error)
 }

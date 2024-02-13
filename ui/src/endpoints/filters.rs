@@ -11,8 +11,8 @@
 use askama::Result;
 use std::fmt::Display;
 
-/// Askama filter for properly capitalizing and formatting some names
-pub fn format_name<S: Display>(s: S) -> Result<String> {
+/// Askama filter for properly capitalizing and formatting common words
+pub fn format_word<S: Display>(s: S) -> Result<String> {
     let name = format!("{}", s);
     let found = match name.as_str() {
         "linux" => String::from("Linux"),

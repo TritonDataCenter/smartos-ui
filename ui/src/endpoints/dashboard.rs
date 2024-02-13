@@ -35,18 +35,14 @@ pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if Session::get_login(&ctx).is_some() {
-        let sysinfo = ctx
-            .context()
-            .client
-            .get_sysinfo()
-            .await
-            .map_err(to_internal_error)?;
-
-        let template = DashboardTemplate { title: "Dashboard", sysinfo };
-        let result = template.render().map_err(to_internal_error)?;
-        return htmx_response(response, "/dashboard", result.into());
+    if !Session::is_valid(&ctx) {
+        return redirect_login(response, &ctx);
     }
 
-    redirect_login(response, &ctx)
+    let sysinfo =
+        ctx.context().client.get_sysinfo().await.map_err(to_internal_error)?;
+
+    let template = DashboardTemplate { title: "Dashboard", sysinfo };
+    let result = template.render().map_err(to_internal_error)?;
+    htmx_response(response, "/dashboard", result.into())
 }

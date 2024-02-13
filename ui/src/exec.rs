@@ -111,7 +111,7 @@ impl Client {
     pub async fn delete_instance(
         &self,
         id: &Uuid,
-    ) -> Result<(), reqwest::Error> {
+    ) -> Result<String, reqwest::Error> {
         self.exec.delete_instance(id).await
     }
 
@@ -295,12 +295,13 @@ impl ExecClient {
     pub async fn delete_instance(
         &self,
         id: &Uuid,
-    ) -> Result<(), reqwest::Error> {
+    ) -> Result<String, reqwest::Error> {
         self.delete(format!("instance/{}", id.as_hyphenated()).as_str())
             .send()
             .await?
-            .error_for_status()?;
-        Ok(())
+            .error_for_status()?
+            .text()
+            .await
     }
 
     pub async fn start_instance(

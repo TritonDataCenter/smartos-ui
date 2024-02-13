@@ -9,27 +9,6 @@
       {% call icons::import("inline w-8 h-8") %}
       <span class="align-middle pl-2">Available Images</span>
     </h1>
-    <div class="flex flex-1 items-center justify-end gap-x-6 mb-10 my-10">
-      <a
-        href="/import"
-        data-hx-get="/import"
-        data-hx-target="#main"
-        data-hx-select="#content"
-        data-hx-indicator="#import-loader"
-        data-hx-disabled-elt="this"
-        title="Import Image"
-        class="btn btn-primary">
-          <span class="htmx-indicator" id="import-loader">
-            <span class="loader-icon">
-              {% call icons::loading("h-6 w-6 inline pr-1") %}
-            </span>
-            <span class="default-icon">
-              {% call icons::import("h-6 w-6 inline") %}
-            </span>
-          </span>
-          <span class="align-middle btn-text">Import</span>
-      </a>
-    </div>
   </header>
 
   <main>
@@ -74,8 +53,8 @@
                     </div>
                   </td>
                   <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.state}}</td>
-                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.type|format_name}}</td>
-                  <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:pr-8 lg:pr-20">{{image.manifest.os|format_name}}</td>
+                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.type|format_word}}</td>
+                  <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:pr-8 lg:pr-20">{{image.manifest.os|format_word}}</td>
                   <td class="py-4 pl-0 pr-4 text-sm leading-6 sm:pr-8 lg:pr-20">
                     <form
                       method="POST"
@@ -92,13 +71,13 @@
                           data-hx-disabled-elt="this"
                           data-hx-indicator="#import-loader-{{image.manifest.uuid}}"
                           title="Import this image"
-                          class="btn btn-clear">
+                          class="btn btn-clear p-0">
                             <span class="htmx-indicator" id="import-loader-{{image.manifest.uuid}}">
                               <span class="loader-icon">
-                                {% call icons::loading("h-6 w-6 inline pr-1") %}
+                                {% call icons::loading("h-5 w-5 inline") %}
                               </span>
                               <span class="default-icon">
-                                {% call icons::import("h-6 w-6 inline") %}
+                                {% call icons::import("h-5 w-5 inline") %}
                               </span>
                             </span>
                         </button>

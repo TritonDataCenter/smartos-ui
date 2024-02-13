@@ -37,22 +37,17 @@ pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-
-    if Session::get_login(&ctx).is_some() {
-        let images = ctx
-            .context()
-            .client
-            .get_images()
-            .await
-            .map_err(to_internal_error)?;
-
-        let template = ImagesTemplate { title: "Images", images };
-        let result = template.render().map_err(to_internal_error)?;
-
-        return htmx_response(response, "/images", result.into());
+    if !Session::is_valid(&ctx) {
+        return redirect_login(response, &ctx);
     }
 
-    redirect_login(response, &ctx)
+    let images =
+        ctx.context().client.get_images().await.map_err(to_internal_error)?;
+
+    let template = ImagesTemplate { title: "Images", images };
+    let result = template.render().map_err(to_internal_error)?;
+
+    htmx_response(response, "/images", result.into())
 }
 
 #[derive(Template)]
@@ -71,30 +66,21 @@ pub async fn get_by_id(
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-
-    if Session::get_login(&ctx).is_some() {
-        let id = path_params.into_inner().id;
-        let image = ctx
-            .context()
-            .client
-            .get_image(&id)
-            .await
-            .map_err(to_internal_error)?;
-
-        let template = ImageTemplate {
-            title: format!("Image: {}", image.manifest.name),
-            image,
-        };
-        let result = template.render().map_err(to_internal_error)?;
-
-        return htmx_response(
-            response,
-            &format!("/images/{}", id),
-            result.into(),
-        );
+    if !Session::is_valid(&ctx) {
+        return redirect_login(response, &ctx);
     }
 
-    redirect_login(response, &ctx)
+    let id = path_params.into_inner().id;
+    let image =
+        ctx.context().client.get_image(&id).await.map_err(to_internal_error)?;
+
+    let template = ImageTemplate {
+        title: format!("Image: {}", image.manifest.name),
+        image,
+    };
+    let result = template.render().map_err(to_internal_error)?;
+
+    htmx_response(response, &format!("/images/{}", id), result.into())
 }
 
 #[endpoint {
@@ -106,25 +92,21 @@ pub async fn delete_by_id(
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if Session::get_login(&ctx).is_some() {
-        let id = path_params.into_inner().id;
-        ctx.context()
-            .client
-            .delete_image(&id)
-            .await
-            .map_err(to_internal_error)?;
-
-        let mut location = HXLocation::new_with_common("/images");
-        location.values = Some(json!({
-            "allowedPaths": [format!("/images/{}", id)],
-            "notification": {
-                "heading": "Image deletion complete",
-                "body": format!("Image {} has been deleted", id)
-            }
-        }));
-        return location.serve(response);
+    if !Session::is_valid(&ctx) {
+        return redirect_login(response, &ctx);
     }
-    redirect_login(response, &ctx)
+    let id = path_params.into_inner().id;
+    ctx.context().client.delete_image(&id).await.map_err(to_internal_error)?;
+
+    let mut location = HXLocation::new_with_common("/images");
+    location.values = Some(json!({
+        "allowedPaths": [format!("/images/{}", id)],
+        "notification": {
+            "heading": "Image deletion complete",
+            "body": format!("Image {} has been deleted", id)
+        }
+    }));
+    location.serve(response)
 }
 
 #[derive(Template)]
@@ -146,22 +128,22 @@ pub async fn get_import_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if Session::get_login(&ctx).is_some() {
-        let mut images = ctx
-            .context()
-            .client
-            .get_available_images()
-            .await
-            .map_err(to_internal_error)?;
-        images.reverse();
-        let template =
-            ImportTemplate { title: "Available Images".to_string(), images };
-
-        let result = template.render().map_err(to_internal_error)?;
-        return htmx_response(response, "/import", result.into());
+    if !Session::is_valid(&ctx) {
+        return redirect_login(response, &ctx);
     }
 
-    redirect_login(response, &ctx)
+    let mut images = ctx
+        .context()
+        .client
+        .get_available_images()
+        .await
+        .map_err(to_internal_error)?;
+    images.reverse();
+    let template =
+        ImportTemplate { title: "Available Images".to_string(), images };
+
+    let result = template.render().map_err(to_internal_error)?;
+    htmx_response(response, "/import", result.into())
 }
 
 #[endpoint {
@@ -174,25 +156,28 @@ pub async fn post_import_index(
     path_params: Path<PathParams>,
     request_body: TypedBody<ImageImportParams>,
 ) -> Result<Response<Body>, HttpError> {
+    let response = Response::builder();
+    if !Session::is_valid(&ctx) {
+        return redirect_login(response, &ctx);
+    }
+
     let request = request_body.into_inner();
     let id = &path_params.into_inner().id;
     let response = Response::builder();
-    if Session::get_login(&ctx).is_some() {
-        ctx.context()
-            .client
-            .import_image(id, &request)
-            .await
-            .map_err(to_internal_error)?;
 
-        let mut location = HXLocation::new_with_common("/images");
-        location.values = Some(json!({
-            "allowedPaths": [],
-            "notification": {
-                "heading": "Image import complete",
-                "body": format!("Image {} has been imported and is ready to use.", id)
-            }
-        }));
-        return location.serve(response);
-    }
-    redirect_login(response, &ctx)
+    ctx.context()
+        .client
+        .import_image(id, &request)
+        .await
+        .map_err(to_internal_error)?;
+
+    let mut location = HXLocation::new_with_common("/images");
+    location.values = Some(json!({
+        "allowedPaths": [],
+        "notification": {
+            "heading": "Image import complete",
+            "body": format!("Image {} has been imported and is ready to use.", id)
+        }
+    }));
+    location.serve(response)
 }
