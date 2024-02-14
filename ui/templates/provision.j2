@@ -496,6 +496,46 @@
 
     <div id="validate-result" class="mt-6"></div>
 
+    <div class="mt-6 mb-6 flex items-center justify-end gap-x-6">
+      <button
+        id="validate-bottom-button"
+        type="button"
+        data-hx-disabled-elt="this"
+        data-hx-indicator="#validate-bottom-loader"
+        data-hx-post="/provision/validate"
+        data-hx-target="#validate-result"
+        data-hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
+        class="btn btn-clear">
+        <span class="htmx-indicator" id="validate-bottom-loader">
+          <span class="loader-icon">
+            {% call icons::loading("h-6 w-6 inline pr-1") %}
+          </span>
+          <span class="default-icon">
+            {% call icons::doc_check("h-6 w-6 inline") %}
+          </span>
+        </span>
+        <span class="align-middle btn-text">Validate</span>
+      </button>
+
+      <button
+        id="create-bottom-button"
+        type="button"
+        data-hx-disabled-elt="this"
+        data-hx-indicator="#create-bottom-loader"
+        data-hx-post="/provision"
+        data-hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
+        class="btn btn-primary">
+        <span class="htmx-indicator" id="create-bottom-loader">
+          <span class="loader-icon">
+            {% call icons::loading("h-6 w-6 inline pr-1") %}
+          </span>
+          <span class="default-icon">
+            {% call icons::plus_circle("h-6 w-6 inline") %}
+          </span>
+        </span>
+        <span class="align-middle btn-text">Create</span>
+      </button>
+    </div>
   </div>
 </div>
 {% endblock %}

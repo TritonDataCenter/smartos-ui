@@ -57,43 +57,42 @@ pub struct Generic {
     pub autoboot: bool,
     pub billing_id: String,
     pub owner_uuid: Uuid,
-    // create_timestamp
-    // customer_metadata
-    // dns_domain
-    // internal_metadata
-    // last_modified
-    // limit_priv
-    // max_locked_memory
-    // max_lwps
-    // max_msg_ids
-    // max_sem_ids
-    // max_shm_ids
-    // max_shm_memory
-    // max_swap
-    // nics
-    // platform_buildstamp
-    // routes
-    // server_uuid
+    pub dns_domain: Option<String>,
+    pub limit_priv: String,
+    pub max_locked_memory: u64,
+    pub max_lwps: u64,
+    pub max_msg_ids: u64,
+    pub max_sem_ids: u64,
+    pub max_shm_ids: u64,
+    pub max_shm_memory: u64,
+    pub max_swap: u64,
+    pub server_uuid: Uuid,
+    pub zfs_filesystem: String,
+    pub zfs_io_priority: u64,
+    pub zfs_root_recsize: u64,
+    pub zone_state: String,
+    pub zonename: Uuid,
+    pub zonepath: String,
+    pub zpool: String,
+    pub create_timestamp: String,
+    pub last_modified: String,
+    pub platform_buildstamp: String,
     // snapshots
     // tags
-    // zfs_filesystem
-    // zfs_io_priority
-    // zfs_root_recsize
-    // zone_state
-    // zonedid
-    // zoneid
-    // zonename
-    // zonepath
-    // zpool
+    // routes
+    // nics
+    // internal_metadata
+    // customer_metadata
 
-    // if started...
-    // boot_timestamp
-    // init_restarts
-    // pid
+    // if started
+    pub boot_timestamp: Option<String>,
+    pub init_restarts: Option<u64>,
+    pub pid: Option<u64>,
+    pub zoneid: Option<u64>,
 
-    // if stopped...
-    // exit_status
-    // exit_timestamp
+    // if stopped
+    pub exit_status: Option<u64>,
+    pub exit_timestamp: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -120,11 +119,10 @@ impl HVM {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Native {
     pub image_uuid: Uuid,
-    // datasets
-    // tmpfs
-
+    pub tmpfs: u64,
+    pub datasets: Option<Vec<String>>,
     // if dataset
-    // zfs_data_recsize
+    pub zfs_data_recsize: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -133,10 +131,10 @@ pub struct Bhyve {
     pub generic: Generic,
     #[serde(flatten)]
     pub hvm: HVM,
-    // com1
-    // com2
-    // zlog_mode
-    // zlog_name
+    pub com1: String,
+    pub com2: String,
+    pub zlog_mode: String,
+    pub zlog_name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

@@ -9,15 +9,17 @@
         {% call input::text_view("State", instance.generic.state) %}
         {% call input::text_view("Quota", instance.generic.quota) %}
         {% call input::text_view("Max Physical Memory", instance.generic.max_physical_memory) %}
+        {% call input::text_view("Max Locked Memory", instance.generic.max_locked_memory) %}
         {% match instance.generic.resolvers %}
           {% when Some with (resolvers) %}
-            {% call input::text_view("Resolvers", resolvers.join(",")) %}
+            {% call input::text_view("Resolvers", resolvers.join(", ")) %}
           {% when None %}
             {% call input::text_view("Resolvers", "") %}
         {% endmatch %}
         {% call input::text_view("CPU Shares", instance.generic.cpu_shares) %}
         {% call input::text_view("Billing ID", instance.generic.billing_id) %}
         {% call input::text_view("Owner UUID", instance.generic.owner_uuid) %}
+        {% call input::text_view("Server UUID", instance.generic.server_uuid) %}
         {% call input::bool_view("Firewall Enabled",
           "firewall_enabled",
             instance.generic.firewall_enabled,
@@ -28,6 +30,72 @@
           instance.generic.autoboot,
           "Specifies whether or not a VM is booted when the system is rebooted.")
         %}
+
+        {% match instance.generic.dns_domain %}
+          {% when Some with (dns_domain) %}
+            {% call input::text_view("DNS Domain", dns_domain) %}
+          {% when None %}
+            {% call input::text_view("DNS Domain", "") %}
+        {% endmatch %}
+
+        {% call input::text_view("Privileges", instance.generic.limit_priv) %}
+        {% call input::text_view("Max Lightweight Processes", instance.generic.max_lwps) %}
+        {% call input::text_view("Max Message IDs", instance.generic.max_msg_ids) %}
+        {% call input::text_view("Max Semaphore IDs", instance.generic.max_sem_ids) %}
+        {% call input::text_view("Max Shared Memory IDs", instance.generic.max_shm_ids) %}
+        {% call input::text_view("Max Shared Memory", instance.generic.max_shm_memory) %}
+        {% call input::text_view("Max Swap", instance.generic.max_swap) %}
+        {% call input::text_view("ZFS Filesystem", instance.generic.zfs_filesystem) %}
+        {% call input::text_view("ZFS IO Priority", instance.generic.zfs_io_priority) %}
+        {% call input::text_view("ZFS Record Size", instance.generic.zfs_root_recsize) %}
+        {% call input::text_view("Zone State", instance.generic.zone_state) %}
+        {% match instance.generic.zoneid %}
+          {% when Some with (zoneid) %}
+            {% call input::text_view("Zone ID", zoneid) %}
+          {% when None %}
+        {% endmatch %}
+        {% call input::text_view("Zone Name", instance.generic.zonename) %}
+        {% call input::text_view("Zone Path", instance.generic.zonepath) %}
+        {% call input::text_view("ZPool", instance.generic.zpool) %}
+        {% call input::text_view("Created", instance.generic.create_timestamp) %}
+        {% call input::text_view("Last Modified", instance.generic.last_modified) %}
+        {% call input::text_view("Platform Build Timestamp", instance.generic.platform_buildstamp) %}
+
+        {% match instance.generic.boot_timestamp %}
+          {% when Some with (boot_timestamp) %}
+            {% call input::text_view("Boot Timestamp", boot_timestamp) %}
+          {% when None %}
+        {% endmatch %}
+
+        {% match instance.generic.init_restarts %}
+          {% when Some with (init_restarts) %}
+            {% call input::text_view("Init Restarts", init_restarts) %}
+          {% when None %}
+        {% endmatch %}
+
+        {% match instance.generic.pid %}
+          {% when Some with (pid) %}
+            {% call input::text_view("Process ID", pid) %}
+          {% when None %}
+        {% endmatch %}
+
+        {% match instance.generic.pid %}
+          {% when Some with (pid) %}
+            {% call input::text_view("Process ID", pid) %}
+          {% when None %}
+        {% endmatch %}
+
+        {% match instance.generic.exit_status %}
+          {% when Some with (exit_status) %}
+            {% call input::text_view("Exit Status", exit_status) %}
+          {% when None %}
+        {% endmatch %}
+
+        {% match instance.generic.exit_timestamp %}
+          {% when Some with (exit_timestamp) %}
+            {% call input::text_view("Exit Timestamp", exit_timestamp) %}
+          {% when None %}
+        {% endmatch %}
       </div>
     </div>
   </div>
