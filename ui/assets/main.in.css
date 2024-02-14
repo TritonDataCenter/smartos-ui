@@ -125,6 +125,45 @@
     display:none;
 }
 
+/*
+ * Kind of hacky, but will give each new notification a slight margin
+ * to give a stacking effect until we can handle this better.
+ */
+#notifications .notification:nth-child(2) {
+    margin-top:0.5em;
+    margin-right:0.5em;
+}
+
+#notifications .notification:nth-child(3) {
+    margin-top:1em;
+    margin-right:1em;
+}
+
+#notifications .notification:nth-child(4) {
+    margin-top:1.5em;
+    margin-right:1.5em;
+}
+
+#notifications .notification:nth-child(5) {
+    margin-top:2em;
+    margin-right:2em;
+}
+
+#notifications .notification:nth-child(6) {
+    margin-top:2.5em;
+    margin-right:2.5em;
+}
+
+#notifications .notification:nth-child(7) {
+    margin-top:3em;
+    margin-right:3em;
+}
+
+#notifications .notification:nth-child(8) {
+    margin-top:3.5em;
+    margin-right:3.5em;
+}
+
 .htmx-indicator {
     opacity: 1 !important;
 }

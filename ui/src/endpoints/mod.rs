@@ -21,8 +21,10 @@ use std::sync::{Arc, Mutex};
 
 use crate::exec::{Client, PingResponse};
 use crate::session::{Session, UserSession};
-use smartos_shared::config::Config;
 
+use smartos_shared::{config::Config, http_server::to_internal_error};
+
+use askama::Template;
 use dropshot::{
     endpoint, http_response_see_other, HttpError, HttpResponseOk,
     HttpResponseSeeOther, RequestContext,
@@ -35,8 +37,23 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
 
-pub fn to_internal_error<T: fmt::Display>(e: T) -> HttpError {
-    HttpError::for_internal_error(e.to_string())
+#[derive(Default)]
+enum NotificationKind {
+    Ok,
+    #[default]
+    Error,
+}
+
+#[derive(Template)]
+#[template(path = "notification.j2")]
+pub struct NotificationTemplate {
+    id: String,
+    kind: NotificationKind,
+    subject: String,
+    message: String,
+    /// Parsed by: https://htmx.org/api/#parseInterval
+    /// None == no timeout, must be closed manually
+    timeout: Option<String>,
 }
 
 /// <https://htmx.org/headers/hx-location>

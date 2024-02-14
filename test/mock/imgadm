@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --no-warnings
 
 const { join } = require('node:path')
 const {
@@ -25,6 +25,11 @@ const cmd = {
     fetch(`${source}/images/${uuid}`)
       .then(res => res.json())
       .then(manifest => {
+        if (manifest.code && manifest.code === 'ResourceNotFound') {
+          console.error(`imgadm import: error (ActiveImageNotFound): \
+an active image "${uuid}" was not found in image sources`)
+          process.exit(1)
+        }
         setTimeout(() => {
           const fileName = join(root, `${uuid}.json`)
           writeFileSync(fileName, JSON.stringify({ manifest, source }))
@@ -35,6 +40,9 @@ Must download and install 1 image (100.0 MiB)
 Downloaded image ${uuid} (100.0 MiB)
 Imported image ${uuid} (${manifest.name}@${manifest.version})`)
         }, 5000)
+      }).catch(() => {
+        console.error('imgadm import: error')
+        process.exit(1)
       })
   },
   delete: ([uuid]) => unlinkSync(join(root, `${uuid}.json`)),
@@ -44,6 +52,54 @@ Imported image ${uuid} (${manifest.name}@${manifest.version})`)
       .then(res => res.json())
       .then(images => {
         const list = images.map(manifest => ({ manifest, source: url }))
+        // Image doesn't exist in source, used for testing error handling
+        list.push({
+          manifest: {
+            v: 2,
+            uuid: '00000000-0000-0000-0000-000000000001',
+            owner: '00000000-0000-0000-0000-000000000000',
+            name: 'bogus-20244',
+            version: '20240214',
+            state: 'active',
+            disabled: false,
+            public: true,
+            published_at: '2024-02-14T04:10:34Z',
+            type: 'zvol',
+            os: 'linux',
+            files: [
+              {
+                sha1: '80563f87c4b6a5e3cacf28a7b758b8de2f91e148',
+                size: 404943968,
+                compression: 'gzip'
+              }
+            ],
+            description: 'A bogus image that will never exist in the source.',
+            homepage: 'https://i.no.de/8bebf7b8979b8a11',
+            requirements: {
+              min_ram: 500,
+              networks: [
+                {
+                  name: 'net0',
+                  description: 'public'
+                }
+              ],
+              ssh_key: true
+            },
+            users: [
+              {
+                name: 'root'
+              }
+            ],
+            nic_driver: 'virtio',
+            disk_driver: 'virtio',
+            cpu_type: 'host',
+            image_size: 10240,
+            tags: {
+              role: 'os'
+            }
+          },
+          source: url
+        })
         console.log(JSON.stringify(list, null, 2))
       })
   }

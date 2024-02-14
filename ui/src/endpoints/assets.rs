@@ -8,7 +8,9 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use crate::endpoints::{to_internal_error, Context};
+use crate::endpoints::Context;
+
+use smartos_shared::http_server::to_internal_error;
 
 use dropshot::{endpoint, HttpError, RequestContext};
 use hyper::{body::Bytes, Body, Response};

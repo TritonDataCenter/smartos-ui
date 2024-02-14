@@ -8,10 +8,10 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use crate::endpoints::{to_internal_error, Context};
-use crate::session::Session;
+use crate::{endpoints::Context, exec::PingResponse, session::Session};
 
-use crate::exec::PingResponse;
+use smartos_shared::http_server::to_internal_error;
+
 use askama::Template;
 use dropshot::{
     endpoint, HttpError, HttpResponseTemporaryRedirect, RequestContext,

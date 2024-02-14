@@ -13,7 +13,7 @@ use std::process::Stdio;
 use crate::endpoints::{exec, exec_and_cache, Context, PathParams};
 
 use smartos_shared::http_server::{
-    empty_ok, to_bad_request, to_internal_error,
+    empty_ok, to_bad_request, to_internal_error, GenericResponse,
 };
 use smartos_shared::image::{Image, ImageImportParams, ImportStatus, Manifest};
 
@@ -196,7 +196,7 @@ pub async fn post_import_by_id(
 
     // We need to spawn tokio tasks for long-running processes
     // https://github.com/oxidecomputer/dropshot/issues/695
-    match tokio::spawn(async move {
+    tokio::spawn(async move {
         info!(ctx.log, "Starting import task for {}", id);
         let args = ["import", "-q", "-S", &req.url.as_ref(), &id.to_string()];
         debug!(ctx.log, "Executing imgadm {:?}", &args);
@@ -219,33 +219,52 @@ pub async fn post_import_by_id(
                 queue.remove(&id);
                 ctx.context().remove_cache("imgadm list -j");
                 drop(queue);
-                return empty_ok();
+                let resp = GenericResponse {
+                    request_id: ctx.request_id,
+                    message: format!(
+                        "Image {} has been imported and is ready to use.",
+                        id
+                    ),
+                    detail: stdout,
+                };
+                return Response::builder()
+                    .status(StatusCode::OK)
+                    .body(
+                        serde_json::to_string(&resp)
+                            .map_err(to_internal_error)?
+                            .into(),
+                    )
+                    .map_err(to_internal_error);
             }
 
+            let stderr =
+                String::from_utf8(out.stderr).map_err(to_internal_error)?;
+
             if let Some(mut image) = queue.remove(&id) {
-                let stderr =
-                    String::from_utf8(out.stderr).map_err(to_internal_error)?;
                 error!(ctx.log, "Image {} import failed: {}", id, stderr);
-                image.import_status = Some(ImportStatus::Failed(stderr));
+                image.import_status =
+                    Some(ImportStatus::Failed(stderr.clone()));
                 queue.insert(id, image);
             } else {
                 error!(ctx.log, "Not queue entry found for {}", id);
             }
 
             drop(queue);
-            return Err(to_internal_error(format!("Import failed for {}", id)));
+            return Err(to_bad_request(format!(
+                "Import failed for {}: {}",
+                id, stderr
+            )));
         }
 
         Err(to_internal_error("Failed to get image import queue"))
     })
     .await
-    {
-        Ok(result) => result,
-        Err(e) => Err(HttpError::for_internal_error(format!(
+    .unwrap_or_else(|e| {
+        Err(HttpError::for_internal_error(format!(
             "Failed awaiting \"post_import_by_id\": {:#}",
             e
-        ))),
-    }
+        )))
+    })
 }
 
 #[endpoint {

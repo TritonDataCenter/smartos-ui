@@ -11,17 +11,47 @@
 use smartos_shared::{
     image::Image, instance::Instance, nictag::NicTag, sysinfo::Sysinfo,
 };
+use std::fmt;
 
 use http::StatusCode;
 use reqwest::{Client as HTTPClient, RequestBuilder, Response};
 use schemars::JsonSchema;
 use serde::Serialize;
+use serde_json::to_string as stringify;
 use smartos_shared::image::{ImageImportParams, Source};
 use smartos_shared::instance::{
     InstancePayload, InstanceValidateResponse, InstanceView,
 };
 use tokio::try_join;
 use uuid::Uuid;
+
+#[derive(Debug)]
+pub enum RequestError {
+    ReqwestError(reqwest::Error),
+    JsonError(serde_json::Error),
+}
+
+impl From<reqwest::Error> for RequestError {
+    fn from(e: reqwest::Error) -> Self {
+        RequestError::ReqwestError(e)
+    }
+}
+
+impl From<serde_json::Error> for RequestError {
+    fn from(e: serde_json::Error) -> Self {
+        RequestError::JsonError(e)
+    }
+}
+
+// TODO: format these errors with more details
+impl fmt::Display for RequestError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            RequestError::ReqwestError(_) => write!(f, "HTTP Request Error"),
+            RequestError::JsonError(_) => write!(f, "JSON parsing Error"),
+        }
+    }
+}
 
 #[derive(Serialize, JsonSchema)]
 pub struct PingResponse {
@@ -98,7 +128,7 @@ impl Client {
         &self,
         id: &Uuid,
         params: &ImageImportParams,
-    ) -> Result<(), reqwest::Error> {
+    ) -> Result<Response, RequestError> {
         self.exec.import_image(id, params).await
     }
 
@@ -261,14 +291,13 @@ impl ExecClient {
         &self,
         id: &Uuid,
         params: &ImageImportParams,
-    ) -> Result<(), reqwest::Error> {
-        let req = serde_json::to_string(&params).expect("failed");
-        self.post(format!("import/{}", id.as_hyphenated()).as_str())
+    ) -> Result<Response, RequestError> {
+        let req = stringify(&params)?;
+        Ok(self
+            .post(format!("import/{}", id.as_hyphenated()).as_str())
             .body(req)
             .send()
-            .await?
-            .error_for_status()?;
-        Ok(())
+            .await?)
     }
 
     pub async fn get_sources(&self) -> Result<Vec<Source>, reqwest::Error> {
@@ -279,7 +308,7 @@ impl ExecClient {
         &self,
         payload: InstancePayload,
     ) -> Result<Response, reqwest::Error> {
-        let req = serde_json::to_string(&payload).expect("failed");
+        let req = stringify(&payload).expect("failed");
         self.post("provision").body(req).send().await
     }
 
@@ -287,7 +316,7 @@ impl ExecClient {
         &self,
         payload: InstancePayload,
     ) -> Result<InstanceValidateResponse, reqwest::Error> {
-        let req = serde_json::to_string(&payload).expect("failed");
+        let req = stringify(&payload).expect("failed");
         self.post("validate/create")
             .body(req)
             .send()

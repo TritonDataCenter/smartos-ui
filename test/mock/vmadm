@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --no-warnings
 
 const { join } = require('node:path')
 const { readFileSync, writeFileSync, unlinkSync } = require('node:fs')

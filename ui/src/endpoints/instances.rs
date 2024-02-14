@@ -12,11 +12,11 @@ use std::collections::BTreeMap;
 use std::str::FromStr;
 
 use crate::endpoints::{
-    filters, htmx_response, redirect_login, to_internal_error, Context,
-    HXLocation, PathParams,
+    filters, htmx_response, redirect_login, Context, HXLocation, PathParams,
 };
 use crate::session::Session;
 
+use smartos_shared::http_server::to_internal_error;
 use smartos_shared::instance::{
     Brand, Instance, InstancePayload, InstanceView, PayloadContainer,
 };

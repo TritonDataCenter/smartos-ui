@@ -8,10 +8,9 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use crate::endpoints::filters;
 use crate::endpoints::{
-    htmx_response, redirect_login, to_internal_error, Context, HXLocation,
-    PathParams,
+    filters, htmx_response, redirect_login, Context, HXLocation,
+    NotificationKind, NotificationTemplate, PathParams,
 };
 use crate::session::Session;
 
@@ -19,8 +18,10 @@ use smartos_shared::image::{Image, ImageImportParams};
 
 use askama::Template;
 use dropshot::{endpoint, HttpError, Path, RequestContext, TypedBody};
+use http::StatusCode;
 use hyper::{Body, Response};
 use serde_json::json;
+use smartos_shared::http_server::{to_internal_error, GenericResponse};
 
 #[derive(Template)]
 #[template(path = "images.j2")]
@@ -146,6 +147,17 @@ pub async fn get_import_index(
     htmx_response(response, "/import", result.into())
 }
 
+impl TryFrom<&reqwest::Response> for NotificationKind {
+    type Error = ();
+
+    fn try_from(response: &reqwest::Response) -> Result<Self, ()> {
+        if response.status().is_success() {
+            Ok(Self::Ok)
+        } else {
+            Ok(Self::Error)
+        }
+    }
+}
 #[endpoint {
 method = POST,
 path = "/import/{id}",
@@ -161,23 +173,32 @@ pub async fn post_import_index(
         return redirect_login(response, &ctx);
     }
 
-    let request = request_body.into_inner();
-    let id = &path_params.into_inner().id;
-    let response = Response::builder();
-
-    ctx.context()
+    let result = ctx
+        .context()
         .client
-        .import_image(id, &request)
+        .import_image(&path_params.into_inner().id, &request_body.into_inner())
         .await
         .map_err(to_internal_error)?;
 
-    let mut location = HXLocation::new_with_common("/images");
-    location.values = Some(json!({
-        "allowedPaths": [],
-        "notification": {
-            "heading": "Image import complete",
-            "body": format!("Image {} has been imported and is ready to use.", id)
-        }
-    }));
-    location.serve(response)
+    let kind = (&result).try_into().unwrap_or_default();
+    let import_response: GenericResponse =
+        result.json().await.map_err(to_internal_error)?;
+
+    let subject = match kind {
+        NotificationKind::Ok => String::from("Image Import Complete"),
+        NotificationKind::Error => String::from("Image Import Failed"),
+    };
+
+    let template = NotificationTemplate {
+        id: import_response.request_id.to_string(),
+        kind,
+        subject,
+        message: import_response.message,
+        timeout: Some(String::from("8s")),
+    };
+    let template_result = template.render().map_err(to_internal_error)?;
+    response
+        .status(StatusCode::OK)
+        .body(template_result.into())
+        .map_err(to_internal_error)
 }

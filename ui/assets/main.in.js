@@ -1,8 +1,26 @@
 import htmx from 'htmx.org'
 import { $, $$ } from './global'
 import { setupProvisioningForm } from './provision'
+import { removeMe } from './htmx-extensions'
+
+removeMe(htmx)
 
 document.addEventListener('DOMContentLoaded', () => {
+  $('#modal').addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-close')) {
+      $('#modal-content').classList.add('hidden')
+    }
+  })
+
+  $('#notifications').addEventListener('click', (e) => {
+    if (e.target.classList.contains('notification-close')) {
+      const $notification = $(e.target.dataset.target)
+      if ($notification) {
+        $notification.remove()
+      }
+    }
+  })
+
   const $notify = $('#notify')
 
   function hideNotify () {
@@ -14,12 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   $('#notify-close').addEventListener('click', hideNotify)
-
-  $('#modal').addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal-close')) {
-      $('#modal-content').classList.add('hidden')
-    }
-  })
 
   function notify (notification, timeout = 10000) {
     if (!notification || !notification.heading || !notification.body) {
@@ -57,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const active = 'active-sidebar-nav'
     const inactive = 'inactive-sidebar-nav'
     $$('.main-nav').forEach($element => {
-      const match = $element.getAttribute('hx-get') === path
+      const match = $element.dataset.hxGet === path
       $element.classList.remove(match ? inactive : active)
       $element.classList.add(match ? active : inactive)
     })

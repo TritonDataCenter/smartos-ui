@@ -59,6 +59,8 @@
                     <form
                       method="POST"
                       data-hx-post="/import/{{image.manifest.uuid}}"
+                      data-hx-target="#notifications"
+                      data-hx-swap="beforeend"
                       action="/import/{{image.manifest.uuid}}">
                       <input type="hidden" name="url" value="{{image.source}}" />
                       <input type="hidden" name="name" value="{{image.manifest.name}}" />

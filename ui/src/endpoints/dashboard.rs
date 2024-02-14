@@ -9,12 +9,10 @@
  */
 
 use crate::endpoints::filters;
-use crate::endpoints::{
-    htmx_response, redirect_login, to_internal_error, Context,
-};
+use crate::endpoints::{htmx_response, redirect_login, Context};
 use crate::session::Session;
 
-use smartos_shared::sysinfo::Sysinfo;
+use smartos_shared::{http_server::to_internal_error, sysinfo::Sysinfo};
 
 use askama::Template;
 use dropshot::{endpoint, HttpError, RequestContext};
