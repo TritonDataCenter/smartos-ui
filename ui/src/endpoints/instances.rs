@@ -32,7 +32,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use smartos_shared::http_server::to_bad_request;
 use smartos_shared::image::Image;
-use uuid::Uuid;
 
 #[derive(Template)]
 #[template(path = "instance.j2")]
@@ -368,15 +367,11 @@ pub async fn get_provision(
     htmx_response(response, "/provision", result.into())
 }
 
-#[derive(Deserialize, Serialize, Debug, JsonSchema)]
-pub struct CreateRequestBody {
-    pub alias: Option<String>,
-    pub image_uuid: Uuid,
-    pub ram: Option<u64>,
-    pub quota: Option<u64>,
-    pub nic_tag: String,
-    pub ip: String,
-    pub gateway: String,
+#[derive(Template)]
+#[template(path = "create_result.j2")]
+pub struct ProvisionTemplate {
+    success: bool,
+    message: String,
 }
 
 #[endpoint {
@@ -398,16 +393,28 @@ pub async fn post_provision(
     let PayloadContainer { uuid } =
         serde_json::from_str(&req.payload).map_err(to_bad_request)?;
 
-    ctx.context().client.provision(req).await.map_err(to_internal_error)?;
-    let mut location = HXLocation::new_with_common("/instances");
-    location.values = Some(json!({
+    let result =
+        ctx.context().client.provision(req).await.map_err(to_internal_error)?;
+
+    if result.status().is_success() {
+        let mut location = HXLocation::new_with_common("/instances");
+        location.values = Some(json!({
         "allowedPaths": ["/provision"],
         "notification": {
             "heading": "Instance created",
             "body": format!("Instance {} has been created.", uuid)
-        }
-    }));
-    location.serve(response)
+                }
+            }));
+        return location.serve(response);
+    }
+
+    let message = result.text().await.expect("failed");
+    let template = ProvisionTemplate { success: false, message };
+    let exec_result = template.render().map_err(to_internal_error)?;
+    response
+        .status(StatusCode::OK)
+        .body(exec_result.into())
+        .map_err(to_internal_error)
 }
 
 #[derive(Template)]

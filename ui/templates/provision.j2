@@ -37,6 +37,7 @@
         data-hx-disabled-elt="this"
         data-hx-indicator="#create-loader"
         data-hx-post="/provision"
+        data-hx-target="#modal"
         data-hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
         class="btn btn-primary">
         <span class="htmx-indicator" id="create-loader">
@@ -495,7 +496,7 @@
     </div>
 
     <div id="validate-result" class="mt-6"></div>
-
+    {#
     <div class="mt-6 mb-6 flex items-center justify-end gap-x-6">
       <button
         id="validate-bottom-button"
@@ -536,6 +537,8 @@
         <span class="align-middle btn-text">Create</span>
       </button>
     </div>
+    #}
   </div>
 </div>
+
 {% endblock %}

@@ -13,7 +13,7 @@ use smartos_shared::{
 };
 
 use http::StatusCode;
-use reqwest::{Client as HTTPClient, RequestBuilder};
+use reqwest::{Client as HTTPClient, RequestBuilder, Response};
 use schemars::JsonSchema;
 use serde::Serialize;
 use smartos_shared::image::{ImageImportParams, Source};
@@ -105,7 +105,7 @@ impl Client {
     pub async fn provision(
         &self,
         payload: InstancePayload,
-    ) -> Result<(), reqwest::Error> {
+    ) -> Result<Response, reqwest::Error> {
         self.exec.provision(payload).await
     }
 
@@ -278,10 +278,9 @@ impl ExecClient {
     pub async fn provision(
         &self,
         payload: InstancePayload,
-    ) -> Result<(), reqwest::Error> {
+    ) -> Result<Response, reqwest::Error> {
         let req = serde_json::to_string(&payload).expect("failed");
-        self.post("provision").body(req).send().await?.error_for_status()?;
-        Ok(())
+        self.post("provision").body(req).send().await
     }
 
     pub async fn validate_create(

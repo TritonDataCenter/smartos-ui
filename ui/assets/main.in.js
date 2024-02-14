@@ -15,6 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('#notify-close').addEventListener('click', hideNotify)
 
+  $('#modal').addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-close')) {
+      $('#modal-content').classList.add('hidden')
+    }
+  })
+
   function notify (notification, timeout = 10000) {
     if (!notification || !notification.heading || !notification.body) {
       return

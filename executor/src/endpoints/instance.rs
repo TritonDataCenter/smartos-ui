@@ -78,7 +78,7 @@ pub async fn post_provision_index(
             String::from_utf8(out.stderr).map_err(to_internal_error)?;
         error!(ctx.log, "Instance {} create failed: {}", uuid, stderr);
 
-        Err(to_internal_error(stderr))
+        Err(to_bad_request(stderr))
     })
     .await
     .unwrap_or_else(|e| {
