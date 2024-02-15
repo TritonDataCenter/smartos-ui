@@ -28,14 +28,26 @@
             </p>
           </div>
           <div class="ml-4 flex flex-shrink-0">
-            <button type="button" data-target="#notification-{{id}}" class="notification-close cursor-pointer inline-flex rounded-md bg-slate-600 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-              <svg data-target="#notification-{{id}}" class="notification-close h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-              </svg>
+            <button
+              type="button"
+              data-target="#notification-{{id}}"
+              class="notification-close cursor-pointer inline-flex rounded-md bg-slate-600 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+              {% call icons::close("h-5 w-5") %}
             </button>
           </div>
         </div>
       </div>
     </div>
   </div>
+  {# Handles redirecting user if requested #}
+  {% match redirect %}
+    {% when Some with (path) %}
+      <div
+        data-hx-get="{{path}}"
+        data-hx-target="#main"
+        data-hx-select="#content"
+        data-hx-trigger="load"
+        data-created-at="{{created_at}}"></div>
+    {% when None %}
+  {% endmatch %}
 </div>

@@ -8,154 +8,163 @@
       {% call icons::servers("inline w-8 h-8") %}
       <span class="align-middle pl-2">Instances</span>
     </h1>
-    <div class="flex flex-1 items-center justify-end gap-x-6 mb-10 my-10">
-      <a
-        href="/provision"
-        data-hx-get="/provision"
-        data-hx-target="#main"
-        data-hx-select="#content"
-        data-hx-disabled-elt="this"
-        data-hx-indicator="#create-loader"
-        title="Create a new Instance"
-        class="btn btn-primary">
-        <span class="htmx-indicator" id="create-loader">
-          <span class="loader-icon">
-            {% call icons::loading("h-6 w-6 inline pr-1") %}
+    {% if image_count > 0 %}
+      <div class="flex flex-1 items-center justify-end gap-x-6 mb-10 my-10">
+        <a
+          data-hx-get="/provision"
+          data-hx-target="#main"
+          data-hx-select="#content"
+          data-hx-disabled-elt="this"
+          data-hx-indicator="#create-loader"
+          title="Create a new Instance"
+          class="btn btn-primary">
+          <span class="htmx-indicator" id="create-loader">
+            <span class="loader-icon">
+              {% call icons::loading("h-6 w-6 inline pr-1") %}
+            </span>
+            <span class="default-icon">
+              {% call icons::plus_circle("h-6 w-6 inline") %}
+            </span>
           </span>
-          <span class="default-icon">
-            {% call icons::plus_circle("h-6 w-6 inline") %}
-          </span>
-        </span>
-        <span class="align-middle btn-text">Create</span>
-      </a>
-    </div>
+          <span class="align-middle btn-text">Create</span>
+        </a>
+      </div>
+    {% endif %}
   </header>
 
-  <header>
-    <div class="grid grid-cols-1 bg-gray-700/10 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8">
-        <p class="text-sm font-medium leading-6 text-gray-400">Virtual Machines</p>
-        <p class="mt-2 flex items-baseline gap-x-2">
-          <span class="text-4xl font-semibold tracking-tight text-white">{{instances.len()}}</span>
-        </p>
+  {% if (image_count > 0) && (instances.len() > 0) %}
+    <header>
+      <div class="grid grid-cols-1 bg-gray-700/10 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8">
+          <p class="text-sm font-medium leading-6 text-gray-400">Virtual Machines</p>
+          <p class="mt-2 flex items-baseline gap-x-2">
+            <span class="text-4xl font-semibold tracking-tight text-white">{{instances.len()}}</span>
+          </p>
+        </div>
+        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
+          <p class="text-sm font-medium leading-6 text-gray-400">Provisioned CPU</p>
+          <p class="mt-2 flex items-baseline gap-x-2">
+            <span class="text-4xl font-semibold tracking-tight text-white">{{total_cpu}}</span>
+            <span class="text-sm text-gray-400">vCPUs + Shares</span>
+          </p>
+        </div>
+        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
+          <p class="text-sm font-medium leading-6 text-gray-400">Provisioned Memory</p>
+          <p class="mt-2 flex items-baseline gap-x-2">
+            <span class="text-4xl font-semibold tracking-tight text-white">{{total_ram|mib_to_gib}}</span>
+            <span class="text-sm text-gray-400">GiB</span>
+          </p>
+        </div>
+        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 lg:border-l">
+          <p class="text-sm font-medium leading-6 text-gray-400">Provisioned Storage</p>
+          <p class="mt-2 flex items-baseline gap-x-2">
+            <span class="text-4xl font-semibold tracking-tight text-white">{{total_quota|mib_to_gib}}</span>
+            <span class="text-sm text-gray-400">GiB</span>
+          </p>
+        </div>
       </div>
-      <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
-        <p class="text-sm font-medium leading-6 text-gray-400">Provisioned CPU</p>
-        <p class="mt-2 flex items-baseline gap-x-2">
-          <span class="text-4xl font-semibold tracking-tight text-white">{{total_cpu}}</span>
-          <span class="text-sm text-gray-400">vCPUs + Shares</span>
-        </p>
-      </div>
-      <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
-        <p class="text-sm font-medium leading-6 text-gray-400">Provisioned Memory</p>
-        <p class="mt-2 flex items-baseline gap-x-2">
-          <span class="text-4xl font-semibold tracking-tight text-white">{{total_ram|mib_to_gib}}</span>
-          <span class="text-sm text-gray-400">GiB</span>
-        </p>
-      </div>
-      <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 lg:border-l">
-        <p class="text-sm font-medium leading-6 text-gray-400">Provisioned Storage</p>
-        <p class="mt-2 flex items-baseline gap-x-2">
-          <span class="text-4xl font-semibold tracking-tight text-white">{{total_quota|mib_to_gib}}</span>
-          <span class="text-sm text-gray-400">GiB</span>
-        </p>
-      </div>
-    </div>
-  </header>
+    </header>
+  {% endif %}
 
   <main>
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="flow-root">
         <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
           <div class="inline-block min-w-full py-2 align-middle">
-            <table class="w-full whitespace-nowrap text-left">
-              <colgroup>
-                <col class="w-full sm:w-4/12">
-                <col class="lg:w-1/12">
-                <col class="lg:w-4/12">
-                <col class="lg:w-2/12">
-                <col class="lg:w-2/12">
-              </colgroup>
-              <thead class="border-b border-white/10 text-sm leading-6 text-white">
-                <tr class="sticky-header">
-                  <th scope="col" class="sticky top-0 z-10 py-2 pl-4 pr-8 sm:pl-6 lg:pl-8 font-semibold sm:table-cell bg-gray-900">Alias</th>
-                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold sm:table-cell bg-gray-900">Brand</th>
-                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold sm:table-cell bg-gray-900">Image</th>
-                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">CPU</th>
-                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">Memory <sup>MiB</sup></th>
-                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold md:table-cell bg-gray-900">Storage Quota <sup>GiB</sup></th>
-                  <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold md:table-cell bg-gray-900">Status</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-white/5">
-                {% for instance in instances %}
-                <tr
-                  data-hx-get="/instances/{{instance.uuid}}"
-                  data-hx-target="#main"
-                  data-hx-select="#content"
-                  class="hover:bg-gray-800 cursor-pointer">
-                  <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
-                    <div class="flex items-center gap-x-4">
-                      <div class="truncate text-sm font-medium leading-6 text-white">{{instance.alias.as_deref().unwrap_or("-")}}</div>
-                    </div>
-                  </td>
-                  <td class="hidden py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
-                    <time datetime="2023-01-23T11:00">{{instance.brand}}</time>
-                  </td>
-                  <td class="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
-                      {{instance.image_uuid}}
-                  </td>
-                  <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
-                    {% if instance.hvm %}
-                      {{instance.cpu}}
-                    {% else %}
-                        {{instance.cpu * 100.0 }}
-                    {% endif %}
-                    <span class="text-xs text-gray-500">
+            {% if image_count < 1 %}
+              {% include "include/no_images.j2" %}
+            {% else if instances.len() < 1 %}
+              {% include "include/no_instances.j2" %}
+            {% else %}
+              <table class="w-full whitespace-nowrap text-left">
+                <colgroup>
+                  <col class="w-full sm:w-4/12">
+                  <col class="lg:w-1/12">
+                  <col class="lg:w-4/12">
+                  <col class="lg:w-2/12">
+                  <col class="lg:w-2/12">
+                </colgroup>
+                <thead class="border-b border-white/10 text-sm leading-6 text-white">
+                  <tr class="sticky-header">
+                    <th scope="col" class="sticky top-0 z-10 py-2 pl-4 pr-8 sm:pl-6 lg:pl-8 font-semibold sm:table-cell bg-gray-900">Alias</th>
+                    <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold sm:table-cell bg-gray-900">Brand</th>
+                    <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold sm:table-cell bg-gray-900">Image</th>
+                    <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">CPU</th>
+                    <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">Memory <sup>MiB</sup></th>
+                    <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold md:table-cell bg-gray-900">Storage Quota <sup>GiB</sup></th>
+                    <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold md:table-cell bg-gray-900">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                  {% for instance in instances %}
+                  <tr
+                    data-hx-get="/instances/{{instance.uuid}}"
+                    data-hx-target="#main"
+                    data-hx-select="#content"
+                    class="hover:bg-gray-800 cursor-pointer">
+                    <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
+                      <div class="flex items-center gap-x-4">
+                        <div class="truncate text-sm font-medium leading-6 text-white">{{instance.alias.as_deref().unwrap_or("-")}}</div>
+                      </div>
+                    </td>
+                    <td class="hidden py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
+                      <time datetime="2023-01-23T11:00">{{instance.brand}}</time>
+                    </td>
+                    <td class="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
+                        {{instance.image_uuid}}
+                    </td>
+                    <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
                       {% if instance.hvm %}
-                        vCPUs
+                        {{instance.cpu}}
                       {% else %}
-                        Shares
+                          {{instance.cpu * 100.0 }}
                       {% endif %}
-                    </span>
-                  </td>
-                  <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{instance.ram}}</td>
-                  <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
-                    {% if instance.disk_usage == 0 %}
-                      <span title="No quota">∞</span>
-                    {% else %}
-                      {{instance.disk_usage|mib_to_gib}}
-                    {% endif %}
-                  </td>
-                  <td class="py-4 pl-0 pr-4 text-sm leading-6 sm:pr-8 lg:pr-20">
-                    <div class="flex items-center justify-end gap-x-2 sm:justify-start">
-                      {% if instance.state == "running" %}
-                      <div class="flex-none rounded-full p-1 text-green-400 bg-green-400/10">
-                        <div class="h-1.5 w-1.5 rounded-full bg-current"></div>
+                      <span class="text-xs text-gray-500">
+                        {% if instance.hvm %}
+                          vCPUs
+                        {% else %}
+                          Shares
+                        {% endif %}
+                      </span>
+                    </td>
+                    <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{instance.ram}}</td>
+                    <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+                      {% if instance.disk_usage == 0 %}
+                        <span title="No quota">∞</span>
+                      {% else %}
+                        {{instance.disk_usage|mib_to_gib}}
+                      {% endif %}
+                    </td>
+                    <td class="py-4 pl-0 pr-4 text-sm leading-6 sm:pr-8 lg:pr-20">
+                      <div class="flex items-center justify-end gap-x-2 sm:justify-start">
+                        {% if instance.state == "running" %}
+                        <div class="flex-none rounded-full p-1 text-green-400 bg-green-400/10">
+                          <div class="h-1.5 w-1.5 rounded-full bg-current"></div>
+                        </div>
+                        {% endif %}
+                        {% if instance.state == "provisioning" %}
+                        <div class="flex-none rounded-full p-1 text-yellow-400 bg-yellow-400/10">
+                          <div class="h-1.5 w-1.5 rounded-full bg-current"></div>
+                        </div>
+                        {% endif %}
+                        {% if instance.state == "stopped" %}
+                        <div class="flex-none rounded-full p-1 text-red-400 bg-red-400/10">
+                          <div class="h-1.5 w-1.5 rounded-full bg-current"></div>
+                        </div>
+                        {% endif %}
+                        {% if instance.state == "down" %}
+                        <div class="flex-none rounded-full p-1 text-black-400 bg-black-400/10">
+                          <div class="h-1.5 w-1.5 rounded-full bg-current"></div>
+                        </div>
+                        {% endif %}
+                        <div class="hidden text-white sm:block">{{instance.state|capitalize}}</div>
                       </div>
-                      {% endif %}
-                      {% if instance.state == "provisioning" %}
-                      <div class="flex-none rounded-full p-1 text-yellow-400 bg-yellow-400/10">
-                        <div class="h-1.5 w-1.5 rounded-full bg-current"></div>
-                      </div>
-                      {% endif %}
-                      {% if instance.state == "stopped" %}
-                      <div class="flex-none rounded-full p-1 text-red-400 bg-red-400/10">
-                        <div class="h-1.5 w-1.5 rounded-full bg-current"></div>
-                      </div>
-                      {% endif %}
-                      {% if instance.state == "down" %}
-                      <div class="flex-none rounded-full p-1 text-black-400 bg-black-400/10">
-                        <div class="h-1.5 w-1.5 rounded-full bg-current"></div>
-                      </div>
-                      {% endif %}
-                      <div class="hidden text-white sm:block">{{instance.state|capitalize}}</div>
-                    </div>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            {% endif %}
           </div>
         </div>
       </div>

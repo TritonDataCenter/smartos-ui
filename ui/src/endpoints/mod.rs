@@ -16,7 +16,6 @@ pub mod instances;
 pub mod login;
 
 use std::collections::HashMap;
-use std::fmt;
 use std::sync::{Arc, Mutex};
 
 use crate::exec::{Client, PingResponse};
@@ -33,8 +32,7 @@ use http::response::Builder;
 use hyper::{Body, Response, StatusCode};
 use pwhash::unix;
 use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde::Deserialize;
 use uuid::Uuid;
 
 #[derive(Default)]
@@ -44,6 +42,18 @@ enum NotificationKind {
     Error,
 }
 
+impl TryFrom<&reqwest::Response> for NotificationKind {
+    type Error = ();
+
+    fn try_from(response: &reqwest::Response) -> Result<Self, ()> {
+        if response.status().is_success() {
+            Ok(Self::Ok)
+        } else {
+            Ok(Self::Error)
+        }
+    }
+}
+
 #[derive(Template)]
 #[template(path = "notification.j2")]
 pub struct NotificationTemplate {
@@ -51,105 +61,16 @@ pub struct NotificationTemplate {
     kind: NotificationKind,
     subject: String,
     message: String,
+
     /// Parsed by: https://htmx.org/api/#parseInterval
     /// None == no timeout, must be closed manually
     timeout: Option<String>,
-}
 
-/// <https://htmx.org/headers/hx-location>
-#[derive(Debug, Deserialize, Serialize)]
-pub struct HXLocation {
-    /// url to load the response from
-    pub path: String,
+    /// If Some, will load the specified path after showing the notification
+    redirect: Option<String>,
 
-    /// The source element of the request
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub source: Option<String>,
-
-    /// An event that “triggered” the request
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub event: Option<String>,
-
-    /// A callback that will handle the response HTML
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub handler: Option<String>,
-
-    /// The target to swap the response into
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub target: Option<String>,
-
-    /// How the response will be swapped in relative to the target
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub swap: Option<String>,
-
-    /// Values to submit with the request
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub values: Option<Value>,
-
-    // /// Headers to submit with the request
-    // pub headers: Option<String>,
-    //
-    /// Allows you to select the content you want swapped from a response
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub select: Option<String>,
-}
-
-impl HXLocation {
-    pub fn new(path: &str) -> HXLocation {
-        Self {
-            path: String::from(path),
-            source: None,
-            event: None,
-            handler: None,
-            target: None,
-            swap: None,
-            values: None,
-            select: None,
-        }
-    }
-
-    pub fn new_with_common(path: &str) -> Self {
-        Self {
-            path: String::from(path),
-            source: None,
-            event: None,
-            handler: None,
-            target: Some(String::from("#main")),
-            swap: None,
-            values: None,
-            select: Some(String::from("#content")),
-        }
-    }
-
-    pub fn serve(
-        &self,
-        response: Builder,
-    ) -> Result<Response<Body>, HttpError> {
-        let header = serde_json::to_string(&self).map_err(to_internal_error)?;
-        response
-            .header("HX-Location", header)
-            .status(StatusCode::OK)
-            .body(Body::empty())
-            .map_err(to_internal_error)
-    }
-
-    pub fn common(
-        response: Builder,
-        path: &str,
-    ) -> Result<Response<Body>, HttpError> {
-        let location = Self::new_with_common(path);
-        response
-            .header("HX-Location", location.to_string())
-            .status(StatusCode::OK)
-            .body(Body::empty())
-            .map_err(to_internal_error)
-    }
-}
-
-impl fmt::Display for HXLocation {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", serde_json::to_string(&self).unwrap_or_default())
-    }
+    /// The path where the notification was created.
+    created_at: String,
 }
 
 #[derive(Debug, Deserialize, JsonSchema)]

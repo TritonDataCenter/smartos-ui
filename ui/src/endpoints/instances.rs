@@ -12,7 +12,8 @@ use std::collections::BTreeMap;
 use std::str::FromStr;
 
 use crate::endpoints::{
-    filters, htmx_response, redirect_login, Context, HXLocation, PathParams,
+    filters, htmx_response, redirect_login, Context, NotificationKind,
+    NotificationTemplate, PathParams,
 };
 use crate::session::Session;
 
@@ -29,7 +30,6 @@ use http::StatusCode;
 use hyper::{Body, Response};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use smartos_shared::http_server::to_bad_request;
 use smartos_shared::image::Image;
 
@@ -83,24 +83,34 @@ pub async fn delete_by_id(
 
     let id = path_params.into_inner().id;
 
-    let delete_response = ctx
-        .context()
-        .client
-        .delete_instance(&id)
-        .await
-        .map_err(to_internal_error)?;
-
-    let mut location = HXLocation::new_with_common("/instances");
-
-    location.values = Some(json!({
-        "allowedPaths": [format!("/instances/{}", &id)],
-        "notification": {
-            "heading": "Instance Delete",
-            "body": delete_response
+    let template = if ctx.context().client.delete_instance(&id).await.is_ok() {
+        NotificationTemplate {
+            id: ctx.request_id,
+            kind: NotificationKind::Ok,
+            subject: String::from("Instance deleted"),
+            message: format!("Instance {} successfully deleted", id),
+            timeout: Some(String::from("8s")),
+            redirect: Some(String::from("/instances")),
+            created_at: format!("/instances/{}", id),
         }
-    }));
+    } else {
+        NotificationTemplate {
+            id: ctx.request_id,
+            kind: NotificationKind::Error,
+            subject: String::from("Instance could not be deleted"),
+            message: format!("Failed to delete instance {}", id),
+            timeout: Some(String::from("8s")),
+            redirect: None,
+            created_at: format!("/instances/{}", id),
+        }
+    };
 
-    location.serve(response)
+    let template_result = template.render().map_err(to_internal_error)?;
+
+    response
+        .status(StatusCode::OK)
+        .body(template_result.into())
+        .map_err(to_internal_error)
 }
 
 #[endpoint {
@@ -117,24 +127,34 @@ pub async fn start_by_id(
     }
 
     let id = path_params.into_inner().id;
-    let start_response = ctx
-        .context()
-        .client
-        .start_instance(&id)
-        .await
-        .map_err(to_internal_error)?;
-
-    let mut location =
-        HXLocation::new_with_common(&format!("/instances/{}", &id));
-
-    location.values = Some(json!({
-        "allowedPaths": [format!("/instances/{}", &id)],
-        "notification": {
-            "heading": "Instance Start",
-            "body": start_response
+    let template = if ctx.context().client.start_instance(&id).await.is_ok() {
+        NotificationTemplate {
+            id: ctx.request_id,
+            kind: NotificationKind::Ok,
+            subject: String::from("Started"),
+            message: format!("Instance {} successfully started", id),
+            timeout: Some(String::from("8s")),
+            redirect: Some(format!("/instances/{}", id)),
+            created_at: format!("/instances/{}", id),
         }
-    }));
-    location.serve(response)
+    } else {
+        NotificationTemplate {
+            id: ctx.request_id,
+            kind: NotificationKind::Error,
+            subject: String::from("Start Failed"),
+            message: format!("Failed to start instance {}", id),
+            timeout: Some(String::from("8s")),
+            redirect: None,
+            created_at: format!("/instances/{}", id),
+        }
+    };
+
+    let template_result = template.render().map_err(to_internal_error)?;
+
+    response
+        .status(StatusCode::OK)
+        .body(template_result.into())
+        .map_err(to_internal_error)
 }
 
 #[endpoint {
@@ -151,30 +171,40 @@ pub async fn stop_by_id(
     }
 
     let id = path_params.into_inner().id;
-    let stop_response = ctx
-        .context()
-        .client
-        .stop_instance(&id)
-        .await
-        .map_err(to_internal_error)?;
-
-    let mut location =
-        HXLocation::new_with_common(&format!("/instances/{}", &id));
-
-    location.values = Some(json!({
-        "allowedPaths": [format!("/instances/{}", &id)],
-        "notification": {
-            "heading": "Instance Stop",
-            "body": stop_response
+    let template = if ctx.context().client.stop_instance(&id).await.is_ok() {
+        NotificationTemplate {
+            id: ctx.request_id,
+            kind: NotificationKind::Ok,
+            subject: String::from("Stopped"),
+            message: format!("Instance {} successfully stopped", id),
+            timeout: Some(String::from("8s")),
+            redirect: Some(format!("/instances/{}", id)),
+            created_at: format!("/instances/{}", id),
         }
-    }));
+    } else {
+        NotificationTemplate {
+            id: ctx.request_id,
+            kind: NotificationKind::Error,
+            subject: String::from("Stop Failed"),
+            message: format!("Failed to stop instance {}", id),
+            timeout: Some(String::from("8s")),
+            redirect: None,
+            created_at: format!("/instances/{}", id),
+        }
+    };
 
-    location.serve(response)
+    let template_result = template.render().map_err(to_internal_error)?;
+
+    response
+        .status(StatusCode::OK)
+        .body(template_result.into())
+        .map_err(to_internal_error)
 }
 
 #[derive(Template)]
 #[template(path = "instances.j2")]
 pub struct InstancesTemplate<'a> {
+    image_count: usize,
     total_ram: u64,
     total_quota: u64,
     total_cpu: f32,
@@ -194,6 +224,14 @@ pub async fn get_index(
         return redirect_login(response, &ctx);
     }
 
+    let image_count = ctx
+        .context()
+        .client
+        .get_images()
+        .await
+        .map_err(to_internal_error)?
+        .len();
+
     let instances = ctx
         .context()
         .client
@@ -205,6 +243,7 @@ pub async fn get_index(
     let total_quota = instances.iter().fold(0, |acc, i| i.disk_usage + acc);
     let total_cpu = instances.iter().fold(0.0, |acc, i| i.cpu + acc);
     let template = InstancesTemplate {
+        image_count,
         total_ram,
         total_quota,
         total_cpu,
@@ -367,11 +406,19 @@ pub async fn get_provision(
     htmx_response(response, "/provision", result.into())
 }
 
+struct Button {
+    pub text: String,
+    pub classes: Vec<String>,
+    pub attributes: Vec<String>,
+}
+
 #[derive(Template)]
-#[template(path = "create_result.j2")]
+#[template(path = "modal.j2")]
 pub struct ProvisionTemplate {
-    success: bool,
+    kind: NotificationKind,
+    subject: String,
     message: String,
+    buttons: Option<Vec<Button>>,
 }
 
 #[endpoint {
@@ -396,21 +443,46 @@ pub async fn post_provision(
     let result =
         ctx.context().client.provision(req).await.map_err(to_internal_error)?;
 
-    if result.status().is_success() {
-        let mut location = HXLocation::new_with_common("/instances");
-        location.values = Some(json!({
-        "allowedPaths": ["/provision"],
-        "notification": {
-            "heading": "Instance created",
-            "body": format!("Instance {} has been created.", uuid)
-                }
-            }));
-        return location.serve(response);
-    }
+    let exec_result = if result.status().is_success() {
+        let buttons = vec![
+            Button {
+                text: String::from("Ok"),
+                classes: vec![String::from("btn-primary")],
+                attributes: vec![
+                    String::from("data-hx-get=\"/instances\""),
+                    String::from("data-hx-target=\"#main\""),
+                    String::from("data-hx-select=\"#content\""),
+                ],
+            },
+            Button {
+                text: String::from("View Instance"),
+                classes: vec![String::from("btn-clear")],
+                attributes: vec![
+                    format!("data-hx-get=\"/instances/{}\"", uuid),
+                    String::from("data-hx-target=\"#main\""),
+                    String::from("data-hx-select=\"#content\""),
+                ],
+            },
+        ];
+        let message = result.text().await.expect("failed");
+        let template = ProvisionTemplate {
+            kind: NotificationKind::Ok,
+            subject: String::from("Provision successful"),
+            message: format!("Instance {} created. {}", uuid, message),
+            buttons: Some(buttons),
+        };
+        template.render().map_err(to_internal_error)?
+    } else {
+        let message = result.text().await.expect("failed");
+        let template = ProvisionTemplate {
+            kind: NotificationKind::Error,
+            subject: String::from("Provision failed"),
+            message,
+            buttons: None,
+        };
+        template.render().map_err(to_internal_error)?
+    };
 
-    let message = result.text().await.expect("failed");
-    let template = ProvisionTemplate { success: false, message };
-    let exec_result = template.render().map_err(to_internal_error)?;
     response
         .status(StatusCode::OK)
         .body(exec_result.into())

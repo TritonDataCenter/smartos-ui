@@ -364,6 +364,7 @@ impl Display for Brand {
         }
     }
 }
+
 impl Default for Brand {
     fn default() -> Self {
         Self::Other

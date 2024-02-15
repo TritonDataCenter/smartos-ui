@@ -60,8 +60,7 @@
                       method="POST"
                       data-hx-post="/import/{{image.manifest.uuid}}"
                       data-hx-target="#notifications"
-                      data-hx-swap="beforeend"
-                      action="/import/{{image.manifest.uuid}}">
+                      data-hx-swap="beforeend">
                       <input type="hidden" name="url" value="{{image.source}}" />
                       <input type="hidden" name="name" value="{{image.manifest.name}}" />
                       <input type="hidden" name="version" value="{{image.manifest.version}}" />
@@ -97,6 +96,5 @@
 
   </main>
 </div>
-
 
 {% endblock %}

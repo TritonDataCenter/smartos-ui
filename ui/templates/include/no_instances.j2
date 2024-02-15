@@ -1,0 +1,27 @@
+<div class="text-center mt-6">
+  <div class="htmx-indicator mx-auto h-12 w-12 text-gray-400" id="import-main-loader">
+    <div class="loader-icon">
+      {% call icons::loading("h-10 w-10") %}
+    </div>
+    <div class="default-icon">
+      {% call icons::server("h-10 w-10") %}
+    </div>
+  </div>
+  <h3 class="mt-2 text-sm font-semibold text-white">No Instances Created</h3>
+  <p class="mt-1 text-sm text-gray-500">Get started by creating an instance.</p>
+  <div class="mt-6">
+    <button
+      type="button"
+      href="/import"
+      data-hx-get="/provision"
+      data-hx-target="#main"
+      data-hx-select="#content"
+      data-hx-disabled-elt="this"
+      data-hx-indicator="#create-loader"
+      title="Create an Instance"
+      class="btn btn-primary">
+        {% call icons::plus_circle("h-6 w-6 inline pr-1") %}
+        <span class="align-middle btn-text">Create an Instance</span>
+    </button>
+  </div>
+</div>

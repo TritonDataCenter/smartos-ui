@@ -9,8 +9,8 @@
  */
 
 use crate::endpoints::{
-    filters, htmx_response, redirect_login, Context, HXLocation,
-    NotificationKind, NotificationTemplate, PathParams,
+    filters, htmx_response, redirect_login, Context, NotificationKind,
+    NotificationTemplate, PathParams,
 };
 use crate::session::Session;
 
@@ -20,7 +20,6 @@ use askama::Template;
 use dropshot::{endpoint, HttpError, Path, RequestContext, TypedBody};
 use http::StatusCode;
 use hyper::{Body, Response};
-use serde_json::json;
 use smartos_shared::http_server::{to_internal_error, GenericResponse};
 
 #[derive(Template)]
@@ -97,17 +96,35 @@ pub async fn delete_by_id(
         return redirect_login(response, &ctx);
     }
     let id = path_params.into_inner().id;
-    ctx.context().client.delete_image(&id).await.map_err(to_internal_error)?;
 
-    let mut location = HXLocation::new_with_common("/images");
-    location.values = Some(json!({
-        "allowedPaths": [format!("/images/{}", id)],
-        "notification": {
-            "heading": "Image deletion complete",
-            "body": format!("Image {} has been deleted", id)
+    let template = if ctx.context().client.delete_image(&id).await.is_ok() {
+        NotificationTemplate {
+            id: ctx.request_id,
+            kind: NotificationKind::Ok,
+            subject: String::from("Image deleted"),
+            message: format!("Image {} successfully deleted", id),
+            timeout: Some(String::from("8s")),
+            redirect: Some(String::from("/images")),
+            created_at: format!("/images/{}", id),
         }
-    }));
-    location.serve(response)
+    } else {
+        NotificationTemplate {
+            id: ctx.request_id,
+            kind: NotificationKind::Error,
+            subject: String::from("Image could not be deleted"),
+            message: format!("Failed to delete image {}", id),
+            timeout: Some(String::from("8s")),
+            redirect: None,
+            created_at: format!("/images/{}", id),
+        }
+    };
+
+    let template_result = template.render().map_err(to_internal_error)?;
+
+    response
+        .status(StatusCode::OK)
+        .body(template_result.into())
+        .map_err(to_internal_error)
 }
 
 #[derive(Template)]
@@ -147,17 +164,6 @@ pub async fn get_import_index(
     htmx_response(response, "/import", result.into())
 }
 
-impl TryFrom<&reqwest::Response> for NotificationKind {
-    type Error = ();
-
-    fn try_from(response: &reqwest::Response) -> Result<Self, ()> {
-        if response.status().is_success() {
-            Ok(Self::Ok)
-        } else {
-            Ok(Self::Error)
-        }
-    }
-}
 #[endpoint {
 method = POST,
 path = "/import/{id}",
@@ -173,30 +179,45 @@ pub async fn post_import_index(
         return redirect_login(response, &ctx);
     }
 
-    let result = ctx
-        .context()
-        .client
-        .import_image(&path_params.into_inner().id, &request_body.into_inner())
-        .await
-        .map_err(to_internal_error)?;
+    let id = &path_params.into_inner().id;
 
-    let kind = (&result).try_into().unwrap_or_default();
-    let import_response: GenericResponse =
-        result.json().await.map_err(to_internal_error)?;
+    let template_result;
 
-    let subject = match kind {
-        NotificationKind::Ok => String::from("Image Import Complete"),
-        NotificationKind::Error => String::from("Image Import Failed"),
-    };
+    if let Ok(result) =
+        ctx.context().client.import_image(id, &request_body.into_inner()).await
+    {
+        let kind = (&result).try_into().unwrap_or_default();
+        let import_response: GenericResponse =
+            result.json().await.map_err(to_internal_error)?;
 
-    let template = NotificationTemplate {
-        id: import_response.request_id.to_string(),
-        kind,
-        subject,
-        message: import_response.message,
-        timeout: Some(String::from("8s")),
-    };
-    let template_result = template.render().map_err(to_internal_error)?;
+        let subject = match kind {
+            NotificationKind::Ok => String::from("Image Import Complete"),
+            NotificationKind::Error => String::from("Image Import Failed"),
+        };
+
+        let template = NotificationTemplate {
+            id: import_response.request_id,
+            kind,
+            subject,
+            message: import_response.message,
+            timeout: Some(String::from("8s")),
+            redirect: None,
+            created_at: format!("/import/{}", id),
+        };
+        template_result = template.render().map_err(to_internal_error)?;
+    } else {
+        let template = NotificationTemplate {
+            id: ctx.request_id,
+            kind: NotificationKind::Error,
+            subject: String::from("Import failed"),
+            message: format!("Failed to import image: {}", id),
+            timeout: Some(String::from("8s")),
+            redirect: None,
+            created_at: format!("/import/{}", id),
+        };
+        template_result = template.render().map_err(to_internal_error)?;
+    }
+
     response
         .status(StatusCode::OK)
         .body(template_result.into())

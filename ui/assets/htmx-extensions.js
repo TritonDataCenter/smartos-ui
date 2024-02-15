@@ -1,6 +1,6 @@
-// The HTMX extensions don't have ES6 module support (like HTMX itself), so any
-// extensions we need can be copied here (they're usually very small) and
-// wrapped in a function.
+// The HTMX extensions don't have ES6 module support (thouhg HTMX itself does),
+// so any extensions we need can be copied here (they're usually very small),
+// wrapped in a function, and exported.
 
 // Remove Me Extension: https://htmx.org/extensions/remove-me/
 export const removeMe = htmx => {
@@ -8,7 +8,9 @@ export const removeMe = htmx => {
     const timing = elt.getAttribute('remove-me') || elt.getAttribute('data-remove-me')
     if (timing) {
       setTimeout(function () {
-        elt.parentElement.removeChild(elt)
+        if (elt && elt.parentElement) {
+          elt.parentElement.removeChild(elt)
+        }
       }, htmx.parseInterval(timing))
     }
   }

@@ -9,8 +9,8 @@
     {% if instance.generic.state == "running" %}
       <button
         data-hx-post="/instances/{{instance.generic.uuid}}/stop"
-        data-hx-target="#main"
-        data-hx-select="#content"
+        data-hx-target="#notifications"
+        data-hx-swap="beforeend"
         data-hx-confirm="Are you sure you want to stop this instance?"
         data-hx-indicator="#instance-stop-indicator"
         data-hx-disabled-elt="this"
@@ -30,8 +30,8 @@
     {% else %}
       <button
         data-hx-post="/instances/{{instance.generic.uuid}}/start"
-        data-hx-target="#main"
-        data-hx-select="#content"
+        data-hx-target="#notifications"
+        data-hx-swap="beforeend"
         data-hx-indicator="#instance-start-indicator"
         data-hx-disabled-elt="this"
         title="Start this instance"
@@ -50,8 +50,8 @@
     {% endif %}
     <button
       data-hx-delete="/instances/{{instance.generic.uuid}}"
-      data-hx-target="#main"
-      data-hx-select="#content"
+      data-hx-target="#notifications"
+      data-hx-swap="beforeend"
       data-hx-confirm="Are you sure you want to delete this instance?"
       data-hx-indicator="#instance-delete-indicator"
       data-hx-disabled-elt="this"
