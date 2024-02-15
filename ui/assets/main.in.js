@@ -54,11 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
     setupProvisioningForm()
   }
 
+  // When a notification is loaded which contains a redirect, it will also
+  // have a data-created-at attribute. If the current path does not equal
+  // the value in that attribute, do not redirect.
   htmx.on('htmx:beforeRequest', (e) => {
-    console.log('htmx:beforeRequest', e.target.dataset.createdAt, document.location.pathname)
-    // When a notification is loaded which contains a redirect, it will also
-    // have a data-created-at attribute. If the current path does not equal
-    // the value in that attribute, do not redirect.
     if (e.target.dataset.createdAt &&
       document.location.pathname !== e.target.dataset.createdAt) {
       e.preventDefault()
