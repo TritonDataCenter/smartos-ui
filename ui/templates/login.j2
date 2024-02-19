@@ -3,7 +3,7 @@
 {% block title %}SmartOS UI Login{% endblock %}
 {% block scripts %}{% endblock %}
 {% block body %}
-<body class="h-full">
+<body class="min-h-screen">
     {% if !executor || !vminfod %}
         <div class="rounded-md bg-white p-4 mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
             <div class="flex">
@@ -12,12 +12,12 @@
                 </div>
                 <div class="ml-3">
                     <h3 class="text-sm font-medium text-red-800">
-                        {#
-                            TODO: Handle this automatically with hx-trigger="every ..."
-                        #}
-                        Backend services not yet ready.
-                        Refresh the page and try again.
+                        The backend service is unavailable or not yet ready.
+                        Trying again automatically in 30 seconds.
                     </h3>
+                    <script type="application/javascript">
+                        setTimeout(() => document.location.reload(), 30000)
+                    </script>
                 </div>
             </div>
         </div>
@@ -45,7 +45,12 @@
                         <div>
                             <label for="user" class="block text-sm font-medium leading-6 text-white">User</label>
                             <div class="mt-2">
-                                <input id="user" name="user" type="text" required class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
+                                <input
+                                    id="user"
+                                    name="user"
+                                    type="text"
+                                    required
+                                    class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
                             </div>
                         </div>
                         <div>
@@ -53,7 +58,11 @@
                                 <label for="password" class="block text-sm font-medium leading-6 text-white">Password</label>
                             </div>
                             <div class="mt-2">
-                                <input id="password" name="password" type="password" required class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type="password" required
+                                    class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
                             </div>
                         </div>
                         <div>
@@ -63,17 +72,13 @@
                 </div>
             </div>
         </div>
-        {% if crate::DEBUG %}
-        <script type="application/javascript">
-        document.addEventListener('DOMContentLoaded', () => {
-            if (document.location.host === 'localhost:8080') {
-                document.getElementById('user').value = 'root'
-                document.getElementById('password').value = 'root'
-                document.getElementById('login').submit()
-            }
-        })
-        </script>
-        {%  endif %}
+        <footer class="sticky w-full  top-[100vh]">
+          <div class="mx-auto max-w-7xl overflow-hidden">
+            <p class="mt-10 mb-10 text-center text-xs leading-5 text-gray-400">
+                Powered by <a class="underline hover:text-gray-300" href="https://smartos.org" target="_blank">SmartOS</a>
+            </p>
+          </div>
+        </footer>
     {%  endif %}
 </body>
 {% endblock %}
