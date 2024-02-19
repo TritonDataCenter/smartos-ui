@@ -20,7 +20,6 @@ use smartos_shared::image::{Image, ImageImportParams, ImportStatus, Manifest};
 use dropshot::{endpoint, HttpError, Path, RequestContext, TypedBody};
 use hyper::{Body, Response, StatusCode};
 use slog::{debug, error, info};
-use time::OffsetDateTime;
 use tokio::process::Command;
 
 #[endpoint {
@@ -172,19 +171,13 @@ pub async fn post_import_by_id(
         queue.insert(
             id,
             Image {
-                manifest: Manifest {
-                    uuid: id,
-                    name: req.name,
-                    version: req.version,
-                    state: "importing".to_string(),
-                    published_at: OffsetDateTime::now_utc(),
-                    r#type: req.r#type,
-                    os: req.os,
-                    description: String::new(),
-                    homepage: None,
-                    requirements: None,
-                    disabled: true,
-                },
+                manifest: Manifest::new_for_import(
+                    id,
+                    req.name,
+                    req.version,
+                    req.r#type,
+                    req.os,
+                ),
                 source: req.url.clone(),
                 import_status: Some(ImportStatus::Importing),
             },

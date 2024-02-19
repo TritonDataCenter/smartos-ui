@@ -19,15 +19,23 @@
         <div class="sm:col-span-2 sm:col-start-1">
           <label for="disk_{{loop.index}}_image_uuid" class="block text-sm font-medium leading-6 text-white">Image UUID</label>
           <div class="mt-2">
-            <input type="text" name="disk_{{loop.index}}_image_uuid" id="disk_{{loop.index}}_image_uuid" autocomplete="address-level2" class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-              value={{disk.image_uuid}} readonly>
+            <input
+              type="text"
+              name="disk_{{loop.index}}_image_uuid"
+              id="disk_{{loop.index}}_image_uuid"
+              class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              value="{{disk.image_uuid}}" readonly>
           </div>
         </div>
 
         <div class="sm:col-span-2">
           <label for="disk_{{loop.index}}_image_size" class="block text-sm font-medium leading-6 text-white">Image Size <sup>MiB</sup></label>
           <div class="mt-2">
-            <input type="text" name="disk_{{loop.index}}_image_size" id="disk_{{loop.index}}_image_size" class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            <input
+              type="text"
+              name="disk_{{loop.index}}_image_size"
+              id="disk_{{loop.index}}_image_size"
+              class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
               value="{{disk.image_size}}" readonly>
           </div>
         </div>

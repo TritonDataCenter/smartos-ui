@@ -1,4 +1,5 @@
 {%- import "macros/icons.j2" as icons -%}
+{%- import "macros/inputs.j2" as input -%}
 {% extends "layout/authed.j2" %}
 {% block title %}{{title}}{% endblock %}
 {% block content %}
@@ -36,29 +37,133 @@
     <div class="space-y-12">
       <div class="pb-12">
         <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+          {% call input::text_view("UUID", image.manifest.uuid) %}
+          {% call input::text_view("Owner", image.manifest.owner) %}
+          {% call input::text_view("Name", image.manifest.name) %}
+          {% call input::text_view("Version", image.manifest.version) %}
+          {% match image.manifest.description %}
+            {% when Some with (description) %}
+              {% call input::text_view("Description", description) %}
+            {% when None %}
+          {% endmatch %}
+          {% match image.manifest.homepage %}
+            {% when Some with (homepage) %}
+              {% call input::text_view("Homepage", homepage) %}
+            {% when None %}
+          {% endmatch %}
+          {% match image.manifest.eula %}
+            {% when Some with (eula) %}
+              {% call input::text_view("EULA", eula) %}
+            {% when None %}
+          {% endmatch %}
+          {% call input::text_view("State", image.manifest.state) %}
+          {% match image.manifest.icon %}
+            {% when Some with (icon) %}
+              {% call input::bool_view(
+                "Icon",
+                "icon",
+                icon,
+                "Indicates if the image has an icon file.")
+              %}
+            {% when None %}
+          {% endmatch %}
+          {% call input::bool_view(
+            "Disabled",
+            "disabled",
+            image.manifest.disabled,
+            "Indicates if this image is available for provisioning.")
+          %}
+          {% call input::bool_view(
+            "Public",
+            "public",
+            image.manifest.public,
+            "Indicates if this image is publicly available.")
+          %}
+          {% match image.manifest.published_at %}
+            {% when Some with (published_at) %}
+              {% call input::text_view("Published", published_at) %}
+            {% when None %}
+          {% endmatch %}
+          {% call input::text_view("Type", image.manifest.type) %}
+          {% call input::text_view("OS", image.manifest.os) %}
+          {% match image.manifest.generate_passwords %}
+            {% when Some with (generate_passwords) %}
+              {% call input::bool_view(
+                "Generate Passwords",
+                "generate_passwords",
+                generate_passwords,
+                "A boolean indicating whether to generate passwords for the users in the \"users\" field.")
+              %}
+            {% when None %}
+          {% endmatch %}
+          {% match image.manifest.inherited_directories %}
+            {% when Some with (inherited_directories) %}
+              {% for dir in inherited_directories %}
 
-          <div class="sm:col-span-4">
-            <label for="alias" class="block text-sm font-medium leading-6 text-white">Name</label>
-            <div class="mt-2">
-              <div class="flex rounded-md bg-white/5 ring-1 ring-inset ring-white/10 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500">
-                <span class="flex select-none items-center pl-3 text-gray-500 sm:text-sm">{{image.manifest.name}}</span>
-                <input type="text" name="alias" id="alias" class="flex-1 border-0 bg-transparent py-1.5 pl-1 text-white focus:ring-0 sm:text-sm sm:leading-6">
-              </div>
-            </div>
-          </div>
-        
-          <div class="sm:col-span-4">
-              <label for="brand" class="block text-sm font-medium leading-6 text-white">OS</label>
-              <div class="mt-2">
-                <div class="flex rounded-md bg-white/5 ring-1 ring-inset ring-white/10 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500">
-                  <span class="flex select-none items-center pl-3 text-gray-500 sm:text-sm">{{image.manifest.os}}</span>
-                  <input type="text" name="brand" id="brand" class="flex-1 border-0 bg-transparent py-1.5 pl-1 text-white focus:ring-0 sm:text-sm sm:leading-6">
+                <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+                  <span class="text-base font-semibold leading-7 text-white">Inherited Directory {{loop.index}}</span>
                 </div>
-              </div>
-            </div>
-          </div>
+
+                <div class="sm:col-span-2 sm:col-start-1">
+                  <label for="disk_{{loop.index}}_image_uuid" class="block text-sm font-medium leading-6 text-white">Directory</label>
+                  <div class="mt-2">
+                    <input type="text"
+                      name="inherited_directories_{{loop.index}}"
+                      id="inherited_directories_{{loop.index}}"
+                      class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+                      value={{dir}} readonly>
+                  </div>
+                </div>
+
+              {% endfor %}
+            {% when None %}
+          {% endmatch %}
+          {% match image.manifest.nic_driver %}
+            {% when Some with (nic_driver) %}
+              {% call input::text_view("Nic Driver", nic_driver) %}
+            {% when None %}
+          {% endmatch %}
+          {% match image.manifest.disk_driver %}
+            {% when Some with (disk_driver) %}
+              {% call input::text_view("Disk Driver", disk_driver) %}
+            {% when None %}
+          {% endmatch %}
+          {% match image.manifest.cpu_type %}
+            {% when Some with (cpu_type) %}
+              {% call input::text_view("CPU Type", cpu_type) %}
+            {% when None %}
+          {% endmatch %}
+          {% match image.manifest.image_size %}
+            {% when Some with (image_size) %}
+              {% call input::text_view("Image Size (MiB)", image_size) %}
+            {% when None %}
+          {% endmatch %}
+          {% match image.manifest.channels %}
+            {% when Some with (channels) %}
+              {% for channel in channels %}
+
+                <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+                  <span class="text-base font-semibold leading-7 text-white">Channel {{loop.index}}</span>
+                </div>
+
+                <div class="sm:col-span-2 sm:col-start-1">
+                  <label for="disk_{{loop.index}}_image_uuid" class="block text-sm font-medium leading-6 text-white">Channel</label>
+                  <div class="mt-2">
+                    <input type="text"
+                      name="inherited_directories_{{loop.index}}"
+                      id="inherited_directories_{{loop.index}}"
+                      class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+                      value={{channel}} readonly>
+                  </div>
+                </div>
+
+              {% endfor %}
+            {% when None %}
+          {% endmatch %}
+        </div>
       </div>
     </div>
   </div>
+
 </form>
 {% endblock %}

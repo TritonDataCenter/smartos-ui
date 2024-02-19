@@ -132,8 +132,7 @@
                         {%  for image in list %}
                           <option
                             {% if image.manifest.uuid.to_string() == image_uuid %}selected{% endif %}
-                            value="{{image.manifest.uuid}}"
-                            title="{{image.manifest.description}}">
+                            value="{{image.manifest.uuid}}">
                             {{image.manifest.name}} {{image.manifest.version}}
                           </option>
                         {% endfor %}
