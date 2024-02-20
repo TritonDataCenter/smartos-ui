@@ -45,8 +45,18 @@
               </li>
             </ul>
           </li>
-          <li class="-mx-6 mt-auto">
-            <a href="/logout" class="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-white hover:bg-gray-800">
+          <li class="-mx-2 mt-auto">
+            <a
+              href="https://docs.smartos.org/"
+              target="_blank"
+              class="{{inactive}} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer">
+              {% call icons::book("") %}
+              SmartOS Docs
+            </a>
+          </li>
+          <li class="-mx-2 mb-2 -mt-6">
+            <a href="/logout"
+            class="{{inactive}} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer">
               {% call icons::logout("") %}
               Logout
             </a>

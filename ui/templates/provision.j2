@@ -133,7 +133,7 @@
                           <option
                             {% if image.manifest.uuid.to_string() == image_uuid %}selected{% endif %}
                             value="{{image.manifest.uuid}}">
-                            {{image.manifest.name}} {{image.manifest.version}}
+                            {{image.manifest.name}} {{image.manifest.version}} ({{image.manifest.uuid}})
                           </option>
                         {% endfor %}
                       </optgroup>
@@ -162,7 +162,7 @@
                     required
                     class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
                     {% if let Some(current_image) = selected_image %}
-                      {%  if current_image.manifest.type == "zvol" %}
+                      {%  if current_image.manifest.type == ImageType::ZVol %}
                         <option
                           {% if brand.to_string() == "bhyve" %}selected{% endif %}
                           value="bhyve"
@@ -173,27 +173,27 @@
                           {% if brand.to_string() == "kvm" %}selected{% endif %}
                           value="kvm"
                           title="The KVM hypervisor ported from Linux.">
-                          KVM
+                          kvm
                         </option>
-                      {% else if (current_image.manifest.type == "zone-dataset") %}
+                      {% else if (current_image.manifest.type == ImageType::ZoneDataset) %}
                           <option
                             {% if brand.to_string() == "joyent" %}selected{% endif %}
                             value="joyent"
                             title="Joyent Native Zone">
-                            Joyent
+                            joyent
                           </option>
                           <option
                             {% if brand.to_string() == "joyent-minimal" %}selected{% endif %}
                             value="joyent-minimal"
                             title="Joyent Minimal Native Zone">
-                            Joyent Minimal
+                            joyent-minimal
                           </option>
-                      {% else if (current_image.manifest.type == "lx-dataset") %}
+                      {% else if (current_image.manifest.type == ImageType::LXDataset) %}
                         <option
                           {% if brand.to_string() == "lx" %}selected{% endif %}
                           value="lx"
                           title="LX branded zone for running Linux binaries">
-                          LX
+                          lx
                         </option>
                       {% endif %}
                     {% else %}
@@ -204,7 +204,7 @@
               </div>
 
               {% if let Some(current_image) = selected_image %}
-                {% if current_image.manifest.type == "lx-dataset" %}
+                {% if current_image.manifest.type == ImageType::LXDataset %}
                 <div class="col-span-full">
                   <label for="quota" class="block text-sm font-medium leading-6 text-white">Kernel Version</label>
                   <div class="mt-2">

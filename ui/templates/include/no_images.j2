@@ -1,4 +1,4 @@
-<div class="text-center mt-6">
+<div class="text-center mt-20">
   <div class="htmx-indicator mx-auto h-12 w-12 text-gray-400" id="import-main-loader">
     <div class="loader-icon">
       {% call icons::loading("h-10 w-10") %}
@@ -7,8 +7,10 @@
       {% call icons::empty_box("h-10 w-10") %}
     </div>
   </div>
-  <h3 class="mt-2 text-sm font-semibold text-white">No Images Installed</h3>
-  <p class="mt-1 text-sm text-gray-500">Get started by importing an image.</p>
+  <h3 class="mt-2 text-lg font-semibold text-white">No images are installed</h3>
+  <p class="mt-1 text-sm text-gray-500">
+    An instance is created from an image, you must first import an image before you may provision any instances.
+  </p>
   <div class="mt-6">
     <button
       type="button"

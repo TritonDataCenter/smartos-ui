@@ -23,6 +23,8 @@ use hyper::{Body, Response};
 pub struct DashboardTemplate<'a> {
     title: &'a str,
     sysinfo: Sysinfo,
+    image_count: usize,
+    instance_count: usize,
 }
 
 #[endpoint {
@@ -40,7 +42,28 @@ pub async fn get_index(
     let sysinfo =
         ctx.context().client.get_sysinfo().await.map_err(to_internal_error)?;
 
-    let template = DashboardTemplate { title: "Dashboard", sysinfo };
+    let image_count = ctx
+        .context()
+        .client
+        .get_images()
+        .await
+        .map_err(to_internal_error)?
+        .len();
+
+    let instance_count = ctx
+        .context()
+        .client
+        .get_instances()
+        .await
+        .map_err(to_internal_error)?
+        .len();
+
+    let template = DashboardTemplate {
+        title: "Dashboard",
+        sysinfo,
+        image_count,
+        instance_count,
+    };
     let result = template.render().map_err(to_internal_error)?;
     htmx_response(response, "/dashboard", result.into())
 }

@@ -96,7 +96,7 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
-                  {% for instance in instances %}
+                  {% for (instance, image) in instances %}
                   <tr
                     data-hx-get="/instances/{{instance.uuid}}"
                     data-hx-target="#main"
@@ -104,14 +104,16 @@
                     class="hover:bg-gray-800 cursor-pointer">
                     <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
                       <div class="flex items-center gap-x-4">
-                        <div class="truncate text-sm font-medium leading-6 text-white">{{instance.alias.as_deref().unwrap_or("-")}}</div>
+                        <div class="truncate text-sm font-medium leading-6 text-white">
+                          {{instance.alias.as_deref().unwrap_or("-")}}
+                        </div>
                       </div>
                     </td>
                     <td class="hidden py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
-                      <time datetime="2023-01-23T11:00">{{instance.brand}}</time>
+                      {{instance.brand}}
                     </td>
                     <td class="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
-                        {{instance.image_uuid}}
+                        <a class="text-sm underline hover:text-gray-300" href="/images/{{instance.image_uuid}}">{{image}}</a>
                     </td>
                     <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
                       {% if instance.hvm %}

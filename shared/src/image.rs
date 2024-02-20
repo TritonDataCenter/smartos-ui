@@ -12,6 +12,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fmt::{Display, Error, Formatter};
+use std::str::FromStr;
 use url::Url;
 use uuid::Uuid;
 
@@ -77,11 +78,11 @@ pub struct Manifest {
     /// a new SmartOS zone, "lx-dataset" for a Lx-brand image, "lxd" for a
     /// LXD image, "zvol" for a virtual machine image or "other" for image
     /// types that serve any other specific purpose.
-    pub r#type: String, // TODO: use Type
+    pub r#type: Type,
 
     /// The OS family this image provides. One of "smartos", "windows",
     /// "linux", "bsd", "illumos" or "other".
-    pub os: String, // TODO: use OS
+    pub os: String,
 
     /// A set of named requirements for provisioning a VM with this image
     pub requirements: Option<Value>, // TODO: Use Requirements
@@ -142,7 +143,7 @@ impl Manifest {
             owner: Default::default(),
             name,
             version,
-            r#type,
+            r#type: Type::from_str(r#type.as_str()).unwrap_or_default(),
             os,
             state: "importing".to_string(),
             published_at: None, //OffsetDateTime::now_utc(),
@@ -187,7 +188,17 @@ pub struct Image {
 
 impl Image {
     pub fn is_for_hvm(&self) -> bool {
-        self.manifest.r#type == "zvol"
+        self.manifest.r#type == Type::ZVol
+    }
+    pub fn group_name(&self) -> String {
+        match self.manifest.r#type {
+            Type::ZVol => String::from("Hardware Virtual Machine"),
+            Type::LXDataset | Type::LXD => {
+                String::from("Container-native Linux")
+            }
+            Type::ZoneDataset => String::from("SmartOS Zone (Container)"),
+            Type::Other => String::from("Other"),
+        }
     }
 }
 
@@ -232,7 +243,7 @@ impl Default for State {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, JsonSchema, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, JsonSchema, Eq, PartialEq, Clone)]
 pub enum Type {
     #[serde(rename = "zone-dataset")]
     ZoneDataset,
@@ -261,5 +272,20 @@ impl Display for crate::image::Type {
 impl Default for Type {
     fn default() -> Self {
         Self::Other
+    }
+}
+
+impl FromStr for Type {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "zone-dataset" => Ok(Type::ZoneDataset),
+            "lx-dataset" => Ok(Type::LXDataset),
+            "lxd" => Ok(Type::LXD),
+            "zvol" => Ok(Type::ZVol),
+            "other" => Ok(Type::Other),
+            _ => Err(format!("Unknown type provided: {}", s)),
+        }
     }
 }

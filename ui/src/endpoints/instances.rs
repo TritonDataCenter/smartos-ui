@@ -23,7 +23,6 @@ use smartos_shared::instance::{
 };
 use smartos_shared::nictag::NicTag;
 
-use crate::endpoints::filters::format_word;
 use askama::Template;
 use dropshot::{endpoint, HttpError, Path, Query, RequestContext, TypedBody};
 use http::StatusCode;
@@ -31,7 +30,7 @@ use hyper::{Body, Response};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use smartos_shared::http_server::to_bad_request;
-use smartos_shared::image::Image;
+use smartos_shared::image::{Image, Type as ImageType};
 
 #[derive(Template)]
 #[template(path = "instance.j2")]
@@ -209,7 +208,7 @@ pub struct InstancesTemplate<'a> {
     total_quota: u64,
     total_cpu: f32,
     title: &'a str,
-    instances: Vec<InstanceView>,
+    instances: Vec<(InstanceView, String)>,
 }
 
 #[endpoint {
@@ -223,25 +222,35 @@ pub async fn get_index(
     if !Session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
+    let mut instances: Vec<(InstanceView, String)> = Vec::new();
 
-    let image_count = ctx
-        .context()
-        .client
-        .get_images()
-        .await
-        .map_err(to_internal_error)?
-        .len();
+    let images =
+        ctx.context().client.get_images().await.map_err(to_internal_error)?;
+    let image_count = images.len();
 
-    let instances = ctx
+    let mut instance_views = ctx
         .context()
         .client
         .get_instances()
         .await
         .map_err(to_internal_error)?;
 
-    let total_ram = instances.iter().fold(0, |acc, i| i.ram + acc);
-    let total_quota = instances.iter().fold(0, |acc, i| i.disk_usage + acc);
-    let total_cpu = instances.iter().fold(0.0, |acc, i| i.cpu + acc);
+    let total_ram = instance_views.iter().fold(0, |acc, i| i.ram + acc);
+    let total_quota =
+        instance_views.iter().fold(0, |acc, i| i.disk_usage + acc);
+    let total_cpu = instance_views.iter().fold(0.0, |acc, i| i.cpu + acc);
+
+    for instance in instance_views.drain(..) {
+        let image_name = if let Some(image) =
+            images.iter().find(|&i| i.manifest.uuid == instance.image_uuid)
+        {
+            format!("{}@{}", image.manifest.name, image.manifest.version)
+        } else {
+            instance.image_uuid.to_string().clone()
+        };
+        instances.push((instance, image_name));
+    }
+
     let template = InstancesTemplate {
         image_count,
         total_ram,
@@ -362,21 +371,11 @@ pub async fn get_provision(
         if image_uuid == image.manifest.uuid.to_string() {
             selected_image = Some(image.clone())
         }
-        let virt_type = if image.is_for_hvm() {
-            "Hardware Virtualization"
-        } else {
-            "Native Virtualization"
-        };
-        let key = format!(
-            "{} ({} {})",
-            virt_type,
-            format_word(&image.manifest.os).unwrap_or_default(),
-            format_word(&image.manifest.r#type).unwrap_or_default()
-        );
-        if let Some(image_vec) = image_list.get_mut(&key) {
+
+        if let Some(image_vec) = image_list.get_mut(&image.group_name()) {
             image_vec.push(image);
         } else {
-            image_list.insert(key, vec![image]);
+            image_list.insert(image.group_name(), vec![image]);
         }
     }
 
@@ -446,19 +445,19 @@ pub async fn post_provision(
     let exec_result = if result.status().is_success() {
         let buttons = vec![
             Button {
-                text: String::from("Ok"),
+                text: String::from("Instance Details"),
                 classes: vec![String::from("btn-primary")],
                 attributes: vec![
-                    String::from("data-hx-get=\"/instances\""),
+                    format!("data-hx-get=\"/instances/{}\"", uuid),
                     String::from("data-hx-target=\"#main\""),
                     String::from("data-hx-select=\"#content\""),
                 ],
             },
             Button {
-                text: String::from("View Instance"),
+                text: String::from("Instance List"),
                 classes: vec![String::from("btn-clear")],
                 attributes: vec![
-                    format!("data-hx-get=\"/instances/{}\"", uuid),
+                    String::from("data-hx-get=\"/instances\""),
                     String::from("data-hx-target=\"#main\""),
                     String::from("data-hx-select=\"#content\""),
                 ],
