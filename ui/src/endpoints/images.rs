@@ -17,9 +17,11 @@ use crate::session::Session;
 use smartos_shared::image::{Image, ImageImportParams};
 
 use askama::Template;
-use dropshot::{endpoint, HttpError, Path, RequestContext, TypedBody};
+use dropshot::{endpoint, HttpError, Path, Query, RequestContext, TypedBody};
 use http::StatusCode;
 use hyper::{Body, Response};
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 use smartos_shared::http_server::{to_internal_error, GenericResponse};
 
 #[derive(Template)]
@@ -55,6 +57,13 @@ pub async fn get_index(
 pub struct ImageTemplate {
     title: String,
     image: Image,
+    json: Option<String>,
+}
+
+#[derive(Deserialize, Serialize, Debug, JsonSchema)]
+pub struct AsJson {
+    #[serde(default)]
+    pub json: Option<bool>,
 }
 
 #[endpoint {
@@ -64,6 +73,7 @@ path = "/images/{id}"
 pub async fn get_by_id(
     ctx: RequestContext<Context>,
     path_params: Path<PathParams>,
+    query_params: Query<AsJson>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
     if !Session::is_valid(&ctx) {
@@ -74,9 +84,20 @@ pub async fn get_by_id(
     let image =
         ctx.context().client.get_image(&id).await.map_err(to_internal_error)?;
 
+    let mut json_string = None;
+    if let Some(as_json) = query_params.into_inner().json {
+        if as_json {
+            json_string = Some(
+                serde_json::to_string_pretty(&image)
+                    .unwrap_or(String::from("{}")),
+            )
+        }
+    }
+
     let template = ImageTemplate {
         title: format!("Image: {}", image.manifest.name),
         image,
+        json: json_string,
     };
     let result = template.render().map_err(to_internal_error)?;
 
@@ -156,7 +177,20 @@ pub async fn get_import_index(
         .get_available_images()
         .await
         .map_err(to_internal_error)?;
+
+    let installed_images =
+        ctx.context().client.get_images().await.map_err(to_internal_error)?;
+
+    images.retain(|available| {
+        !installed_images
+            .iter()
+            .any(|installed| {
+                installed.manifest.uuid == available.manifest.uuid
+            })
+    });
+
     images.reverse();
+
     let template =
         ImportTemplate { title: "Available Images".to_string(), images };
 

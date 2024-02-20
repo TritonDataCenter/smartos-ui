@@ -1,6 +1,7 @@
 import htmx from 'htmx.org'
 import { $, $$ } from './global'
 import { setupProvisioningForm } from './provision'
+import { setupJSONViewer } from './json-viewer'
 import { removeMe } from './htmx-extensions'
 
 removeMe(htmx)
@@ -45,6 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
   htmx.on('htmx:afterSettle', ({ detail: { pathInfo: { requestPath } } }) => {
     if (requestPath === '/provision') {
       setupProvisioningForm()
+    } else {
+      setupJSONViewer()
     }
   })
 
@@ -52,6 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // need to setup the forms here too.
   if (document.location.pathname === '/provision') {
     setupProvisioningForm()
+  } else {
+    setupJSONViewer()
   }
 
   // When a notification is loaded which contains a redirect, it will also

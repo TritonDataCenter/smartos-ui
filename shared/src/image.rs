@@ -85,12 +85,12 @@ pub struct Manifest {
     pub os: String,
 
     /// A set of named requirements for provisioning a VM with this image
-    pub requirements: Option<Value>, // TODO: Use Requirements
+    pub requirements: Option<Requirements>,
 
     /// A list of users for which passwords should be generated for
     /// provisioning. This may only make sense for some images
     /// Example: `[{"name": "root"}, {"name": "admin"}]`
-    pub users: Option<Vec<Value>>, // TODO use Option<Vec<User>>
+    pub users: Option<Vec<User>>,
 
     /// A list of tags that can be used by operators for additional billing
     /// processing.
@@ -101,7 +101,7 @@ pub struct Manifest {
 
     /// An object that defines a collection of properties that is used by other
     /// APIs to evaluate where should customer VMs be placed.
-    pub tags: Option<Value>, // TODO use Hashmap?
+    pub tags: Option<Value>,
 
     /// A boolean indicating whether to generate passwords for the users in the
     /// "users" field. If not present, the default value is true.
@@ -168,6 +168,44 @@ impl Manifest {
             channels: None,
         }
     }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct User {
+    pub name: String,
+}
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Network {
+    pub name: String,
+    pub description: String,
+}
+
+/// A set of named requirements for provisioning a VM with this image
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Requirements {
+    /// Defines the minimum number of network interfaces required by this image.
+    pub networks: Option<Vec<Network>>,
+
+    /// Defines the brand that is required to provision with this image.
+    pub brand: Option<String>,
+
+    /// Indicates that provisioning with this image requires that an SSH public key be provided.
+    pub ssh_key: Option<bool>,
+
+    /// Minimum RAM (in MiB) required to provision this image.
+    pub min_ram: Option<u64>,
+
+    /// Maximum RAM (in MiB) this image may be provisioned with.
+    pub max_ram: Option<u64>,
+
+    /// Minimum platform requirement for provisioning with this image.
+    pub min_platform: Option<Value>,
+
+    /// Maximum platform requirement for provisioning with this image.
+    pub max_platform: Option<Value>,
+
+    /// Bootrom image to use with this image.
+    pub bootrom: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
