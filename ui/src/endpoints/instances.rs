@@ -29,7 +29,6 @@ use http::StatusCode;
 use hyper::{Body, Response};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use slog::info;
 use smartos_shared::http_server::to_bad_request;
 use smartos_shared::image::{Image, Type as ImageType};
 use smartos_shared::sysinfo::Sysinfo;

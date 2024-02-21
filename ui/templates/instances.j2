@@ -46,7 +46,7 @@
           <p class="mt-2 flex items-baseline gap-x-2">
             <span class="text-4xl font-semibold tracking-tight text-white">
               {{provisioned_cpu}}
-              <span class="text-gray-300 text-3xl"> / {{total_cpu}}</span>
+              <span class="text-gray-300 text-3xl font-normal"> / {{total_cpu}}</span>
               </span>
             <span class="text-sm text-gray-400">vCPUs + Shares</span>
           </p>
@@ -56,7 +56,7 @@
           <p class="mt-2 flex items-baseline gap-x-2">
             <span class="text-4xl font-semibold tracking-tight text-white">
               {{provisioned_ram|mib_to_gib}}
-              <span class="text-gray-300 text-3xl"> / {{total_ram|mib_to_gib}}</span>
+              <span class="text-gray-300 text-3xl font-normal"> / {{total_ram|mib_to_gib}}</span>
             </span>
             <span class="text-sm text-gray-400">GiB</span>
           </p>
@@ -66,7 +66,7 @@
           <p class="mt-2 flex items-baseline gap-x-2">
             <span class="text-4xl font-semibold tracking-tight text-white">
               {{provisioned_quota|mib_to_gib}}
-              <span class="text-gray-300 text-3xl"> / {{total_quota}}</span>
+              <span class="text-gray-300 text-3xl font-normal"> / {{total_quota}}</span>
             </span>
             <span class="text-sm text-gray-400">GiB</span>
           </p>
