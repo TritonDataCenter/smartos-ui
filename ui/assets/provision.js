@@ -237,6 +237,7 @@ export const setupProvisioningForm = () => {
   const active = 'active-editor-tab'
   const inactive = 'inactive-editor-tab'
   const updateEditors = window.updateEditors
+  let editorsSetup = false
 
   function clearStyle ($tabs, $buttons) {
     $tabs.forEach($element => $element.classList.add('hidden'))
@@ -249,18 +250,25 @@ export const setupProvisioningForm = () => {
   $editorTabs.forEach($tab => {
     const editors = window.editors
     const { name } = $tab.dataset
-    if (!$tab.querySelector('.cm-editor')) {
-      const parent = $tab.querySelector('.editor-wrapper')
-      const extensions = [basicSetup, json(), oneDark]
-      if ($tab.dataset.readOnly) {
-        extensions.push(EditorState.readOnly.of(true))
-      }
-      editors[name] = new EditorView({
-        extensions,
-        parent
-      })
+    if ($tab.querySelector('.cm-editor')) {
+      editorsSetup = true
+      return
     }
+    const parent = $tab.querySelector('.editor-wrapper')
+    const extensions = [basicSetup, json(), oneDark]
+    if ($tab.dataset.readOnly) {
+      extensions.push(EditorState.readOnly.of(true))
+    }
+    editors[name] = new EditorView({
+      extensions,
+      parent
+    })
   })
+
+  if (editorsSetup) {
+    // Don't need to re-create event handlers
+    return
+  }
 
   $finalButton.addEventListener('click', () => {
     if (updateEditors()) {
