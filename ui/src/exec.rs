@@ -17,7 +17,7 @@ use http::StatusCode;
 use reqwest::{Client as HTTPClient, RequestBuilder, Response};
 use schemars::JsonSchema;
 use serde::Serialize;
-use serde_json::to_string as stringify;
+use serde_json::{to_string as stringify, Value};
 use smartos_shared::image::{ImageImportParams, Source};
 use smartos_shared::instance::{
     InstancePayload, InstanceValidateResponse, InstanceView,
@@ -260,8 +260,18 @@ impl ExecClient {
         self.get("sysinfo").send().await?.error_for_status()?.json().await
     }
 
+    // TODO need to pass ctx.log to log errors
     pub async fn get_images(&self) -> Result<Vec<Image>, reqwest::Error> {
-        self.get("image").send().await?.error_for_status()?.json().await
+        let mut images: Vec<Image> = Vec::new();
+        let mut response: Vec<Value> =
+            self.get("image").send().await?.error_for_status()?.json().await?;
+        for value in response.drain(..) {
+            match serde_json::from_value(value) {
+                Ok(image) => images.push(image),
+                Err(e) => println!("Error parsing image: {}", e),
+            }
+        }
+        Ok(images)
     }
 
     pub async fn get_image(&self, id: &Uuid) -> Result<Image, reqwest::Error> {
@@ -273,10 +283,20 @@ impl ExecClient {
             .await
     }
 
+    // TODO need to pass ctx.log to log errors
     pub async fn get_available_images(
         &self,
     ) -> Result<Vec<Image>, reqwest::Error> {
-        self.get("avail").send().await?.error_for_status()?.json().await
+        let mut images: Vec<Image> = Vec::new();
+        let mut response: Vec<Value> =
+            self.get("avail").send().await?.error_for_status()?.json().await?;
+        for value in response.drain(..) {
+            match serde_json::from_value(value) {
+                Ok(image) => images.push(image),
+                Err(e) => println!("Error parsing image: {}", e)
+            }
+        }
+        Ok(images)
     }
 
     pub async fn delete_image(&self, id: &Uuid) -> Result<(), reqwest::Error> {
