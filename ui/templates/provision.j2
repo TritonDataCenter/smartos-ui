@@ -185,7 +185,6 @@
                     name="ram"
                     id="ram"
                     min="0"
-                    placeholder="1024"
                     class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
                     value="{{ram}}">
                 </div>
@@ -201,7 +200,6 @@
                         name="primary_disk_size"
                         id="primary_disk_size"
                         min="10"
-                        placeholder="10"
                         class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
                         {# All of our HVM images have a minimum of 10 GiB, can't set this to any lower value than 10 #}
                         onblur="window.inputBoundToMin(this)"
@@ -217,7 +215,6 @@
                         name="quota"
                         id="quota"
                         min="0"
-                        placeholder="8"
                         class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
                         value="{{quota}}">
                     </div>
@@ -235,7 +232,6 @@
                       name="vcpus"
                       id="vcpus"
                       min="0"
-                      placeholder="1"
                       class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
                       value="{{vcpus}}">
                   </div>

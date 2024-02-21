@@ -79,6 +79,17 @@
             </p>
           </div>
         </footer>
+    {% endif %}
+    {% if crate::DEBUG %}
+    <script type="application/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        if (document.location.host === 'localhost:8080') {
+            document.getElementById('user').value = 'root'
+            document.getElementById('password').value = 'root'
+            document.getElementById('login').submit()
+        }
+    })
+    </script>
     {%  endif %}
 </body>
 {% endblock %}
