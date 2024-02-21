@@ -141,6 +141,10 @@ window.updateEditors = () => {
     props.resolvers = resolvers
   }
 
+  if (isHvm && props.vcpus) {
+    props.cpu_cap = props.vcpus * 100
+  }
+
   // how to compute?
   // flexible_disk_size:
   //
