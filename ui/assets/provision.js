@@ -93,7 +93,7 @@ window.updateEditors = () => {
       nic.gateways = [gateway]
     }
   } else if (nicTag && $ipv4Setup && $ipv4Setup.value === 'auto') {
-    nic.ips = ['dhcp', 'addrconf']
+    nic.ips = ['dhcp']
   }
 
   if (nicTag && $ipv6Setup && $ipv6Setup.value === 'static') {
@@ -106,9 +106,7 @@ window.updateEditors = () => {
       nic.ips.push(ip)
     }
   } else if (nicTag && $ipv6Setup && $ipv6Setup.value === 'auto') {
-    if (nic.ips.indexOf('dhcp') === -1) {
-      nic.ips.push(...['dhcp', 'addrconf'])
-    }
+    nic.ips.push('addrconf')
   }
 
   if (Object.keys(nic).length) {
@@ -165,6 +163,7 @@ window.updateEditors = () => {
   //   props.flexible_disk_size = true
   // }
 
+  // Place PI version into body, ensure PI > xxxx here
   // Specifying bootrom, causes vmadm validate to complain about image size...
   // if (props.brand === 'bhyve') {
   //   props.bootrom = 'uefi'

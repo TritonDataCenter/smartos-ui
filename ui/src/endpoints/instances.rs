@@ -296,7 +296,7 @@ pub struct InstanceCreateTemplate {
     resolvers: String,
     vcpus: String,
     kernel_version: String,
-    primary_disk_size: u64
+    primary_disk_size: u64,
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -334,7 +334,7 @@ pub struct ProvisionQuery {
     #[serde(default)]
     kernel_version: String,
     #[serde(default)]
-    primary_disk_size: u64
+    primary_disk_size: u64,
 }
 
 #[endpoint {
