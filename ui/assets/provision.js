@@ -11,6 +11,17 @@ import {
 // HTMLX needs access to the editors
 window.editors = {}
 
+// Ensure an input can't be lower than it's minimium
+window.inputBoundToMin = ($element) => {
+  const parsedValue = parseInt($element.value, 10)
+  const min = $element.min || 0
+  if (isNaN(parsedValue)) {
+    $element.value = min
+  } else {
+    $element.value = parsedValue < min ? min : parsedValue
+  }
+}
+
 // Will interrogate input types for a given <form> and attempt to massage
 // them into basic JSON types.
 // A data attr named data-enctype="TYPE" can be used on any element with a name
@@ -112,10 +123,12 @@ window.updateEditors = () => {
       {
         image_uuid: props.image_uuid,
         boot: true,
-        model: 'virtio'
+        model: 'virtio',
+        image_size: props.primary_disk_size
       }
     ]
     delete props.image_uuid
+    delete props.primary_disk_size
   } else if (props.disks) {
     delete props.disks
   }
