@@ -178,7 +178,7 @@ pub async fn post_import_by_id(
                     req.r#type,
                     req.os,
                 ),
-                source: req.url.clone(),
+                source: Some(req.url.clone()),
                 import_status: Some(ImportStatus::Importing),
             },
         );

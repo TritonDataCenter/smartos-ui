@@ -217,8 +217,7 @@ pub enum ImportStatus {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Image {
     pub manifest: Manifest,
-
-    pub source: Url,
+    pub source: Option<Url>,
 
     // field for internal use
     pub import_status: Option<ImportStatus>,

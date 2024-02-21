@@ -56,34 +56,36 @@
                   <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.type|format_word}}</td>
                   <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:pr-8 lg:pr-20">{{image.manifest.os|format_word}}</td>
                   <td class="py-4 pl-0 pr-4 text-sm leading-6 sm:pr-8 lg:pr-20">
-                    <form
-                      method="POST"
-                      data-hx-post="/import/{{image.manifest.uuid}}"
-                      data-hx-target="#notifications"
-                      data-hx-swap="beforeend">
-                      <input type="hidden" name="url" value="{{image.source}}" />
-                      <input type="hidden" name="name" value="{{image.manifest.name}}" />
-                      <input type="hidden" name="version" value="{{image.manifest.version}}" />
-                      <input type="hidden" name="type" value="{{image.manifest.type}}" />
-                      <input type="hidden" name="os" value="{{image.manifest.os}}" />
-                      <div>
-                        <button
-                          type="submit"
-                          data-hx-disabled-elt="this"
-                          data-hx-indicator="#import-loader-{{image.manifest.uuid}}"
-                          title="Import this image"
-                          class="btn btn-clear p-0">
-                            <span class="htmx-indicator" id="import-loader-{{image.manifest.uuid}}">
-                              <span class="loader-icon">
-                                {% call icons::loading("h-5 w-5 inline") %}
+                    {% if let Some(source) = image.source %}
+                      <form
+                        method="POST"
+                        data-hx-post="/import/{{image.manifest.uuid}}"
+                        data-hx-target="#notifications"
+                        data-hx-swap="beforeend">
+                        <input type="hidden" name="url" value="{{source}}" />
+                        <input type="hidden" name="name" value="{{image.manifest.name}}" />
+                        <input type="hidden" name="version" value="{{image.manifest.version}}" />
+                        <input type="hidden" name="type" value="{{image.manifest.type}}" />
+                        <input type="hidden" name="os" value="{{image.manifest.os}}" />
+                        <div>
+                          <button
+                            type="submit"
+                            data-hx-disabled-elt="this"
+                            data-hx-indicator="#import-loader-{{image.manifest.uuid}}"
+                            title="Import this image"
+                            class="btn btn-clear p-0">
+                              <span class="htmx-indicator" id="import-loader-{{image.manifest.uuid}}">
+                                <span class="loader-icon">
+                                  {% call icons::loading("h-5 w-5 inline") %}
+                                </span>
+                                <span class="default-icon">
+                                  {% call icons::import("h-5 w-5 inline") %}
+                                </span>
                               </span>
-                              <span class="default-icon">
-                                {% call icons::import("h-5 w-5 inline") %}
-                              </span>
-                            </span>
-                        </button>
-                      </div>
-                    </form>
+                          </button>
+                        </div>
+                      </form>
+                    {% endif %}
                   </td>
                 </tr>
                 {% endfor %}
