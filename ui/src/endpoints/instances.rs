@@ -29,8 +29,10 @@ use http::StatusCode;
 use hyper::{Body, Response};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use slog::info;
 use smartos_shared::http_server::to_bad_request;
 use smartos_shared::image::{Image, Type as ImageType};
+use smartos_shared::sysinfo::Sysinfo;
 
 #[derive(Template)]
 #[template(path = "instance.j2")]
@@ -204,9 +206,12 @@ pub async fn stop_by_id(
 #[template(path = "instances.j2")]
 pub struct InstancesTemplate<'a> {
     image_count: usize,
+    provisioned_ram: u64,
     total_ram: u64,
+    provisioned_quota: u64,
     total_quota: u64,
-    total_cpu: f32,
+    provisioned_cpu: f32,
+    total_cpu: u64,
     title: &'a str,
     instances: Vec<(InstanceView, String)>,
 }
@@ -224,6 +229,9 @@ pub async fn get_index(
     }
     let mut instances: Vec<(InstanceView, String)> = Vec::new();
 
+    let Sysinfo { cpu_count, mib_of_memory, zpool_size_in_gib, .. } =
+        ctx.context().client.get_sysinfo().await.map_err(to_internal_error)?;
+
     let images =
         ctx.context().client.get_images().await.map_err(to_internal_error)?;
     let image_count = images.len();
@@ -235,11 +243,10 @@ pub async fn get_index(
         .await
         .map_err(to_internal_error)?;
 
-    let total_ram = instance_views.iter().fold(0, |acc, i| i.ram + acc);
-    let total_quota =
+    let provisioned_ram = instance_views.iter().fold(0, |acc, i| i.ram + acc);
+    let provisioned_quota =
         instance_views.iter().fold(0, |acc, i| i.disk_usage + acc);
-    let total_cpu = instance_views.iter().fold(0.0, |acc, i| i.cpu + acc);
-
+    let provisioned_cpu = instance_views.iter().fold(0.0, |acc, i| i.cpu + acc);
     for instance in instance_views.drain(..) {
         let image_name = if let Some(image) =
             images.iter().find(|&i| i.manifest.uuid == instance.image_uuid)
@@ -253,9 +260,12 @@ pub async fn get_index(
 
     let template = InstancesTemplate {
         image_count,
-        total_ram,
-        total_quota,
-        total_cpu,
+        provisioned_ram,
+        total_ram: mib_of_memory,
+        provisioned_quota,
+        total_quota: zpool_size_in_gib,
+        provisioned_cpu,
+        total_cpu: cpu_count,
         title: "Instances",
         instances,
     };

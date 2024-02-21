@@ -44,21 +44,30 @@
         <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
           <p class="text-sm font-medium leading-6 text-gray-400">Provisioned CPU</p>
           <p class="mt-2 flex items-baseline gap-x-2">
-            <span class="text-4xl font-semibold tracking-tight text-white">{{total_cpu}}</span>
+            <span class="text-4xl font-semibold tracking-tight text-white">
+              {{provisioned_cpu}}
+              <span class="text-gray-300 text-3xl"> / {{total_cpu}}</span>
+              </span>
             <span class="text-sm text-gray-400">vCPUs + Shares</span>
           </p>
         </div>
         <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
           <p class="text-sm font-medium leading-6 text-gray-400">Provisioned Memory</p>
           <p class="mt-2 flex items-baseline gap-x-2">
-            <span class="text-4xl font-semibold tracking-tight text-white">{{total_ram|mib_to_gib}}</span>
+            <span class="text-4xl font-semibold tracking-tight text-white">
+              {{provisioned_ram|mib_to_gib}}
+              <span class="text-gray-300 text-3xl"> / {{total_ram|mib_to_gib}}</span>
+            </span>
             <span class="text-sm text-gray-400">GiB</span>
           </p>
         </div>
         <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 lg:border-l">
           <p class="text-sm font-medium leading-6 text-gray-400">Provisioned Storage</p>
           <p class="mt-2 flex items-baseline gap-x-2">
-            <span class="text-4xl font-semibold tracking-tight text-white">{{total_quota|mib_to_gib}}</span>
+            <span class="text-4xl font-semibold tracking-tight text-white">
+              {{provisioned_quota|mib_to_gib}}
+              <span class="text-gray-300 text-3xl"> / {{total_quota}}</span>
+            </span>
             <span class="text-sm text-gray-400">GiB</span>
           </p>
         </div>

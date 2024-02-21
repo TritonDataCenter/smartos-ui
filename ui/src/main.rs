@@ -43,7 +43,6 @@ async fn main() -> Result<(), String> {
 
     info!(log, "CONFIG: {:#?}", &config);
 
-    // This must occur before chroot
     let ctx = Context::new(config);
 
     if skip_privilege_drop {

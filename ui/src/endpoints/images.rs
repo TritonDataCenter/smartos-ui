@@ -184,9 +184,7 @@ pub async fn get_import_index(
     images.retain(|available| {
         !installed_images
             .iter()
-            .any(|installed| {
-                installed.manifest.uuid == available.manifest.uuid
-            })
+            .any(|installed| installed.manifest.uuid == available.manifest.uuid)
     });
 
     images.reverse();
