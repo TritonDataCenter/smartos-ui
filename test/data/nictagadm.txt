@@ -1,1 +1,2 @@
 admin,d0:50:99:d0:85:34,igb1,normal
+external,d0:50:99:d0:85:34,igb2,normal
