@@ -57,7 +57,7 @@ pub struct Manifest {
     pub icon: Option<bool>,
 
     #[serde(default)]
-    pub state: String, // TODO: use State
+    pub state: String,
 
     /// An object with details on image creation failure. It only exists when state=='failed'.
     pub error: Option<Value>,
@@ -72,7 +72,8 @@ pub struct Manifest {
     // #[serde(
     //     deserialize_with = "time::serde::iso8601::deserialize"
     // )]
-    pub published_at: Option<String>, // deserialize_with = "time::serde::iso8601::deserialize" can't be use with Option, add deserializer
+    // deserialize_with = "time::serde::iso8601::deserialize" can't be use with Option, add deserializer
+    pub published_at: Option<String>,
 
     /// The image type. One of "zone-dataset" for a ZFS dataset used to create
     /// a new SmartOS zone, "lx-dataset" for a Lx-brand image, "lxd" for a
@@ -275,25 +276,6 @@ pub enum State {
     Failed,
     #[serde(rename = "unknown")]
     Unknown,
-}
-
-impl Display for State {
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> Result<(), Error> {
-        match *self {
-            State::Active => write!(fmt, "active"),
-            State::Unactivated => write!(fmt, "unactivated"),
-            State::Disabled => write!(fmt, "disabled"),
-            State::Creating => write!(fmt, "creating"),
-            State::Failed => write!(fmt, "failed"),
-            State::Unknown => write!(fmt, "unknown"),
-        }
-    }
-}
-
-impl Default for State {
-    fn default() -> Self {
-        Self::Unknown
-    }
 }
 
 #[derive(Serialize, Deserialize, Debug, JsonSchema, Eq, PartialEq, Clone)]

@@ -242,7 +242,12 @@
                     <div class="space-y-5">
                       <div class="relative flex items-start">
                         <div class="flex h-6 items-center">
-                          <input id="delegate_dataset" name="delegate_dataset" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600">
+                          <input
+                            id="delegate_dataset"
+                            name="delegate_dataset"
+                            type="checkbox"
+                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                            {% if !delegate_dataset.is_empty() %}checked{% endif %}>
                         </div>
                         <div class="ml-3 text-sm leading-6">
                           <label for="delegate_dataset" class="cursor-pointer font-medium text-white">Delegate Dataset</label>
