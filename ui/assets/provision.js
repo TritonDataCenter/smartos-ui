@@ -117,15 +117,16 @@ window.updateEditors = () => {
     props.nics = [nic]
   }
 
-  if (isHvm && props.image_uuid) {
+  if (props.brand === 'bhyve' && props.image_uuid) {
     props.disks = [
       {
         image_uuid: props.image_uuid,
         boot: true,
         model: 'virtio',
-        image_size: props.primary_disk_size * 1024
+        size: props.primary_disk_size * 1024
       }
     ]
+    props.flexible_disk = props.primary_disk_size * 1024
     delete props.image_uuid
     delete props.primary_disk_size
   } else if (props.disks) {
@@ -147,7 +148,10 @@ window.updateEditors = () => {
   if (props.root_authorized_keys) {
     props.customer_metadata = {
       root_authorized_keys: props.root_authorized_keys,
-      'user-script': '/usr/sbin/mdata-get root_authorized_keys > /root/.ssh/authorized_keys'
+    }
+    if (!isHvm) {
+      props.customer_metadata['user-script'] =
+        '/usr/sbin/mdata-get root_authorized_keys > /root/.ssh/authorized_keys'
     }
     delete props.root_authorized_keys
   }
