@@ -9,7 +9,7 @@
  */
 
 use crate::endpoints::{
-    filters, htmx_response, redirect_login, Context, NotificationKind,
+    filters, htmx_response, redirect_login, AsJson, Context, NotificationKind,
     NotificationTemplate, PathParams,
 };
 use crate::session::Session;
@@ -20,8 +20,6 @@ use askama::Template;
 use dropshot::{endpoint, HttpError, Path, Query, RequestContext, TypedBody};
 use http::StatusCode;
 use hyper::{Body, Response};
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
 use smartos_shared::http_server::{to_internal_error, GenericResponse};
 
 #[derive(Template)]
@@ -60,12 +58,6 @@ pub struct ImageTemplate {
     json: Option<String>,
 }
 
-#[derive(Deserialize, Serialize, Debug, JsonSchema)]
-pub struct AsJson {
-    #[serde(default)]
-    pub json: Option<bool>,
-}
-
 #[endpoint {
 method = GET,
 path = "/images/{id}"
@@ -88,9 +80,12 @@ pub async fn get_by_id(
     if let Some(as_json) = query_params.into_inner().json {
         if as_json {
             json_string = Some(
-                serde_json::to_string_pretty(&image)
-                    .unwrap_or(String::from("{}")),
-            )
+                ctx.context()
+                    .client
+                    .get_image_json(&id)
+                    .await
+                    .map_err(to_internal_error)?,
+            );
         }
     }
 

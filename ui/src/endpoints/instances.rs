@@ -12,7 +12,7 @@ use std::collections::BTreeMap;
 use std::str::FromStr;
 
 use crate::endpoints::{
-    filters, htmx_response, redirect_login, Context, NotificationKind,
+    filters, htmx_response, redirect_login, AsJson, Context, NotificationKind,
     NotificationTemplate, PathParams,
 };
 use crate::session::Session;
@@ -38,6 +38,7 @@ use smartos_shared::sysinfo::Sysinfo;
 pub struct InstanceTemplate {
     title: String,
     instance_enum: Instance,
+    json: Option<String>,
 }
 
 #[endpoint {
@@ -47,6 +48,7 @@ path = "/instances/{id}",
 pub async fn get_by_id(
     ctx: RequestContext<Context>,
     path_params: Path<PathParams>,
+    query_params: Query<AsJson>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
     if !Session::is_valid(&ctx) {
@@ -62,7 +64,20 @@ pub async fn get_by_id(
         .await
         .map_err(to_internal_error)?;
 
-    let template = InstanceTemplate { title, instance_enum };
+    let mut json_string = None;
+    if let Some(as_json) = query_params.into_inner().json {
+        if as_json {
+            json_string = Some(
+                ctx.context()
+                    .client
+                    .get_instance_json(&id)
+                    .await
+                    .map_err(to_internal_error)?,
+            );
+        }
+    }
+
+    let template = InstanceTemplate { title, instance_enum, json: json_string };
     let result = template.render().map_err(to_internal_error)?;
 
     htmx_response(response, &format!("/instances/{}", &id), result.into())

@@ -78,6 +78,12 @@ pub struct PathParams {
     id: Uuid,
 }
 
+#[derive(Deserialize, Debug, JsonSchema)]
+pub struct AsJson {
+    #[serde(default)]
+    pub json: Option<bool>,
+}
+
 /// Available to in each Dropshot endpoint, contains global config, and the
 /// user sessions
 pub struct Context {

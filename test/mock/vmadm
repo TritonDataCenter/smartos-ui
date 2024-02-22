@@ -104,8 +104,7 @@ const cmd = {
         })
         break
     }
-    const fileName = join(root, `${vm.uuid}.json`)
-    setTimeout(() => writeFileSync(fileName, JSON.stringify(vm)), 2000)
+    setTimeout(() => setPayload(vm), 2000)
   },
   validate: ([subcmd]) => {
     const { brand } = getPayload()

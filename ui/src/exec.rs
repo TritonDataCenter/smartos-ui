@@ -92,6 +92,13 @@ impl Client {
         self.vminfo.get_instance(id).await
     }
 
+    pub async fn get_instance_json(
+        &self,
+        id: &Uuid,
+    ) -> Result<String, reqwest::Error> {
+        self.vminfo.get_instance_json(id).await
+    }
+
     pub async fn get_instance_view(
         &self,
         id: &Uuid,
@@ -108,6 +115,12 @@ impl Client {
     }
     pub async fn get_image(&self, id: &Uuid) -> Result<Image, reqwest::Error> {
         self.exec.get_image(id).await
+    }
+    pub async fn get_image_json(
+        &self,
+        id: &Uuid,
+    ) -> Result<String, reqwest::Error> {
+        self.exec.get_image_json(id).await
     }
 
     pub async fn get_available_images(
@@ -228,6 +241,18 @@ impl VminfodClient {
             .await
     }
 
+    pub async fn get_instance_json(
+        &self,
+        id: &Uuid,
+    ) -> Result<String, reqwest::Error> {
+        self.get(format!("vms/{}", &id.as_hyphenated()).as_str())
+            .send()
+            .await?
+            .error_for_status()?
+            .text()
+            .await
+    }
+
     pub async fn ping(&self) -> Result<StatusCode, reqwest::Error> {
         Ok(self.get("ping").send().await?.error_for_status()?.status())
     }
@@ -280,6 +305,18 @@ impl ExecClient {
             .await?
             .error_for_status()?
             .json()
+            .await
+    }
+
+    pub async fn get_image_json(
+        &self,
+        id: &Uuid,
+    ) -> Result<String, reqwest::Error> {
+        self.get(format!("image/{}", &id.as_hyphenated()).as_str())
+            .send()
+            .await?
+            .error_for_status()?
+            .text()
             .await
     }
 

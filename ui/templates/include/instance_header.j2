@@ -6,6 +6,45 @@
     </span>
   </h1>
   <div class="flex flex-1 items-center justify-end gap-x-6 mb-10 my-10">
+      {% if json.is_none() %}
+      <button
+        type="submit"
+        data-hx-get="/instances/{{instance.generic.uuid}}?json=true"
+        data-hx-target="#main"
+        data-hx-select="#content"
+        data-hx-disabled-elt="this"
+        data-hx-indicator="#json-loader"
+        class="btn btn-clear">
+          <span class="htmx-indicator" id="json-loader">
+            <span class="loader-icon">
+              {% call icons::loading("h-6 w-6 inline pr-1") %}
+            </span>
+            <span class="default-icon">
+              {% call icons::code("h-6 w-6 inline") %}
+            </span>
+            <span class="align-middle btn-text">View JSON</span>
+          </span>
+      </button>
+    {% else %}
+      <button
+        type="submit"
+        data-hx-get="/instances/{{instance.generic.uuid}}"
+        data-hx-target="#main"
+        data-hx-select="#content"
+        data-hx-disabled-elt="this"
+        data-hx-indicator="#properties-loader"
+        class="btn btn-clear">
+          <span class="htmx-indicator" id="properties-loader">
+            <span class="loader-icon">
+              {% call icons::loading("h-6 w-6 inline pr-1") %}
+            </span>
+            <span class="default-icon">
+              {% call icons::list("h-6 w-6 inline") %}
+            </span>
+            <span class="align-middle btn-text">View Properties</span>
+          </span>
+      </button>
+    {% endif %}
     {% if instance.generic.state == "running" %}
       <button
         data-hx-post="/instances/{{instance.generic.uuid}}/stop"

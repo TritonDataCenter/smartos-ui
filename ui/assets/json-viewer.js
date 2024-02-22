@@ -18,12 +18,22 @@ export const setupJSONViewer = () => {
       EditorState.readOnly.of(true)
     ]
     const editor = new EditorView({ extensions, parent: $element })
+
+    // Parse the JSON so we can print it formatted
+    let text = $($element.dataset.content).value
+    try {
+      text = JSON.stringify(JSON.parse(text), null, 2)
+    } catch (e) {
+      window.alert('Failed parsing JSON')
+    }
+
     editor.dispatch({
       changes: {
         from: 0,
         to: editor.state.doc.length,
-        insert: $($element.dataset.content).value
+        insert: text
       }
     })
+
   })
 }
