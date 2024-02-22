@@ -53,6 +53,7 @@
     </div>
     <div id="guided-tab">
       <form id="provision" class="mx-auto" method="POST" action="/provision" data-hx-post="/provision">
+        <input name="platform_image" id="platform_image" type="hidden" value="{{platform_image}}"/>
         <div class="space-y-12">
           <div class="border-b border-white/10 pb-12">
             <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -185,20 +186,22 @@
 
               {% if let Some(current_image) = selected_image %}
                 {% if current_image.is_for_hvm() %}
-                  <div class="col-span-full">
-                    <label for="primary_disk_size" class="block text-sm font-medium leading-6 text-white">Primary Disk Size <sup>GiB</sup></label>
-                    <div class="mt-2">
-                      <input
-                        type="number"
-                        name="primary_disk_size"
-                        id="primary_disk_size"
-                        min="10"
-                        class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-                        {# All of our HVM images have a minimum of 10 GiB, can't set this to any lower value than 10 #}
-                        onblur="window.inputBoundToMin(this)"
-                        value="{% if primary_disk_size == 0 %}10{% else %}{{primary_disk_size}}{% endif %}">
+                  {% if brand.to_string() == "bhyve" %}
+                    <div class="col-span-full">
+                      <label for="primary_disk_size" class="block text-sm font-medium leading-6 text-white">Primary Disk Size <sup>GiB</sup></label>
+                      <div class="mt-2">
+                        <input
+                          type="number"
+                          name="primary_disk_size"
+                          id="primary_disk_size"
+                          min="10"
+                          class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                          {# All of our HVM images have a minimum of 10 GiB, can't set this to any lower value than 10 #}
+                          onblur="window.inputBoundToMin(this)"
+                          value="{% if primary_disk_size == 0 %}10{% else %}{{primary_disk_size}}{% endif %}">
+                      </div>
                     </div>
-                  </div>
+                  {% endif %}
                 {% else %}
                   <div class="col-span-full">
                     <label for="quota" class="block text-sm font-medium leading-6 text-white">Disk Quota <sup>GiB</sup></label>
@@ -523,5 +526,4 @@
       </button>
   </div>
 </div>
-
 {% endblock %}

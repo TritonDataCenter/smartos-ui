@@ -47,6 +47,7 @@ function encodeFormParameters ($targets, props = {}) {
         break
       case 'text':
       case 'textarea':
+      case 'hidden':
       default:
         value = $element.value
         break
@@ -147,7 +148,7 @@ window.updateEditors = () => {
 
   if (props.root_authorized_keys) {
     props.customer_metadata = {
-      root_authorized_keys: props.root_authorized_keys,
+      root_authorized_keys: props.root_authorized_keys
     }
     if (!isHvm) {
       props.customer_metadata['user-script'] =
@@ -155,31 +156,14 @@ window.updateEditors = () => {
     }
     delete props.root_authorized_keys
   }
-  // how to compute?
-  // flexible_disk_size:
-  //
-  //     This sets an upper bound for the amount of space that a bhyve instance
-  //     may use for its disks and snapshots of those disks. If this value is not
-  //     set, it will not be possible to create snapshots of the instance.
-  //
-  //     This value must be at least as large as the sum of all of the
-  //     disk.*.size values.
-  //
-  //     type: integer (number of MiB)
-  //     vmtype: bhyve
-  //     listable: yes
-  //     create: yes
-  //     update: yes (live update)
-  //
-  // if (props.brand === 'bhyve') {
-  //   props.flexible_disk_size = true
-  // }
 
-  // Place PI version into body, ensure PI > xxxx here
-  // Specifying bootrom, causes vmadm validate to complain about image size...
-  // if (props.brand === 'bhyve') {
-  //   props.bootrom = 'uefi'
-  // }
+  // Fixed in OS-8523, this should be in the PI before the UI is released
+  // but it's a good example of how we can mangle the payload based on PI
+  if (props.brand === 'bhyve' && props.platform_image >= '20240222T001232Z') {
+    props.bootrom = 'uefi'
+  }
+
+  delete props.platform_image
 
   try {
     const content = editors.additional.state.doc.toString()
