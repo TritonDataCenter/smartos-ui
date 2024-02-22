@@ -162,18 +162,11 @@
 
               {% if let Some(current_image) = selected_image %}
                 {% if current_image.manifest.type == ImageType::LXDataset %}
-                <div class="col-span-full">
-                  <label for="kernel" class="block text-sm font-medium leading-6 text-white">Kernel Version</label>
-                  <div class="mt-2">
-                    <input
-                      type="text"
-                      name="kernel_version"
-                      id="kernel_version"
-                      placeholder="6.7.8"
-                      class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-                      value="{{kernel_version}}">
-                  </div>
-                </div>
+                  <input
+                    type="hidden"
+                    name="kernel_version"
+                    id="kernel_version"
+                    value="{{current_image.kernel_version()}}">
                 {% endif %}
               {% endif %}
 

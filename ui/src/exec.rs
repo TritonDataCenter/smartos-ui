@@ -293,7 +293,7 @@ impl ExecClient {
         for value in response.drain(..) {
             match serde_json::from_value(value) {
                 Ok(image) => images.push(image),
-                Err(e) => println!("Error parsing image: {}", e)
+                Err(e) => println!("Error parsing image: {}", e),
             }
         }
         Ok(images)

@@ -237,6 +237,22 @@ impl Image {
             Type::Other => String::from("Other"),
         }
     }
+
+    /// Helper to get kernel_version from an LX image
+    pub fn kernel_version(&self) -> String {
+        if self.manifest.r#type == Type::LXDataset {
+            if let Some(tags) = &self.manifest.tags {
+                if let Some(obj) = tags.as_object() {
+                    if let Some(version) = obj.get("kernel_version") {
+                        return String::from(
+                            version.as_str().unwrap_or("0.0.0"),
+                        );
+                    }
+                }
+            }
+        }
+        String::from("0.0.0")
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]

@@ -295,7 +295,6 @@ pub struct InstanceCreateTemplate {
     ipv6_prefix: String,
     resolvers: String,
     vcpus: String,
-    kernel_version: String,
     primary_disk_size: u64,
 }
 
@@ -332,8 +331,6 @@ pub struct ProvisionQuery {
     #[serde(default)]
     vcpus: String,
     #[serde(default)]
-    kernel_version: String,
-    #[serde(default)]
     primary_disk_size: u64,
 }
 
@@ -366,7 +363,6 @@ pub async fn get_provision(
         ipv6_prefix,
         resolvers,
         vcpus,
-        kernel_version,
         primary_disk_size,
     } = query.into_inner();
     let actual_brand = Brand::from_str(&brand).unwrap_or_default();
@@ -412,7 +408,6 @@ pub async fn get_provision(
         ipv6_prefix,
         resolvers,
         vcpus,
-        kernel_version,
         primary_disk_size,
     };
     let result = template.render().map_err(to_internal_error)?;
