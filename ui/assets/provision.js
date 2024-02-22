@@ -46,6 +46,7 @@ function encodeFormParameters ($targets, props = {}) {
         }
         break
       case 'text':
+      case 'textarea':
       default:
         value = $element.value
         break
@@ -122,7 +123,7 @@ window.updateEditors = () => {
         image_uuid: props.image_uuid,
         boot: true,
         model: 'virtio',
-        image_size: props.primary_disk_size
+        image_size: props.primary_disk_size * 1024
       }
     ]
     delete props.image_uuid
@@ -143,6 +144,13 @@ window.updateEditors = () => {
     props.cpu_cap = props.vcpus * 100
   }
 
+  if (props.root_authorized_keys) {
+    props.customer_metadata = {
+      root_authorized_keys: props.root_authorized_keys,
+      'user-script': '/usr/sbin/mdata-get root_authorized_keys > /root/.ssh/authorized_keys'
+    }
+    delete props.root_authorized_keys
+  }
   // how to compute?
   // flexible_disk_size:
   //

@@ -239,7 +239,7 @@
                     <div class="space-y-5">
                       <div class="relative flex items-start">
                         <div class="flex h-6 items-center">
-                          <input id="delegate_dataset" name="delegate_dataset" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                          <input id="delegate_dataset" name="delegate_dataset" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600">
                         </div>
                         <div class="ml-3 text-sm leading-6">
                           <label for="delegate_dataset" class="cursor-pointer font-medium text-white">Delegate Dataset</label>
@@ -255,6 +255,25 @@
                 </div>
                 {% endif %}
               {% endif %}
+
+              <div class="col-span-full">
+                <label for="root_authorized_keys" class="block text-sm font-medium leading-6 text-white">
+                  SSH Public Key(s)
+                  <span class="has-tooltip cursor-pointer">
+                    {% call icons::info("h-4 w-h inline mb-1") %}
+                    <span class="tooltip rounded shadow-lg p-1 bg-slate-800 text-white -mt-8 p-4 max-w-80">
+                      The provided keys will be written to:<br> /root/.ssh/authorized_keys
+                    </span>
+                  </span>
+                </label>
+                <div class="mt-2">
+                  <textarea
+                    id="root_authorized_keys"
+                    name="root_authorized_keys"
+                    rows="3"
+                    class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">{{root_authorized_keys}}</textarea>
+                </div>
+              </div>
 
             </div>
           </div>

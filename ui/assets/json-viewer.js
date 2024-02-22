@@ -34,6 +34,5 @@ export const setupJSONViewer = () => {
         insert: text
       }
     })
-
   })
 }

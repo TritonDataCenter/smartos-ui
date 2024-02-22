@@ -311,6 +311,7 @@ pub struct InstanceCreateTemplate {
     resolvers: String,
     vcpus: String,
     primary_disk_size: u64,
+    root_authorized_keys: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -347,6 +348,8 @@ pub struct ProvisionQuery {
     vcpus: String,
     #[serde(default)]
     primary_disk_size: u64,
+    #[serde(default)]
+    root_authorized_keys: String,
 }
 
 #[endpoint {
@@ -379,6 +382,7 @@ pub async fn get_provision(
         resolvers,
         vcpus,
         primary_disk_size,
+        root_authorized_keys,
     } = query.into_inner();
     let actual_brand = Brand::from_str(&brand).unwrap_or_default();
 
@@ -424,6 +428,7 @@ pub async fn get_provision(
         resolvers,
         vcpus,
         primary_disk_size,
+        root_authorized_keys,
     };
     let result = template.render().map_err(to_internal_error)?;
     htmx_response(response, "/provision", result.into())
