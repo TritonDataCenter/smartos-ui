@@ -352,6 +352,21 @@ impl Image {
 
         false
     }
+
+    /// Deserializes each image in a list of images individually so that
+    /// images from external sources, which don't strictly follow the IMGAPI
+    /// format won't cause issues elsewhere.
+    pub fn deserialize_list(list: &str) -> Vec<Image> {
+        let mut images: Vec<Image> = Vec::new();
+        let mut values: Vec<Value> =
+            serde_json::from_str(list).unwrap_or(Vec::new());
+        for value in values.drain(..) {
+            if let Ok(image) = serde_json::from_value(value) {
+                images.push(image)
+            }
+        }
+        images
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]

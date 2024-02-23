@@ -52,7 +52,7 @@ pub async fn get_index(
         // and append any queued images to the list.
         if !queue.is_empty() {
             let mut images: Vec<Image> =
-                serde_json::from_str(&stdout).map_err(to_internal_error)?;
+                Image::deserialize_list(stdout.as_str());
             let mut found = Vec::new();
             for (id, image) in queue.iter() {
                 if !images.iter().any(|i| i.manifest.uuid == *id) {
