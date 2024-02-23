@@ -29,6 +29,7 @@ use http::StatusCode;
 use hyper::{Body, Response};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use slog::info;
 use smartos_shared::http_server::to_bad_request;
 use smartos_shared::image::{Image, Type as ImageType};
 use smartos_shared::sysinfo::Sysinfo;
@@ -312,9 +313,9 @@ pub struct InstanceCreateTemplate {
     vcpus: String,
     primary_disk_size: u64,
     root_authorized_keys: String,
-    platform_image: String,
     delegate_dataset: String,
     root_pw: String,
+    bootrom: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -354,11 +355,11 @@ pub struct ProvisionQuery {
     #[serde(default)]
     root_authorized_keys: String,
     #[serde(default)]
-    platform_image: String,
-    #[serde(default)]
     delegate_dataset: String,
     #[serde(default)]
     root_pw: String,
+    #[serde(default)]
+    bootrom: String,
 }
 
 #[endpoint {
@@ -392,11 +393,12 @@ pub async fn get_provision(
         vcpus,
         primary_disk_size,
         root_authorized_keys,
-        platform_image,
         delegate_dataset,
         root_pw,
+        bootrom,
     } = query.into_inner();
-    let actual_brand = Brand::from_str(&brand).unwrap_or_default();
+
+    let mut selected_brand = Brand::default();
 
     let title = String::from("Create Instance");
 
@@ -409,6 +411,27 @@ pub async fn get_provision(
 
     while let Some(image) = images.pop() {
         if image_uuid == image.manifest.uuid.to_string() {
+            // Use the previously chosen brand if exists, else choose a default
+            if let Ok(request_brand) = Brand::from_str(&brand) {
+                info!(ctx.log, "brand from request: {}", request_brand);
+
+                // make sure this brand is valid for the image type
+                // needed if user selects a brand, then changes the image the
+                // conditions we have set for brands will not work as expected
+                if image.valid_brand(&request_brand) {
+                    info!(ctx.log, "using chosen brand: {}", request_brand);
+                    selected_brand = request_brand
+                } else {
+                    selected_brand = image.default_brand();
+                    info!(
+                        ctx.log,
+                        "using default brand instead: {}", selected_brand
+                    );
+                }
+            } else {
+                selected_brand = image.default_brand();
+                info!(ctx.log, "brand from image default: {}", selected_brand);
+            }
             selected_image = Some(image.clone())
         }
 
@@ -419,25 +442,13 @@ pub async fn get_provision(
         }
     }
 
-    let platform_string = if platform_image.is_empty() {
-        let sysinfo = ctx
-            .context()
-            .client
-            .get_sysinfo()
-            .await
-            .map_err(to_internal_error)?;
-        sysinfo.live_image
-    } else {
-        platform_image
-    };
-
     let template = InstanceCreateTemplate {
         title,
         images: image_list,
         selected_image,
         nictags,
         alias,
-        brand: actual_brand,
+        brand: selected_brand,
         image_uuid,
         ram,
         quota,
@@ -453,9 +464,9 @@ pub async fn get_provision(
         vcpus,
         primary_disk_size,
         root_authorized_keys,
-        platform_image: platform_string,
         delegate_dataset,
         root_pw,
+        bootrom,
     };
     let result = template.render().map_err(to_internal_error)?;
     htmx_response(response, "/provision", result.into())

@@ -8,6 +8,7 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
+use crate::instance::Brand;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -188,7 +189,7 @@ pub struct Requirements {
     pub networks: Option<Vec<Network>>,
 
     /// Defines the brand that is required to provision with this image.
-    pub brand: Option<String>,
+    pub brand: Option<Brand>,
 
     /// Indicates that provisioning with this image requires that an SSH public key be provided.
     pub ssh_key: Option<bool>,
@@ -265,6 +266,91 @@ impl Image {
             },
             _ => false,
         };
+    }
+
+    /// Helper for determining if we should set the bootrom to uefi
+    pub fn uses_uefi_bootrom(&self, brand: &Brand) -> bool {
+        // If the image specifies a bootrom uefi requirement
+        if let Some(requirements) = &self.manifest.requirements {
+            if let Some(bootrom) = &requirements.bootrom {
+                if bootrom.as_str() == "uefi" {
+                    return true;
+                }
+            }
+        }
+
+        // If it's a Bhyve brand
+        if brand == &Brand::Bhyve {
+            // ...and an Official image
+            if let Some(source) = &self.source {
+                if source.as_str() == "https://images.smartos.org/" {
+                    //  ...and published 2023 later
+                    if let Some(published) = &self.manifest.published_at {
+                        if published.as_str() >= "2023-01-01T00:00:00Z" {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        false
+    }
+
+    /// Helper to choose a default brand for an image
+    pub fn default_brand(&self) -> Brand {
+        // If the image specifies a brand requirement
+        if let Some(requirements) = &self.manifest.requirements {
+            if let Some(brand) = &requirements.brand {
+                return brand.clone();
+            }
+        }
+        match self.manifest.r#type {
+            // TODO: for images of a certain vintage should we default to KVM?
+            Type::ZVol => Brand::Bhyve,
+            Type::LXDataset => Brand::LX,
+            Type::LXD => Brand::LXD,
+            Type::ZoneDataset => Brand::Joyent,
+            Type::Other => Brand::Joyent,
+        }
+    }
+
+    /// Helper to verify if a brand is valid for the given image
+    pub fn valid_brand(&self, brand: &Brand) -> bool {
+        // If the image specifies a brand requirement
+        if let Some(requirements) = &self.manifest.requirements {
+            if let Some(image_brand) = &requirements.brand {
+                if image_brand == brand {
+                    return true;
+                }
+            }
+        }
+        match &self.manifest.r#type {
+            // TODO: for images of a certain vintage should we default to KVM?
+            Type::ZVol => {
+                if brand == &Brand::Bhyve || brand == &Brand::KVM {
+                    return true;
+                }
+            }
+            Type::LXDataset => {
+                if brand == &Brand::LX {
+                    return true;
+                }
+            }
+            Type::LXD => {
+                if brand == &Brand::LXD {
+                    return true;
+                }
+            }
+            Type::ZoneDataset => {
+                if brand == &Brand::Joyent || brand == &Brand::JoyentMinimal {
+                    return true;
+                }
+            }
+            Type::Other => return true,
+        }
+
+        false
     }
 }
 

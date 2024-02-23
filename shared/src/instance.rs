@@ -302,7 +302,7 @@ impl TryFrom<LX> for InstanceView {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, JsonSchema, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, JsonSchema, Eq, PartialEq, Clone)]
 pub enum Brand {
     #[serde(rename = "joyent")]
     Joyent,

@@ -53,7 +53,6 @@
     </div>
     <div id="guided-tab">
       <form id="provision" class="mx-auto" method="POST" action="/provision" data-hx-post="/provision">
-        <input name="platform_image" id="platform_image" type="hidden" value="{{platform_image}}"/>
         <div class="space-y-12">
           <div class="border-b border-white/10 pb-12">
             <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -117,6 +116,11 @@
                   <select
                     id="brand"
                     name="brand"
+                    data-hx-get="/provision"
+                    data-hx-target="#provision"
+                    data-hx-select="#provision"
+                    data-hx-include="#provision [name]"
+                    data-hx-swap="outerHTML"
                     required
                     class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
                     {% if let Some(current_image) = selected_image %}
@@ -160,6 +164,41 @@
                   </select>
                 </div>
               </div>
+              {% if brand.to_string() == "bhyve" %}
+                <div class="col-span-full">
+                  <label for="bootrom" class="block text-sm font-medium leading-6 text-white">
+                    Boot ROM
+                    <span class="has-tooltip cursor-pointer">
+                      {% call icons::info("h-4 w-h inline mb-1") %}
+                      <span class="tooltip rounded shadow-lg p-1 bg-slate-800 text-white -mt-8 p-4 max-w-80">
+                         This indicates the bootrom to use for bhyve, valid values when set are bios,
+                         and uefi. Official images created in 2023 and later support uefi.
+                      </span>
+                    </span>
+                  </label>
+                  <div class="mt-2">
+                    <select
+                      id="bootrom"
+                      name="bootrom"
+                      required
+                      class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
+                      {% if let Some(current_image) = selected_image %}
+                        {% if current_image.uses_uefi_bootrom(brand) %}
+                          <option {% if bootrom == "uefi" %}selected{% endif %}>uefi</option>
+                          <option {% if bootrom == "bios" %}selected{% endif %}>bios</option>
+                          <option value="">Image default</option>
+                        {% else %}
+                          <option value="">Image default</option>
+                          <option {% if bootrom == "uefi" %}selected{% endif %}>uefi</option>
+                          <option {% if bootrom == "bios" %}selected{% endif %}>bios</option>
+                        {% endif %}
+                      {% else %}
+                        <option value="">Select an Image to choose a Boot ROM</option>
+                      {% endif %}
+                    </select>
+                  </div>
+                </div>
+              {% endif %}
 
               {% if let Some(current_image) = selected_image %}
                 {% if current_image.manifest.type == ImageType::LXDataset %}

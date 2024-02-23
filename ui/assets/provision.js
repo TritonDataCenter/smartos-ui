@@ -164,14 +164,6 @@ window.updateEditors = () => {
     delete props.root_pw
   }
 
-  // Fixed in OS-8523, this should be in the PI before the UI is released
-  // but it's a good example of how we can mangle the payload based on PI
-  if (props.brand === 'bhyve' && props.platform_image >= '20240222T001232Z') {
-    props.bootrom = 'uefi'
-  }
-
-  delete props.platform_image
-
   try {
     const content = editors.additional.state.doc.toString()
     if (content) {
