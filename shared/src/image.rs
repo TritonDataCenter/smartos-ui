@@ -254,6 +254,18 @@ impl Image {
         }
         String::from("0.0.0")
     }
+
+    /// Helper for determining if we should offer the option of setting a
+    /// root_pw for an image
+    pub fn has_root_user(&self) -> bool {
+        return match &self.manifest.r#type {
+            Type::ZVol => match &self.manifest.users {
+                Some(users) => users.iter().any(|user| user.name == "root"),
+                None => true,
+            },
+            _ => false,
+        };
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]

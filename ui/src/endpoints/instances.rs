@@ -314,6 +314,7 @@ pub struct InstanceCreateTemplate {
     root_authorized_keys: String,
     platform_image: String,
     delegate_dataset: String,
+    root_pw: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -356,6 +357,8 @@ pub struct ProvisionQuery {
     platform_image: String,
     #[serde(default)]
     delegate_dataset: String,
+    #[serde(default)]
+    root_pw: String,
 }
 
 #[endpoint {
@@ -391,6 +394,7 @@ pub async fn get_provision(
         root_authorized_keys,
         platform_image,
         delegate_dataset,
+        root_pw,
     } = query.into_inner();
     let actual_brand = Brand::from_str(&brand).unwrap_or_default();
 
@@ -451,6 +455,7 @@ pub async fn get_provision(
         root_authorized_keys,
         platform_image: platform_string,
         delegate_dataset,
+        root_pw,
     };
     let result = template.render().map_err(to_internal_error)?;
     htmx_response(response, "/provision", result.into())

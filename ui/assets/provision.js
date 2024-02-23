@@ -157,6 +157,13 @@ window.updateEditors = () => {
     delete props.root_authorized_keys
   }
 
+  if (props.root_pw) {
+    props.internal_metadata = {
+      root_pw: props.root_pw
+    }
+    delete props.root_pw
+  }
+
   // Fixed in OS-8523, this should be in the PI before the UI is released
   // but it's a good example of how we can mangle the payload based on PI
   if (props.brand === 'bhyve' && props.platform_image >= '20240222T001232Z') {
