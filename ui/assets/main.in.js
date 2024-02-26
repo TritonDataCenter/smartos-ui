@@ -4,6 +4,8 @@ import { setupProvisioningForm } from './provision'
 import { setupJSONViewer } from './json-viewer'
 import { removeMe } from './htmx-extensions'
 
+import 'sortable-tablesort'
+
 removeMe(htmx)
 
 document.addEventListener('DOMContentLoaded', () => {

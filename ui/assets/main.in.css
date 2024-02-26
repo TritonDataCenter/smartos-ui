@@ -1,3 +1,4 @@
+@import 'node_modules/sortable-tablesort/sortable-base.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -190,4 +191,9 @@
 
 .htmx-request.htmx-indicator .default-icon {
     display:none;
+}
+
+/* when clicking on a table header to sort, don't highlight the text */
+thead > tr > th {
+  user-select: none;
 }

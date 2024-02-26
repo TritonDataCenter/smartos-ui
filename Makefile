@@ -48,9 +48,13 @@ ui/assets/main.js.gz: ui/assets/main.js
 .PHONY: assets
 assets: ui/assets/main.css.gz ui/assets/main.js.gz
 
+.PHONY: clean
+clean:: clean-assets
+
 .PHONY: clean-assets
-clean::
-	rm -f ui/assets/*.gz ui/assets/main.js ui/assets/main.css
+clean-assets:
+	rm -f ui/assets/*.gz ui/assets/main.js \
+		ui/assets/main.css ui/assets/main.css.map
 
 .PHONY: clean-mock-db
 clean-mock-db:
