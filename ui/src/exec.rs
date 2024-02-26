@@ -20,7 +20,7 @@ use serde::Serialize;
 use serde_json::to_string as stringify;
 use smartos_shared::image::{ImageImportParams, Source};
 use smartos_shared::instance::{
-    InstancePayload, InstanceValidateResponse, InstanceView,
+    Info, InstancePayload, InstanceValidateResponse, InstanceView,
 };
 use tokio::try_join;
 use uuid::Uuid;
@@ -195,6 +195,10 @@ impl Client {
         let vminfod =
             self.vminfo.ping().await.is_ok_and(|status| status.is_success());
         Ok(PingResponse { executor, vminfod })
+    }
+
+    pub async fn info(&self, id: &Uuid) -> Result<Info, reqwest::Error> {
+        self.exec.info(id).await
     }
 }
 
@@ -413,5 +417,14 @@ impl ExecClient {
 
     pub async fn ping(&self) -> Result<StatusCode, reqwest::Error> {
         Ok(self.get("ping").send().await?.error_for_status()?.status())
+    }
+
+    pub async fn info(&self, id: &Uuid) -> Result<Info, reqwest::Error> {
+        self.get(format!("info/{}", id.as_hyphenated()).as_str())
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await
     }
 }

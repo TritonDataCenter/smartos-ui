@@ -198,6 +198,22 @@ pub enum Instance {
     LX(LX),
 }
 
+impl Instance {
+    pub fn is_hvm(&self) -> bool {
+        matches!(self, Instance::Bhyve(_) | Instance::KVM(_))
+    }
+
+    pub fn uuid(&self) -> Uuid {
+        match self {
+            Instance::Joyent(i) => i.generic.uuid,
+            Instance::JoyentMinimal(i) => i.generic.uuid,
+            Instance::Bhyve(i) => i.generic.uuid,
+            Instance::KVM(i) => i.generic.uuid,
+            Instance::LX(i) => i.generic.uuid,
+        }
+    }
+}
+
 impl TryFrom<Instance> for InstanceView {
     type Error = ();
 
@@ -400,4 +416,16 @@ impl FromStr for Brand {
             _ => Err(BrandError::UnknownBrand),
         }
     }
+}
+
+#[derive(Deserialize, Debug, JsonSchema)]
+pub struct Vnc {
+    pub host: String,
+    pub port: u64,
+    pub display: u64,
+}
+
+#[derive(Deserialize, Debug, JsonSchema)]
+pub struct Info {
+    pub vnc: Vnc,
 }

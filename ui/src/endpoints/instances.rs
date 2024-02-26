@@ -19,7 +19,7 @@ use crate::session::Session;
 
 use smartos_shared::http_server::to_internal_error;
 use smartos_shared::instance::{
-    Brand, Instance, InstancePayload, InstanceView, PayloadContainer,
+    Brand, Info, Instance, InstancePayload, InstanceView, PayloadContainer,
 };
 use smartos_shared::nictag::NicTag;
 
@@ -40,6 +40,7 @@ pub struct InstanceTemplate {
     title: String,
     instance_enum: Instance,
     json: Option<String>,
+    info: Option<Info>,
 }
 
 #[endpoint {
@@ -65,6 +66,7 @@ pub async fn get_by_id(
         .await
         .map_err(to_internal_error)?;
 
+    let mut info: Option<Info> = None;
     let mut json_string = None;
     if let Some(as_json) = query_params.into_inner().json {
         if as_json {
@@ -76,9 +78,18 @@ pub async fn get_by_id(
                     .map_err(to_internal_error)?,
             );
         }
+    } else if instance_enum.is_hvm() {
+        info = Some(
+            ctx.context()
+                .client
+                .info(&instance_enum.uuid())
+                .await
+                .map_err(to_internal_error)?,
+        );
     }
 
-    let template = InstanceTemplate { title, instance_enum, json: json_string };
+    let template =
+        InstanceTemplate { title, instance_enum, json: json_string, info };
     let result = template.render().map_err(to_internal_error)?;
 
     htmx_response(response, &format!("/instances/{}", &id), result.into())

@@ -13,6 +13,7 @@
           {% when Some with (json_string) %}
             {% include "include/json_viewer.j2" %}
           {% when None %}
+            {% include "include/instance_connection_info.j2" %}
             {% include "include/instance_generic.j2" %}
             {% include "include/instance_native.j2" %}
         {% endmatch %}
@@ -24,6 +25,7 @@
           {% when Some with (json_string) %}
             {% include "include/json_viewer.j2" %}
           {% when None %}
+            {% include "include/instance_connection_info.j2" %}
             {% include "include/instance_generic.j2" %}
             {% include "include/instance_native.j2" %}
         {% endmatch %}
@@ -35,6 +37,7 @@
           {% when Some with (json_string) %}
             {% include "include/json_viewer.j2" %}
           {% when None %}
+            {% include "include/instance_connection_info.j2" %}
             {% include "include/instance_generic.j2" %}
             {% include "include/instance_native.j2" %}
             {% include "include/instance_lx.j2" %}
@@ -47,6 +50,7 @@
           {% when Some with (json_string) %}
             {% include "include/json_viewer.j2" %}
           {% when None %}
+            {% include "include/instance_connection_info.j2" %}
             {% include "include/instance_generic.j2" %}
             {% include "include/instance_hvm.j2" %}
         {% endmatch %}
@@ -58,6 +62,7 @@
           {% when Some with (json_string) %}
             {% include "include/json_viewer.j2" %}
           {% when None %}
+            {% include "include/instance_connection_info.j2" %}
             {% include "include/instance_generic.j2" %}
             {% include "include/instance_hvm.j2" %}
         {% endmatch %}

@@ -38,7 +38,7 @@ async fn main() -> Result<(), String> {
     api.register(endpoints::sysinfo::get_index)?;
     api.register(endpoints::pwhash::get_index)?;
 
-    // GET /image
+    // /image
     api.register(endpoints::image::get_index)?;
 
     // /image/{id}
@@ -68,6 +68,9 @@ async fn main() -> Result<(), String> {
 
     // /instance/{id}/start
     api.register(endpoints::instance::start_by_id)?;
+
+    // /info/{id}
+    api.register(endpoints::instance::info_by_id)?;
 
     // /nictag
     api.register(endpoints::nictag::get_index)?;

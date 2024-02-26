@@ -184,3 +184,46 @@ pub async fn start_by_id(
         .body(stderr.into())
         .map_err(to_internal_error)
 }
+
+#[endpoint {
+method = GET,
+path = "/info/{id}",
+}]
+pub async fn info_by_id(
+    ctx: RequestContext<Context>,
+    path_params: Path<PathParams>,
+) -> Result<Response<Body>, HttpError> {
+    let req = path_params.into_inner();
+
+    let out = Command::new("vmadm")
+        .args(["info", &req.id.to_string(), "vnc"])
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(to_internal_error)?
+        .wait_with_output()
+        .await
+        .map_err(to_internal_error)?;
+
+    if !out.status.success() {
+        let stderr =
+            String::from_utf8(out.stderr).map_err(to_internal_error)?;
+
+        error!(
+            ctx.log,
+            "Exec failed vmadm {} info: {}",
+            &req.id.to_string(),
+            stderr
+        );
+
+        return Err(HttpError::for_bad_request(None, stderr));
+    }
+
+    let stdout = String::from_utf8(out.stdout).map_err(to_internal_error)?;
+
+    Response::builder()
+        .status(StatusCode::OK)
+        .body(stdout.into())
+        .map_err(to_internal_error)
+}

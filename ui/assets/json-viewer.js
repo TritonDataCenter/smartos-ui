@@ -10,7 +10,6 @@ import {
 // Setup a read-only CodeMirror instance for JSON viewing
 export const setupJSONViewer = () => {
   $$('.json-viewer').forEach($element => {
-    console.log($element)
     const extensions = [
       basicSetup,
       json(),

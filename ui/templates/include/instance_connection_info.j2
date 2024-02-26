@@ -1,0 +1,18 @@
+{%- import "macros/inputs.j2" as input -%}
+{% if instance_enum.is_hvm() %}
+  {% match self.info %}
+    {% when Some with (vnc_info) %}
+      <div class="mx-auto px-8">
+        <div class="space-y-12">
+          <div class="pb-12 mt-10">
+            <h2 class="text-base font-semibold leading-7 text-white">Connection Info</h2>
+            <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                {% call input::link("VNC Info",
+                  format!("vnc://{}:{}", vnc_info.vnc.host, vnc_info.vnc.port)) %}
+            </div>
+          </div>
+        </div>
+      </div>
+    {% when None %}
+  {% endmatch %}
+{% endif %}
