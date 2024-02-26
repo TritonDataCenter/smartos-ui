@@ -373,13 +373,19 @@
           {%  if nic_tag != "" %}
             <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 grid-cols-10">
               <div class="sm:col-span-2">
-                <label for="resolvers" class="block text-sm font-medium leading-6 text-white">Resolvers</label>
+                <label for="resolvers" class="block text-sm font-medium leading-6 text-white">Resolvers
+                  <span class="has-tooltip cursor-pointer">
+                    {% call icons::info("h-4 w-h inline mb-1") %}
+                    <span class="tooltip rounded shadow-lg p-1 bg-slate-800 text-white -mt-8 p-4 max-w-80">
+                      Multiple resolvers can be separated with a comma (e.g 1.1.1.1,8.8.8.8 )
+                    </span>
+                  </span>
+                </label>
                 <div class="mt-2">
                   <input
                     type="text"
                     id="resolvers"
                     name="resolvers"
-                    placeholder="8.8.8.8, ..."
                     value="{{resolvers}}"
                     class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
                 </div>
@@ -425,7 +431,6 @@
                       type="text"
                       id="ipv4_ip"
                       name="ipv4_ip"
-                      placeholder="192.168.0.100"
                       pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
                       required
                       value="{{ipv4_ip}}"
@@ -436,15 +441,18 @@
                 <div class="sm:col-span-1">
                   <label for="ipv4_prefix" class="block text-sm font-medium leading-6 text-white">Prefix</label>
                   <div class="mt-2">
-                    <input
-                      type="number"
+                    <select
                       id="ipv4_prefix"
                       name="ipv4_prefix"
-                      placeholder="24"
-                      max="32"
-                      min="0"
-                      value="{{ipv4_prefix}}"
-                      class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
+                      class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
+                    {% for prefix in 0..32 %}
+                      {% if ipv4_prefix == "" %}
+                        <option {% if prefix == 24 %}selected{% endif %}>{{prefix}}</option>
+                      {% else %}
+                        <option {% if ipv4_prefix == prefix.to_string() %}selected{% endif %}>{{prefix}}</option>
+                      {% endif %}
+                    {% endfor %}
+                    </select>
                   </div>
                 </div>
 
@@ -456,7 +464,6 @@
                       id="ipv4_gateway"
                       name="ipv4_gateway"
                       pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
-                      placeholder="192.168.0.1"
                       value="{{ipv4_gateway}}"
                       class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
                   </div>
@@ -506,7 +513,6 @@
                       type="text"
                       id="ipv6_ip"
                       name="ipv6_ip"
-                      placeholder="::1"
                       value="{{ipv6_ip}}"
                       class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
                   </div>
@@ -515,15 +521,18 @@
                 <div class="sm:col-span-1">
                   <label for="ipv6_prefix" class="block text-sm font-medium leading-6 text-white">Prefix</label>
                   <div class="mt-2">
-                    <input
-                      type="number"
+                    <select
                       id="ipv6_prefix"
                       name="ipv6_prefix"
-                      placeholder="64"
-                      max="128"
-                      min="0"
-                      value="{{ipv6_prefix}}"
-                      class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">
+                      class="nicprop block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
+                    {% for prefix in 1..128 %}
+                      {% if ipv6_prefix == "" %}
+                        <option {% if prefix == 64 %}selected{% endif %}>{{prefix}}</option>
+                      {% else %}
+                        <option {% if ipv6_prefix == prefix.to_string() %}selected{% endif %}>{{prefix}}</option>
+                      {% endif %}
+                    {% endfor %}
+                    </select>
                   </div>
                 </div>
 
