@@ -151,6 +151,21 @@ const cmd = {
 
     setPayload(vm)
     console.error(`Successfully completed stop for VM ${uuid}`)
+  },
+  info: ([uuid]) => {
+    const vm = getPayload(uuid)
+
+    if (vm.brand !== 'bhyve' || vm.brand !== 'kvm') {
+      console.log(JSON.stringify({
+        vnc: {
+          host: '127.0.0.1',
+          port: randInt(),
+          display: randInt()
+        }
+      }))
+    } else {
+      console.error(`Unable to get VM info for VM ${uuid}: no info types supported for brand ${vm.brand}`)
+    }
   }
 }
 

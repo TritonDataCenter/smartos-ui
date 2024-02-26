@@ -37,18 +37,42 @@ async fn main() -> Result<(), String> {
     let mut api = ApiDescription::new();
     api.register(endpoints::sysinfo::get_index)?;
     api.register(endpoints::pwhash::get_index)?;
+
+    // GET /image
     api.register(endpoints::image::get_index)?;
+
+    // /image/{id}
     api.register(endpoints::image::get_by_id)?;
     api.register(endpoints::image::delete_by_id)?;
+
+    // /import/{id}
     api.register(endpoints::image::get_source_index)?;
+
+    // /source
     api.register(endpoints::image::post_import_by_id)?;
+
+    // /avail
     api.register(endpoints::image::get_avail)?;
+
+    // /provision
     api.register(endpoints::instance::post_provision_index)?;
+
+    // /validate/create
     api.register(endpoints::instance::post_validate_create)?;
+
+    // /instance/{id}
     api.register(endpoints::instance::delete_by_id)?;
+
+    // /instance/{id}/stop
     api.register(endpoints::instance::stop_by_id)?;
+
+    // /instance/{id}/start
     api.register(endpoints::instance::start_by_id)?;
+
+    // /nictag
     api.register(endpoints::nictag::get_index)?;
+
+    // /ping
     api.register(endpoints::get_ping)?;
 
     info!(log, "{} v{}", name, version);
