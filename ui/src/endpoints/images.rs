@@ -112,13 +112,17 @@ pub async fn delete_by_id(
         return redirect_login(response, &ctx);
     }
     let id = path_params.into_inner().id;
-
+    let image =
+        ctx.context().client.get_image(&id).await.map_err(to_internal_error)?;
     let template = if ctx.context().client.delete_image(&id).await.is_ok() {
         NotificationTemplate {
             id: ctx.request_id,
             kind: NotificationKind::Ok,
             subject: String::from("Image deleted"),
-            message: format!("Image {} successfully deleted", id),
+            message: format!(
+                "Image {} ({}) successfully deleted",
+                image.manifest.name, id
+            ),
             timeout: Some(String::from("8s")),
             redirect: Some(String::from("/images")),
             created_at: format!("/images/{}", id),
@@ -128,7 +132,10 @@ pub async fn delete_by_id(
             id: ctx.request_id,
             kind: NotificationKind::Error,
             subject: String::from("Image could not be deleted"),
-            message: format!("Failed to delete image {}", id),
+            message: format!(
+                "Failed to delete image {} ({})",
+                image.manifest.name, id
+            ),
             timeout: Some(String::from("8s")),
             redirect: None,
             created_at: format!("/images/{}", id),

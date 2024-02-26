@@ -109,23 +109,40 @@ pub async fn delete_by_id(
     }
 
     let id = path_params.into_inner().id;
-
+    let instance = ctx
+        .context()
+        .client
+        .get_instance_view(&id)
+        .await
+        .map_err(to_internal_error)?;
     let template = if ctx.context().client.delete_instance(&id).await.is_ok() {
+        let message = match instance.alias {
+            Some(alias) => {
+                format!("Instance {} ({}) successfully deleted", alias, id)
+            }
+            None => format!("Instance {} successfully deleted", id),
+        };
         NotificationTemplate {
             id: ctx.request_id,
             kind: NotificationKind::Ok,
             subject: String::from("Instance deleted"),
-            message: format!("Instance {} successfully deleted", id),
+            message,
             timeout: Some(String::from("8s")),
             redirect: Some(String::from("/instances")),
             created_at: format!("/instances/{}", id),
         }
     } else {
+        let message = match instance.alias {
+            Some(alias) => {
+                format!("Failed to delete instance {} ({})", alias, id)
+            }
+            None => format!("Failed to delete instance {}", id),
+        };
         NotificationTemplate {
             id: ctx.request_id,
             kind: NotificationKind::Error,
             subject: String::from("Instance could not be deleted"),
-            message: format!("Failed to delete instance {}", id),
+            message,
             timeout: Some(String::from("8s")),
             redirect: None,
             created_at: format!("/instances/{}", id),
