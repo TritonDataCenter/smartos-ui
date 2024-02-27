@@ -39,7 +39,7 @@ Gather image ${uuid} ancestry
 Must download and install 1 image (100.0 MiB)
 Downloaded image ${uuid} (100.0 MiB)
 Imported image ${uuid} (${manifest.name}@${manifest.version})`)
-        }, 5000)
+        }, 3000)
       }).catch(() => {
         console.error('imgadm import: error')
         process.exit(1)

@@ -11,7 +11,7 @@
     <div class="border border-slate-700 pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-slate-800 shadow-lg ring-1 ring-black ring-opacity-5 mt-1">
       <div class="p-4">
         <div class="flex items-start">
-          <div id="notification-icons" class="flex-shrink-0">
+          <div class="flex-shrink-0 notification-icons">
             {% match kind %}
               {% when NotificationKind::Ok %}
                 {% call icons::ok("h-6 w-6 text-green-400") %}
@@ -20,12 +20,8 @@
             {% endmatch %}
           </div>
           <div class="ml-3 w-0 flex-1 pt-0.5">
-            <p id="notification-body" class="text-sm font-medium text-white">
-              {{ subject }}
-            </p>
-            <p id="notification-heading" class="mt-1 text-sm text-slate-500">
-              {{ message }}
-            </p>
+            <p class="notification-heading text-sm font-medium text-white">{{ subject }}</p>
+            <p class="notification-body mt-1 text-sm text-slate-500">{{ message }}</p>
           </div>
           <div class="ml-4 flex flex-shrink-0">
             <button

@@ -99,6 +99,30 @@ devrun: debug
 .PHONY: check
 check:: fmt fmt-js clippy
 
+.PHONY: playwright-ui-first-run
+playwright-ui-first-run: clean-mock-db
+	cd ui/assets && npx playwright test --ui first-run.spec.js
+
+.PHONY: playwright-first-run
+playwright-first-run: clean-mock-db
+	cd ui/assets && npx playwright test first-run.spec.js
+
+.PHONY: playwright-ui-images
+playwright-ui-images:
+	cd ui/assets && npx playwright test --ui images.spec.js
+
+.PHONY: playwrightimages
+playwright-images:
+	cd ui/assets && npx playwright test images.spec.js
+
+.PHONY: playwright-ui-native
+playwright-ui-native:
+	cd ui/assets && npx playwright test --ui provision.native.spec.js
+
+.PHONY: playwright-native
+playwright-native:
+	cd ui/assets && npx playwright test provision.native.spec.js
+
 include ./deps/eng/tools/mk/Makefile.deps
 include ./deps/eng/tools/mk/Makefile.targ
 include ./deps/eng/tools/mk/Makefile.rust.targ

@@ -1,0 +1,45 @@
+{
+  "URL": "http://127.0.0.1:8080",
+  "defaultUser": "root",
+  "defaultPassword": "root",
+  "imageImportTimeout": {
+    "timeout": 5000
+  },
+  "images": [
+    {
+      "name": "base-64-trunk",
+      "uuid": "8925400d-ff66-441e-ab5c-340505636ff8",
+      "for": [
+        "joyent",
+        "joyent-minimal"
+      ]
+    },
+    {
+      "name": "ubuntu-22.04",
+      "uuid": "433d1deb-1f17-440c-baec-60fa4034a36e",
+      "for": [
+        "lx"
+      ]
+    },
+    {
+      "name": "debian-12",
+      "uuid": "d89041d8-41b9-481d-918a-722be4598dd1",
+      "for": [
+        "bhyve",
+        "kvm"
+      ]
+    },
+    {
+      "name": "debian-11",
+      "uuid": "6ae6054a-95f7-4f8e-a3f7-88d1d22301bf",
+      "for": [
+        "bhyve",
+        "kvm"
+      ]
+    }
+  ],
+  "deleteTestImage": {
+    "name": "alpine-3",
+    "uuid": "029a1752-71c8-4d30-a2aa-dcdc4ee32008"
+  }
+}

@@ -542,7 +542,10 @@ pub async fn post_provision(
         let buttons = vec![
             Button {
                 text: String::from("Instance Details"),
-                classes: vec![String::from("btn-primary")],
+                classes: vec![
+                    String::from("btn-primary"),
+                    String::from("btn-instance-details")
+                ],
                 attributes: vec![
                     format!("data-hx-get=\"/instances/{}\"", uuid),
                     String::from("data-hx-target=\"#main\""),
@@ -551,7 +554,10 @@ pub async fn post_provision(
             },
             Button {
                 text: String::from("Instance List"),
-                classes: vec![String::from("btn-clear")],
+                classes: vec![
+                    String::from("btn-clear"),
+                    String::from("btn-instance-list")
+                ],
                 attributes: vec![
                     String::from("data-hx-get=\"/instances\""),
                     String::from("data-hx-target=\"#main\""),
