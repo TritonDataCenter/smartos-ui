@@ -57,7 +57,6 @@ pub async fn get_by_id(
         return redirect_login(response, &ctx);
     }
     let id = path_params.into_inner().id;
-    let title = String::from("Instance"); // XXX alias or uuid
 
     let instance_enum = ctx
         .context()
@@ -65,6 +64,8 @@ pub async fn get_by_id(
         .get_instance(&id)
         .await
         .map_err(to_internal_error)?;
+
+    let title = format!("Instance: {}", instance_enum.alias());
 
     let mut info: Option<Info> = None;
     let mut json_string = None;

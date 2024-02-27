@@ -222,6 +222,22 @@ impl Instance {
             Instance::LX(i) => &i.generic.state,
         }
     }
+
+    pub fn alias(&self) -> String {
+        let alias = match self {
+            Instance::Joyent(i) => &i.generic.alias,
+            Instance::JoyentMinimal(i) => &i.generic.alias,
+            Instance::Bhyve(i) => &i.generic.alias,
+            Instance::KVM(i) => &i.generic.alias,
+            Instance::LX(i) => &i.generic.alias,
+        };
+
+        if let Some(alias) = alias {
+            alias.clone()
+        } else {
+            self.uuid().to_string()
+        }
+    }
 }
 
 impl TryFrom<Instance> for InstanceView {
