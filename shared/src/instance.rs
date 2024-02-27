@@ -212,6 +212,16 @@ impl Instance {
             Instance::LX(i) => i.generic.uuid,
         }
     }
+
+    pub fn state(&self) -> &str {
+        match self {
+            Instance::Joyent(i) => &i.generic.state,
+            Instance::JoyentMinimal(i) => &i.generic.state,
+            Instance::Bhyve(i) => &i.generic.state,
+            Instance::KVM(i) => &i.generic.state,
+            Instance::LX(i) => &i.generic.state,
+        }
+    }
 }
 
 impl TryFrom<Instance> for InstanceView {

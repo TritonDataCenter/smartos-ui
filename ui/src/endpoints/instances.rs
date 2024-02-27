@@ -78,7 +78,7 @@ pub async fn get_by_id(
                     .map_err(to_internal_error)?,
             );
         }
-    } else if instance_enum.is_hvm() {
+    } else if instance_enum.is_hvm() && instance_enum.state() == "running" {
         info = Some(
             ctx.context()
                 .client
