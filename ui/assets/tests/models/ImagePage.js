@@ -13,7 +13,7 @@ class ImagePage extends Page {
     this.page.on('dialog', dialog => dialog.accept())
     await button.click()
     const successText = `Image ${this.name} (${this.uuid}) successfully deleted`
-    const locator = this.page.locator(`#notification-${this.uuid} .notification-body`)
+    const locator = this.getNotification(this.uuid)
     await expect(locator).toContainText(successText)
   }
 

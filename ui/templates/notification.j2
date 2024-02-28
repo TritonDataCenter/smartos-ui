@@ -1,5 +1,6 @@
 {%- import "macros/icons.j2" as icons -%}
 <div id="notification-{{id}}"
+  data-for-entity="{{entity_id}}"
   {% match timeout %}
     {% when Some with (interval) %}
       data-hx-ext="remove-me"

@@ -57,6 +57,8 @@ impl TryFrom<&reqwest::Response> for NotificationKind {
 #[derive(Template)]
 #[template(path = "notification.j2")]
 pub struct NotificationTemplate {
+    /// ID for the notification, must be unique within the DOM, request ID
+    /// is usually the best choice
     id: String,
     kind: NotificationKind,
     subject: String,
@@ -71,6 +73,10 @@ pub struct NotificationTemplate {
 
     /// The path where the notification was created.
     created_at: String,
+
+    /// Arbitrary string for the front-end and e2e tests to use, usually a UUI
+    /// but not necessarily
+    entity_id: String
 }
 
 #[derive(Debug, Deserialize, JsonSchema)]

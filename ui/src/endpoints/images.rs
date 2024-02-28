@@ -119,7 +119,8 @@ pub async fn delete_by_id(
         ctx.context().client.get_image(&id).await.map_err(to_internal_error)?;
     let template = if ctx.context().client.delete_image(&id).await.is_ok() {
         NotificationTemplate {
-            id: id.to_string(),
+            id: ctx.request_id,
+            entity_id: id.to_string(),
             kind: NotificationKind::Ok,
             subject: String::from("Image deleted"),
             message: format!(
@@ -132,7 +133,8 @@ pub async fn delete_by_id(
         }
     } else {
         NotificationTemplate {
-            id: id.to_string(),
+            id: ctx.request_id,
+            entity_id: id.to_string(),
             kind: NotificationKind::Error,
             subject: String::from("Image could not be deleted"),
             message: format!(
@@ -233,7 +235,8 @@ pub async fn post_import_index(
         };
 
         let template = NotificationTemplate {
-            id: id.to_string(),
+            id: ctx.request_id,
+            entity_id: id.to_string(),
             kind,
             subject,
             message: import_response.message,
@@ -244,7 +247,8 @@ pub async fn post_import_index(
         template_result = template.render().map_err(to_internal_error)?;
     } else {
         let template = NotificationTemplate {
-            id: id.to_string(),
+            id: ctx.request_id,
+            entity_id: id.to_string(),
             kind: NotificationKind::Error,
             subject: String::from("Import failed"),
             message: format!("Failed to import image: {}", id),

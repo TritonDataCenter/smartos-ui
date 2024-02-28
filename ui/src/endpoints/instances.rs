@@ -125,6 +125,7 @@ pub async fn delete_by_id(
         };
         NotificationTemplate {
             id: ctx.request_id,
+            entity_id: id.to_string(),
             kind: NotificationKind::Ok,
             subject: String::from("Instance deleted"),
             message,
@@ -141,6 +142,7 @@ pub async fn delete_by_id(
         };
         NotificationTemplate {
             id: ctx.request_id,
+            entity_id: id.to_string(),
             kind: NotificationKind::Error,
             subject: String::from("Instance could not be deleted"),
             message,
@@ -175,6 +177,7 @@ pub async fn start_by_id(
     let template = if ctx.context().client.start_instance(&id).await.is_ok() {
         NotificationTemplate {
             id: ctx.request_id,
+            entity_id: id.to_string(),
             kind: NotificationKind::Ok,
             subject: String::from("Started"),
             message: format!("Instance {} successfully started", id),
@@ -185,6 +188,7 @@ pub async fn start_by_id(
     } else {
         NotificationTemplate {
             id: ctx.request_id,
+            entity_id: id.to_string(),
             kind: NotificationKind::Error,
             subject: String::from("Start Failed"),
             message: format!("Failed to start instance {}", id),
@@ -219,6 +223,7 @@ pub async fn stop_by_id(
     let template = if ctx.context().client.stop_instance(&id).await.is_ok() {
         NotificationTemplate {
             id: ctx.request_id,
+            entity_id: id.to_string(),
             kind: NotificationKind::Ok,
             subject: String::from("Stopped"),
             message: format!("Instance {} successfully stopped", id),
@@ -229,6 +234,7 @@ pub async fn stop_by_id(
     } else {
         NotificationTemplate {
             id: ctx.request_id,
+            entity_id: id.to_string(),
             kind: NotificationKind::Error,
             subject: String::from("Stop Failed"),
             message: format!("Failed to stop instance {}", id),
