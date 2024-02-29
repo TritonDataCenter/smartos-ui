@@ -5,6 +5,29 @@
   "imageImportTimeout": {
     "timeout": 5000
   },
+  "instanceCreateTimeout": {
+    "timeout": 240000
+  },
+  "instanceActionTimeout": {
+    "timeout": 60000
+  },
+  "nic": {
+    "tag": "admin",
+    "gateway": "172.16.0.1",
+    "resolvers": "172.16.0.1,1.1.1.1,8.8.8.8",
+    "ipv4Prefix": "21",
+    "ips": {
+      "native": [
+        "172.16.3.130",
+        "172.16.3.131",
+        "172.16.3.132",
+        "172.16.3.133",
+        "172.16.3.134",
+        "172.16.3.135"
+      ]
+    }
+  },
+  "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMI+EAg62hwbsaEmdNSJbKB2mc+cnTQu63KJwhcAx/sN travis.paul@mnx.io",
   "images": [
     {
       "name": "base-64-trunk",
