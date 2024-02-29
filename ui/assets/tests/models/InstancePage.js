@@ -1,6 +1,6 @@
 const Page = require('./Page')
 const { expect } = require('@playwright/test')
-
+const {instanceActionTimeout} = require('../config')
 class InstancePage extends Page {
   brand = 'unknown'
   validateTitle = false
@@ -20,7 +20,7 @@ class InstancePage extends Page {
     stopButton.click()
     const successText = `Instance ${this.uuid} successfully stopped`
     const [locator, close] = this.getNotification(this.uuid)
-    await expect(locator).toContainText(successText)
+    await expect(locator).toContainText(successText, instanceActionTimeout)
     await close.click()
   }
 
@@ -30,7 +30,7 @@ class InstancePage extends Page {
     stopButton.click()
     const successText = `Instance ${this.uuid} successfully started`
     const [locator, close] = this.getNotification(this.uuid)
-    await expect(locator).toContainText(successText)
+    await expect(locator).toContainText(successText, instanceActionTimeout)
     await close.click()
   }
 
@@ -40,10 +40,10 @@ class InstancePage extends Page {
     deleteButton.click()
     const successText = `(${this.uuid}) successfully deleted`
     const [locator, close] = this.getNotification(this.uuid)
-    await expect(locator).toContainText(successText)
+    await expect(locator).toContainText(successText, instanceActionTimeout)
     await close.click()
     // Should navigate back to instances page
-    await expect(this.page).toHaveTitle('Instances', {timeout: 10000})
+    await expect(this.page).toHaveTitle('Instances', instanceActionTimeout)
   }
 
   async isRunning() {

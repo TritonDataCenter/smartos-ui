@@ -550,7 +550,7 @@ pub async fn post_provision(
                 text: String::from("Instance Details"),
                 classes: vec![
                     String::from("btn-primary"),
-                    String::from("btn-instance-details")
+                    String::from("btn-instance-details"),
                 ],
                 attributes: vec![
                     format!("data-hx-get=\"/instances/{}\"", uuid),
@@ -562,7 +562,7 @@ pub async fn post_provision(
                 text: String::from("Instance List"),
                 classes: vec![
                     String::from("btn-clear"),
-                    String::from("btn-instance-list")
+                    String::from("btn-instance-list"),
                 ],
                 attributes: vec![
                     String::from("data-hx-get=\"/instances\""),

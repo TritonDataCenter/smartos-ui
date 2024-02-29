@@ -127,7 +127,7 @@ window.updateEditors = () => {
         size: props.primary_disk_size * 1024
       }
     ]
-    props.flexible_disk = props.primary_disk_size * 1024
+    props.flexible_disk_size = props.primary_disk_size * 1024
     delete props.image_uuid
     delete props.primary_disk_size
   } else if (props.brand === 'kvm' && props.image_uuid) {

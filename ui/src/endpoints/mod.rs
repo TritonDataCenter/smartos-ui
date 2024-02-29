@@ -76,7 +76,7 @@ pub struct NotificationTemplate {
 
     /// Arbitrary string for the front-end and e2e tests to use, usually a UUI
     /// but not necessarily
-    entity_id: String
+    entity_id: String,
 }
 
 #[derive(Debug, Deserialize, JsonSchema)]
