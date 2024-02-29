@@ -95,7 +95,7 @@
             {% call input::text_view("OS", image.manifest.os) %}
             {% match image.manifest.homepage %}
               {% when Some with (homepage) %}
-                {% call input::link("Homepage", homepage) %}
+                {% call input::link_new_tab("Homepage", homepage) %}
               {% when None %}
             {% endmatch %}
             {% match image.manifest.description %}

@@ -34,6 +34,20 @@
     <div class="flex">
       <a
         class="underline decoration-solid text-blue-600 hover:text-blue-500"
+        href="{{href}}">{{href}}
+      </a>
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro link_new_tab(label, href) %}
+<div class="sm:col-span-4">
+  <label for="prop-{{label|lower}}" class="block text-sm font-medium leading-6 text-white">{{label}}</label>
+  <div class="mt-2">
+    <div class="flex">
+      <a
+        class="underline decoration-solid text-blue-600 hover:text-blue-500"
         target="_blank"
         href="{{href}}">{{href}}
       </a>
