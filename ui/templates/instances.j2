@@ -98,6 +98,7 @@
                     <th scope="col" class="sticky top-0 z-10 py-2 pl-4 pr-8 sm:pl-6 lg:pl-8 font-semibold sm:table-cell bg-gray-900">Alias</th>
                     <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold sm:table-cell bg-gray-900">Brand</th>
                     <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold sm:table-cell bg-gray-900">Image</th>
+                    <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold md:table-cell bg-gray-900">Primary Address</th>
                     <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">CPU</th>
                     <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">Memory <sup>MiB</sup></th>
                     <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold md:table-cell bg-gray-900">Storage Quota <sup>GiB</sup></th>
@@ -123,6 +124,13 @@
                     </td>
                     <td class="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
                         <a class="text-sm underline hover:text-gray-300" href="/images/{{instance.image_uuid}}">{{image}}</a>
+                    </td>
+                    <td class="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
+                      {% if let Some(primary_ip) = instance.primary_ip %}
+                        {{ primary_ip }}
+                      {% else %}
+                        none
+                      {% endif %}
                     </td>
                     <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
                       {% if instance.hvm %}

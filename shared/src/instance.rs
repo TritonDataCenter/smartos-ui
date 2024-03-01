@@ -42,6 +42,16 @@ pub struct Disk {
     pub image_uuid: Uuid,
     pub image_size: u64,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Nic {
+    pub nic_tag: Option<String>,
+    pub ips: Option<Vec<String>>,
+    pub gateways: Option<Vec<String>>,
+    pub model: Option<String>,
+    pub primary: Option<bool>,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Generic {
     pub v: u8,
@@ -77,10 +87,10 @@ pub struct Generic {
     pub create_timestamp: String,
     pub last_modified: String,
     pub platform_buildstamp: String,
+    pub nics: Vec<Nic>,
     // snapshots
     // tags
     // routes
-    // nics
     // internal_metadata
     // customer_metadata
 
@@ -93,6 +103,28 @@ pub struct Generic {
     // if stopped
     pub exit_status: Option<u64>,
     pub exit_timestamp: Option<String>,
+}
+
+impl Generic {
+    pub fn primary_ip(&self) -> Option<String> {
+        let mut first_address: Option<String> = None;
+        for nic in self.nics.iter() {
+            if let Some(primary) = nic.primary {
+                if !primary {
+                    continue;
+                }
+            }
+            if let Some(ips) = &nic.ips {
+                if let Some(ip) = ips.iter().next() {
+                    first_address = Some(ip.clone());
+                }
+            }
+            if first_address.is_some() {
+                break;
+            }
+        }
+        first_address
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -181,6 +213,7 @@ pub struct InstanceView {
     pub hvm: bool,
     pub image_uuid: Uuid,
     pub cpu: f32,
+    pub primary_ip: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -258,6 +291,7 @@ impl TryFrom<KVM> for InstanceView {
     type Error = ();
 
     fn try_from(value: KVM) -> Result<Self, Self::Error> {
+        let primary_ip = value.generic.primary_ip();
         Ok(InstanceView {
             uuid: value.generic.uuid,
             alias: value.generic.alias,
@@ -268,6 +302,7 @@ impl TryFrom<KVM> for InstanceView {
             disk_usage: value.hvm.get_disk_usage(),
             image_uuid: value.hvm.get_boot_image_uuid(),
             cpu: value.hvm.vcpus as f32,
+            primary_ip,
         })
     }
 }
@@ -276,6 +311,7 @@ impl TryFrom<Bhyve> for InstanceView {
     type Error = ();
 
     fn try_from(value: Bhyve) -> Result<Self, Self::Error> {
+        let primary_ip = value.generic.primary_ip();
         Ok(InstanceView {
             uuid: value.generic.uuid,
             alias: value.generic.alias,
@@ -286,6 +322,7 @@ impl TryFrom<Bhyve> for InstanceView {
             disk_usage: value.hvm.get_disk_usage(),
             image_uuid: value.hvm.get_boot_image_uuid(),
             cpu: value.hvm.vcpus as f32,
+            primary_ip,
         })
     }
 }
@@ -294,6 +331,7 @@ impl TryFrom<JoyentMinimal> for InstanceView {
     type Error = ();
 
     fn try_from(value: JoyentMinimal) -> Result<Self, Self::Error> {
+        let primary_ip = value.generic.primary_ip();
         Ok(InstanceView {
             uuid: value.generic.uuid,
             alias: value.generic.alias,
@@ -304,6 +342,7 @@ impl TryFrom<JoyentMinimal> for InstanceView {
             disk_usage: value.generic.quota * 1024,
             image_uuid: value.native.image_uuid,
             cpu: value.generic.cpu_shares as f32 / 100.0,
+            primary_ip,
         })
     }
 }
@@ -312,6 +351,7 @@ impl TryFrom<Joyent> for InstanceView {
     type Error = ();
 
     fn try_from(value: Joyent) -> Result<Self, Self::Error> {
+        let primary_ip = value.generic.primary_ip();
         Ok(InstanceView {
             uuid: value.generic.uuid,
             alias: value.generic.alias,
@@ -322,6 +362,7 @@ impl TryFrom<Joyent> for InstanceView {
             disk_usage: value.generic.quota * 1024,
             image_uuid: value.native.image_uuid,
             cpu: value.generic.cpu_shares as f32 / 100.0,
+            primary_ip,
         })
     }
 }
@@ -330,6 +371,7 @@ impl TryFrom<LX> for InstanceView {
     type Error = ();
 
     fn try_from(value: LX) -> Result<Self, Self::Error> {
+        let primary_ip = value.generic.primary_ip();
         Ok(InstanceView {
             uuid: value.generic.uuid,
             alias: value.generic.alias,
@@ -340,6 +382,7 @@ impl TryFrom<LX> for InstanceView {
             disk_usage: value.generic.quota * 1024,
             image_uuid: value.native.image_uuid,
             cpu: value.generic.cpu_shares as f32 / 100.0,
+            primary_ip,
         })
     }
 }
