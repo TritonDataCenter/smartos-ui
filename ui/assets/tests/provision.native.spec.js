@@ -7,11 +7,10 @@
  * and confirm expected behavior.
  *
  */
-const {test} = require('@playwright/test')
+const { test } = require('@playwright/test')
 const config = require('./config')
 const LoginPage = require('./models/LoginPage')
 const ProvisionPage = require('./models/ProvisionPage')
-const InstancesPage = require('./models/InstancesPage')
 const InstanceJoyentPage = require('./models/InstanceJoyentPage')
 const InstanceJoyentMinimalPage = require('./models/InstanceJoyentMinimalPage')
 const InstanceLxPage = require('./models/InstanceLxPage')
@@ -21,7 +20,7 @@ const deleteInstances = true
 
 test.describe.configure({ mode: 'serial' })
 
-test('Create Joyent (all defaults)', async ({ page }, {title}) => {
+test('Create Joyent (all defaults)', async ({ page }, { title }) => {
   test.setTimeout(config.instanceCreateTimeout.timeout)
   const brand = 'joyent'
   const loginPage = new LoginPage(page)
@@ -30,7 +29,7 @@ test('Create Joyent (all defaults)', async ({ page }, {title}) => {
   const provisionPage = new ProvisionPage(page)
   await provisionPage.goto()
 
-  let image = config.images.find(image => image.for.indexOf(brand) !== -1)
+  const image = config.images.find(image => image.for.indexOf(brand) !== -1)
 
   await provisionPage.setAlias(title)
   await provisionPage.selectImage(image.uuid)
@@ -50,7 +49,7 @@ test('Create Joyent (all defaults)', async ({ page }, {title}) => {
   }
 })
 
-test('Create Joyent Minimal (all defaults)', async ({ page }, {title}) => {
+test('Create Joyent Minimal (all defaults)', async ({ page }, { title }) => {
   test.setTimeout(config.instanceCreateTimeout.timeout)
   const brand = 'joyent-minimal'
   const loginPage = new LoginPage(page)
@@ -59,7 +58,7 @@ test('Create Joyent Minimal (all defaults)', async ({ page }, {title}) => {
   const provisionPage = new ProvisionPage(page)
   await provisionPage.goto()
 
-  let image = config.images.find(image => image.for.indexOf(brand) !== -1)
+  const image = config.images.find(image => image.for.indexOf(brand) !== -1)
 
   await provisionPage.setAlias(title)
   await provisionPage.selectImage(image.uuid)
@@ -80,7 +79,7 @@ test('Create Joyent Minimal (all defaults)', async ({ page }, {title}) => {
   }
 })
 
-test('Create LX (all defaults)', async ({ page }, {title}) => {
+test('Create LX (all defaults)', async ({ page }, { title }) => {
   test.setTimeout(config.instanceCreateTimeout.timeout)
   const brand = 'lx'
   const loginPage = new LoginPage(page)
@@ -89,7 +88,7 @@ test('Create LX (all defaults)', async ({ page }, {title}) => {
   const provisionPage = new ProvisionPage(page)
   await provisionPage.goto()
 
-  let image = config.images.find(image => image.for.indexOf(brand) !== -1)
+  const image = config.images.find(image => image.for.indexOf(brand) !== -1)
 
   await provisionPage.setAlias(title)
   await provisionPage.selectImage(image.uuid)
@@ -110,7 +109,7 @@ test('Create LX (all defaults)', async ({ page }, {title}) => {
   }
 })
 
-test('Joyent (512MiB RAM, 8GiB Quota, Ipv4 Static)', async ({ page }, {title}) => {
+test('Joyent (512MiB RAM, 8GiB Quota, Ipv4 Static)', async ({ page }, { title }) => {
   test.setTimeout(config.instanceCreateTimeout.timeout)
   const brand = 'joyent'
   const loginPage = new LoginPage(page)
@@ -121,7 +120,7 @@ test('Joyent (512MiB RAM, 8GiB Quota, Ipv4 Static)', async ({ page }, {title}) =
   const provisionPage = new ProvisionPage(page)
   await provisionPage.goto()
 
-  let image = config.images.find(image => image.for.indexOf(brand) !== -1)
+  const image = config.images.find(image => image.for.indexOf(brand) !== -1)
 
   await provisionPage.setAlias(title)
   await provisionPage.selectImage(image.uuid)
@@ -150,7 +149,7 @@ test('Joyent (512MiB RAM, 8GiB Quota, Ipv4 Static)', async ({ page }, {title}) =
   }
 })
 
-test('LX (512MiB RAM, 8GiB Quota, Ipv4 Static)', async ({ page }, {title}) => {
+test('LX (512MiB RAM, 8GiB Quota, Ipv4 Static)', async ({ page }, { title }) => {
   test.setTimeout(config.instanceCreateTimeout.timeout)
   const brand = 'lx'
   const loginPage = new LoginPage(page)
@@ -161,7 +160,7 @@ test('LX (512MiB RAM, 8GiB Quota, Ipv4 Static)', async ({ page }, {title}) => {
   const provisionPage = new ProvisionPage(page)
   await provisionPage.goto()
 
-  let image = config.images.find(image => image.for.indexOf(brand) !== -1)
+  const image = config.images.find(image => image.for.indexOf(brand) !== -1)
 
   await provisionPage.setAlias(title)
   await provisionPage.selectImage(image.uuid)
@@ -190,7 +189,7 @@ test('LX (512MiB RAM, 8GiB Quota, Ipv4 Static)', async ({ page }, {title}) => {
   }
 })
 
-test('Joyent (1024MiB RAM, 16GiB Quota, Delegate Dataset, Ipv4 Static)', async ({ page }, {title}) => {
+test('Joyent (1024MiB RAM, 16GiB Quota, Delegate Dataset, Ipv4 Static)', async ({ page }, { title }) => {
   test.setTimeout(config.instanceCreateTimeout.timeout)
   const brand = 'joyent'
   const loginPage = new LoginPage(page)
@@ -201,7 +200,7 @@ test('Joyent (1024MiB RAM, 16GiB Quota, Delegate Dataset, Ipv4 Static)', async (
   const provisionPage = new ProvisionPage(page)
   await provisionPage.goto()
 
-  let image = config.images.find(image => image.for.indexOf(brand) !== -1)
+  const image = config.images.find(image => image.for.indexOf(brand) !== -1)
 
   await provisionPage.setAlias(title)
   await provisionPage.selectImage(image.uuid)
@@ -231,7 +230,7 @@ test('Joyent (1024MiB RAM, 16GiB Quota, Delegate Dataset, Ipv4 Static)', async (
   }
 })
 
-test('LX (1024MiB RAM, 16GiB Quota, Delegate Dataset, Ipv4 Static)', async ({ page }, {title}) => {
+test('LX (1024MiB RAM, 16GiB Quota, Delegate Dataset, Ipv4 Static)', async ({ page }, { title }) => {
   test.setTimeout(config.instanceCreateTimeout.timeout)
   const brand = 'lx'
   const loginPage = new LoginPage(page)
@@ -242,7 +241,7 @@ test('LX (1024MiB RAM, 16GiB Quota, Delegate Dataset, Ipv4 Static)', async ({ pa
   const provisionPage = new ProvisionPage(page)
   await provisionPage.goto()
 
-  let image = config.images.find(image => image.for.indexOf(brand) !== -1)
+  const image = config.images.find(image => image.for.indexOf(brand) !== -1)
 
   await provisionPage.setAlias(title)
   await provisionPage.selectImage(image.uuid)
@@ -272,7 +271,7 @@ test('LX (1024MiB RAM, 16GiB Quota, Delegate Dataset, Ipv4 Static)', async ({ pa
   }
 })
 
-test('Joyent Minimal (512MiB RAM, 8GiB Quota, Ipv4 Static)', async ({ page }, {title}) => {
+test('Joyent Minimal (512MiB RAM, 8GiB Quota, Ipv4 Static)', async ({ page }, { title }) => {
   test.setTimeout(config.instanceCreateTimeout.timeout)
   const brand = 'joyent-minimal'
   const loginPage = new LoginPage(page)
@@ -283,7 +282,7 @@ test('Joyent Minimal (512MiB RAM, 8GiB Quota, Ipv4 Static)', async ({ page }, {t
   const provisionPage = new ProvisionPage(page)
   await provisionPage.goto()
 
-  let image = config.images.find(image => image.for.indexOf(brand) !== -1)
+  const image = config.images.find(image => image.for.indexOf(brand) !== -1)
 
   await provisionPage.setAlias(title)
   await provisionPage.selectImage(image.uuid)
@@ -312,7 +311,7 @@ test('Joyent Minimal (512MiB RAM, 8GiB Quota, Ipv4 Static)', async ({ page }, {t
   }
 })
 
-test('Joyent Minimal (1024MiB RAM, 16GiB Quota, Delegate Dataset, Ipv4 Static)', async ({ page }, {title}) => {
+test('Joyent Minimal (1024MiB RAM, 16GiB Quota, Delegate Dataset, Ipv4 Static)', async ({ page }, { title }) => {
   test.setTimeout(config.instanceCreateTimeout.timeout)
   const brand = 'joyent-minimal'
   const loginPage = new LoginPage(page)
@@ -323,7 +322,7 @@ test('Joyent Minimal (1024MiB RAM, 16GiB Quota, Delegate Dataset, Ipv4 Static)',
   const provisionPage = new ProvisionPage(page)
   await provisionPage.goto()
 
-  let image = config.images.find(image => image.for.indexOf(brand) !== -1)
+  const image = config.images.find(image => image.for.indexOf(brand) !== -1)
 
   await provisionPage.setAlias(title)
   await provisionPage.selectImage(image.uuid)

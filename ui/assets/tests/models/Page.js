@@ -12,7 +12,7 @@ class Page {
   async goto () {
     await this.page.goto(`${URL}${this.path}`)
     if (this.validateTitle) {
-      await expect(this.page).toHaveTitle(this.title, {timeout: 10000})
+      await expect(this.page).toHaveTitle(this.title, { timeout: 10000 })
     }
   }
 
@@ -26,11 +26,18 @@ class Page {
     await expect(this.page.getByRole('button', { hasText: 'Create an instance' })).toBeVisible()
   }
 
-  getNotification(uuid) {
+  getNotification (uuid) {
     return [
       this.page.locator(`.notification[data-for-entity="${this.uuid}"]`),
       this.page.locator(`.notification[data-for-entity="${this.uuid}"] .notification-close`)
     ]
+  }
+
+  async changeSelect (selector, value) {
+    const locator = this.page.locator(selector)
+    await locator.selectOption({ value })
+    await locator.blur()
+    await locator.dispatchEvent('change')
   }
 }
 

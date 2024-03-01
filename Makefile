@@ -25,8 +25,11 @@ BUILD_PLATFORM = 20210826T002459Z
 J2_FILES ?= $(shell find $(TOP)/ui/templates -name *.j2)
 JS_FILES ?= $(wildcard $(TOP)/ui/assets/*.js)
 
-ui/assets/node_modules: ui/assets/package.json ui/assets/package-lock.json
+ui/assets/node_modules/@playwright/package.json:
 	cd ui/assets && npm install
+
+ui/assets/node_modules: ui/assets/package.json ui/assets/package-lock.json
+	cd ui/assets && npm install --omit=dev
 
 ui/assets/main.css: ui/assets/main.in.css ui/assets/tailwind.config.js $(J2_FILES)
 	cd ui/assets && \
@@ -100,16 +103,20 @@ devrun: debug
 check:: fmt fmt-js clippy
 
 .PHONY: playwright-first-run
-playwright-first-run: clean-mock-db
+playwright-first-run: clean-mock-db ui/assets/node_modules/@playwright/package.json
 	cd ui/assets && npx playwright test --ui first-run.spec.js
 
 .PHONY: playwright-images
-playwright-images:
+playwright-images: ui/assets/node_modules/@playwright/package.json
 	cd ui/assets && npx playwright test --ui images.spec.js
 
 .PHONY: playwright-native
-playwright-native:
+playwright-native: ui/assets/node_modules/@playwright/package.json
 	cd ui/assets && npx playwright test --ui provision.native.spec.js
+
+.PHONY: playwright-hvm
+playwright-hvm: ui/assets/node_modules/@playwright/package.json
+	cd ui/assets && npx playwright test --ui provision.hvm.spec.js
 
 include ./deps/eng/tools/mk/Makefile.deps
 include ./deps/eng/tools/mk/Makefile.targ

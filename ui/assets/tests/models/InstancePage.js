@@ -1,6 +1,6 @@
 const Page = require('./Page')
 const { expect } = require('@playwright/test')
-const {instanceActionTimeout} = require('../config')
+const { instanceActionTimeout } = require('../config')
 class InstancePage extends Page {
   brand = 'unknown'
   validateTitle = false
@@ -10,11 +10,11 @@ class InstancePage extends Page {
     this.page.on('dialog', dialog => dialog.accept())
   }
 
-  async isExpectedBrand() {
+  async isExpectedBrand () {
     await expect(this.page.locator('#prop-brand')).toHaveValue(this.brand)
   }
 
-  async stop() {
+  async stop () {
     const stopButton = await this.page.locator(`button[data-hx-post="/instances/${this.uuid}/stop"]`)
     await expect(stopButton).toContainText('Stop')
     stopButton.click()
@@ -24,7 +24,7 @@ class InstancePage extends Page {
     await close.click()
   }
 
-  async start() {
+  async start () {
     const stopButton = await this.page.locator(`button[data-hx-post="/instances/${this.uuid}/start"]`)
     await expect(stopButton).toContainText('Start')
     stopButton.click()
@@ -34,7 +34,7 @@ class InstancePage extends Page {
     await close.click()
   }
 
-  async deleteInstance() {
+  async deleteInstance () {
     const deleteButton = await this.page.locator(`button[data-hx-delete="/instances/${this.uuid}"]`)
     await expect(deleteButton).toContainText('Delete')
     deleteButton.click()
@@ -46,7 +46,7 @@ class InstancePage extends Page {
     await expect(this.page).toHaveTitle('Instances', instanceActionTimeout)
   }
 
-  async isRunning() {
+  async isRunning () {
     await expect(this.page.locator('#prop-state')).toHaveValue('running')
   }
 }

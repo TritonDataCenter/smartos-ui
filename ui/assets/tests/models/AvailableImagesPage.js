@@ -11,7 +11,7 @@ class AvailableImagesPage extends Page {
     const title = `Import ${name} (${uuid})`
     await this.page.getByTitle(title).click()
     const successText = `Image ${uuid} has been imported and is ready to use.`
-    const [locator, _] = this.getNotification(uuid)
+    const [locator] = this.getNotification(uuid)
     await expect(locator).toContainText(successText, imageImportTimeout)
   }
 
