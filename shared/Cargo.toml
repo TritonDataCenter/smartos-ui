@@ -17,6 +17,6 @@ schemars = { version = "0.8", features = ["url"] }
 uuid = { version = "1.7.0", features = ["serde", "v4"] }
 time = { version = "0.3", features = ["serde", "formatting", "parsing", "macros"] }
 url = { version = "2.5.0", features = ["serde"] }
-dropshot = "0.9"
+dropshot = "0.10"
 hyper = "0.14"
 http = "0.2.11"

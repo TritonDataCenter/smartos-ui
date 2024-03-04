@@ -15,7 +15,8 @@ use smartos_executor::{endpoints, endpoints::Context};
 use smartos_shared::config::Config;
 
 use dropshot::{
-    ApiDescription, ConfigDropshot, ConfigLogging, HttpServerStarter,
+    ApiDescription, ConfigDropshot, ConfigLogging, HandlerTaskMode,
+    HttpServerStarter,
 };
 
 #[tokio::main]
@@ -87,7 +88,7 @@ async fn main() -> Result<(), String> {
                 .parse()
                 .expect("Failed to parse BIND_ADDRESS"),
             request_body_max_bytes: config.request_body_max_bytes,
-            tls: None,
+            default_handler_task_mode: HandlerTaskMode::Detached,
         },
         api,
         Context::new(config),

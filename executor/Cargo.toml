@@ -11,7 +11,7 @@ authors = [
 ]
 
 [dependencies]
-dropshot = "0.9"
+dropshot = "0.10"
 tokio = {  version = "1.35", features = ["full"] }
 slog = "2.7"
 hyper = "0.14"

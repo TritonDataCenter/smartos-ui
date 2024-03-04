@@ -17,7 +17,8 @@ use smartos_ui::{
 };
 
 use dropshot::{
-    ApiDescription, ConfigDropshot, ConfigLogging, HttpServerStarter,
+    ApiDescription, ConfigDropshot, ConfigLogging, HandlerTaskMode,
+    HttpServerStarter,
 };
 
 #[tokio::main]
@@ -100,7 +101,11 @@ async fn main() -> Result<(), String> {
     info!(log, "{} v{}", name, VERSION);
 
     let server = HttpServerStarter::new(
-        &ConfigDropshot { bind_address, request_body_max_bytes, tls: None },
+        &ConfigDropshot {
+            bind_address,
+            request_body_max_bytes,
+            default_handler_task_mode: HandlerTaskMode::CancelOnDisconnect,
+        },
         api,
         ctx,
         &log,

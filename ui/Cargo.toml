@@ -13,7 +13,7 @@ authors = [
 [dependencies]
 tokio = "1.35"
 hyper = "0.14"
-dropshot = "0.9"
+dropshot = "0.10"
 slog = "2.7"
 schemars = { version = "0.8", features = ["url"] }
 serde_json = "1.0"
