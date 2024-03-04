@@ -38,55 +38,39 @@ pub async fn post_provision_index(
     let PayloadContainer { uuid } =
         serde_json::from_str(&req.payload).map_err(to_bad_request)?;
 
-    info!(ctx.log, "Instance UUID: {}", uuid);
+    let args = ["create"];
+    debug!(ctx.log, "Executing vmadm {:?}", &args);
+    let mut process = Command::new("vmadm")
+        .args(args)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(to_internal_error)?;
 
-    // We need to spawn tokio tasks for long-running processes
-    // https://github.com/oxidecomputer/dropshot/issues/695
-    tokio::spawn(async move {
-        info!(ctx.log, "Starting vmadm create task for {}", uuid);
-        let args = ["create"];
-        debug!(ctx.log, "Executing vmadm {:?}", &args);
-        let mut process = Command::new("vmadm")
-            .args(args)
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
+    if let Some(mut stdin) = process.stdin.take() {
+        stdin
+            .write_all(req.payload.as_bytes())
+            .await
             .map_err(to_internal_error)?;
+        drop(stdin);
+    } else {
+        return Err(to_internal_error("Failed to acquire stdin pipe"));
+    }
 
-        if let Some(mut stdin) = process.stdin.take() {
-            stdin
-                .write_all(req.payload.as_bytes())
-                .await
-                .map_err(to_internal_error)?;
-            drop(stdin);
-        } else {
-            return Err(to_internal_error("Failed to acquire stdin pipe"));
-        }
+    let out = process.wait_with_output().await.map_err(to_internal_error)?;
 
-        let out =
-            process.wait_with_output().await.map_err(to_internal_error)?;
+    if out.status.success() {
+        let stdout =
+            String::from_utf8(out.stdout).map_err(to_internal_error)?;
+        info!(ctx.log, "Instance {} create success: {}", uuid, stdout);
+        return empty_ok();
+    }
 
-        if out.status.success() {
-            let stdout =
-                String::from_utf8(out.stdout).map_err(to_internal_error)?;
-            info!(ctx.log, "Instance {} create success: {}", uuid, stdout);
-            return empty_ok();
-        }
+    let stderr = String::from_utf8(out.stderr).map_err(to_internal_error)?;
+    error!(ctx.log, "Instance {} create failed: {}", uuid, stderr);
 
-        let stderr =
-            String::from_utf8(out.stderr).map_err(to_internal_error)?;
-        error!(ctx.log, "Instance {} create failed: {}", uuid, stderr);
-
-        Err(to_bad_request(stderr))
-    })
-    .await
-    .unwrap_or_else(|e| {
-        Err(HttpError::for_internal_error(format!(
-            "Failed awaiting \"post_provision_index\": {:#}",
-            e
-        )))
-    })
+    Err(to_bad_request(stderr))
 }
 
 #[endpoint {
