@@ -76,6 +76,10 @@ const cmd = {
     vm.zpool = 'zones'
     vm.zonepath = `/${vm.zfs_filesystem}`
 
+    if (!vm.nics) {
+      vm.nics = []
+    }
+
     if (!vm.brand) {
       fatal('{"bad_brand": "undefined"}')
     }
