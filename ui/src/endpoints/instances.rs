@@ -293,10 +293,29 @@ pub async fn get_index(
         .await
         .map_err(to_internal_error)?;
 
-    let provisioned_ram = instance_views.iter().fold(0, |acc, i| i.ram + acc);
+    let provisioned_ram = instance_views.iter().fold(0, |acc, i| {
+        return if i.ram == 0 {
+            mib_of_memory + acc
+        } else {
+            i.ram + acc
+        };
+    });
     let provisioned_quota =
-        instance_views.iter().fold(0, |acc, i| i.disk_usage + acc);
-    let provisioned_cpu = instance_views.iter().fold(0.0, |acc, i| i.cpu + acc);
+        instance_views.iter().fold(0, |acc, i| {
+            return if i.disk_usage == 0 {
+                zpool_size_in_gib + acc
+            } else {
+                i.disk_usage + acc
+            };
+        });
+
+    let provisioned_cpu = instance_views.iter().fold(0.0, |acc, i| {
+        return if i.cpu == 0.0 {
+            acc + cpu_count as f32
+        } else {
+            i.cpu + acc
+        };
+    });
     for instance in instance_views.drain(..) {
         let image_name = if let Some(image) =
             images.iter().find(|&i| i.manifest.uuid == instance.image_uuid)
