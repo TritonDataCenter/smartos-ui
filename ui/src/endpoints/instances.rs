@@ -351,6 +351,7 @@ pub struct InstanceCreateTemplate {
     delegate_dataset: String,
     root_pw: String,
     bootrom: String,
+    cpu_cap: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -395,6 +396,8 @@ pub struct ProvisionQuery {
     root_pw: String,
     #[serde(default)]
     bootrom: String,
+    #[serde(default)]
+    cpu_cap: String,
 }
 
 #[endpoint {
@@ -431,6 +434,7 @@ pub async fn get_provision(
         delegate_dataset,
         root_pw,
         bootrom,
+        cpu_cap,
     } = query.into_inner();
 
     let mut selected_brand = Brand::default();
@@ -502,6 +506,7 @@ pub async fn get_provision(
         delegate_dataset,
         root_pw,
         bootrom,
+        cpu_cap,
     };
     let result = template.render().map_err(to_internal_error)?;
     htmx_response(response, "/provision", result.into())

@@ -258,20 +258,45 @@
 
               {% if let Some(current_image) = selected_image %}
                 {% if current_image.is_for_hvm() %}
-                <div class="col-span-full">
-                  <label for="quota" class="block text-sm font-medium leading-6 text-white">vCPUs</label>
-                  <div class="mt-2">
-                    <input
-                      type="number"
-                      name="vcpus"
-                      id="vcpus"
-                      min="0"
-                      class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-                      value="{{vcpus}}">
+                  <div class="col-span-full">
+                    <label for="quota" class="block text-sm font-medium leading-6 text-white">vCPUs</label>
+                    <div class="mt-2">
+                      <input
+                        type="number"
+                        name="vcpus"
+                        id="vcpus"
+                        min="0"
+                        onblur="window.vCpuOnChange(this)"
+                        onchange="window.vCpuOnChange(this)"
+                        class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                        value="{{vcpus}}">
+                    </div>
                   </div>
-                </div>
                 {% endif %}
               {% endif %}
+
+              <div class="col-span-full">
+                <label for="cpu_cap" class="block text-sm font-medium leading-6 text-white">
+                  CPU Cap
+                  <span class="has-tooltip cursor-pointer">
+                    {% call icons::info("h-4 w-h inline mb-1") %}
+                    <span class="tooltip rounded shadow-lg p-1 bg-slate-800 text-white -mt-8 p-4 max-w-80">
+                      Sets a limit on the amount of CPU time that can be used by a VM. The
+                      unit used is the percentage of a single CPU that can be used by the VM.
+                      Eg. a value of 300 means up to 3 full CPUs.
+                    </span>
+                  </span>
+                </label>
+                <div class="mt-2">
+                  <input
+                    type="number"
+                    name="cpu_cap"
+                    id="cpu_cap"
+                    min="0"
+                    class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                    value="{{cpu_cap}}">
+                </div>
+              </div>
 
               {% if let Some(current_image) = selected_image %}
                 {% if !current_image.is_for_hvm() %}
@@ -377,7 +402,7 @@
                   <span class="has-tooltip cursor-pointer">
                     {% call icons::info("h-4 w-h inline mb-1") %}
                     <span class="tooltip rounded shadow-lg p-1 bg-slate-800 text-white -mt-8 p-4 max-w-80">
-                      Multiple resolvers can be separated with a comma (e.g 1.1.1.1,8.8.8.8 )
+                      Multiple resolvers can be separated with a comma (e.g 1.1.1.1,8.8.8.8)
                     </span>
                   </span>
                 </label>

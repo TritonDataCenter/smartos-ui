@@ -22,6 +22,28 @@ window.inputBoundToMin = ($element) => {
   }
 }
 
+// When vCPU is set, if there's nothing already in CPU Cap, pre-fill using vCPUs
+// if CPU Cap has a value, set it to at least the value of vCPUs
+window.vCpuOnChange = ($element) => {
+  const $cpuCap = $('[name=cpu_cap')
+  const vCPUs = parseInt($element.value, 10)
+
+  if (isNaN(vCPUs)) {
+    return
+  }
+
+  const cpuCapValue = vCPUs * 100
+
+  if (!$cpuCap.value) {
+    $cpuCap.value = cpuCapValue
+  } else {
+    const cpuCap = parseInt($cpuCap.value, 10)
+    if (!isNaN(cpuCap) || cpuCap < cpuCapValue) {
+      $cpuCap.value = cpuCapValue
+    }
+  }
+}
+
 // Will interrogate input types for a given <form> and attempt to massage
 // them into basic JSON types.
 // A data attr named data-enctype="TYPE" can be used on any element with a name
@@ -151,8 +173,9 @@ window.updateEditors = () => {
     props.resolvers = resolvers
   }
 
-  if (isHvm && props.vcpus) {
+  if (isHvm && props.vcpus && !props.cpu_cap) {
     props.cpu_cap = props.vcpus * 100
+    $('[name=cpu_cap').value = props.cpu_cap
   }
 
   if (props.root_authorized_keys) {
