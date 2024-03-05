@@ -48,7 +48,7 @@
               {{provisioned_cpu}}
               <span class="text-gray-300 text-3xl font-normal"> / {{total_cpu}}</span>
               </span>
-            <span class="text-sm text-gray-400">vCPUs + Shares</span>
+            <span class="text-sm text-gray-400">vCPUs + CPU Cap</span>
           </p>
         </div>
         <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
@@ -133,18 +133,18 @@
                       {% endif %}
                     </td>
                     <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
-                      {% if instance.hvm %}
-                        {{instance.cpu}}
+                      {% if instance.cpu == 0.0 %}
+                        <span title="Unlimited">∞</span>
                       {% else %}
-                          {{instance.cpu * 100.0 }}
+                        {{instance.cpu}}
+                        <span class="text-xs text-gray-500">
+                          {% if instance.hvm %}
+                            vCPUs
+                          {% else %}
+                            CPU Cap
+                          {% endif %}
+                        </span>
                       {% endif %}
-                      <span class="text-xs text-gray-500">
-                        {% if instance.hvm %}
-                          vCPUs
-                        {% else %}
-                          Shares
-                        {% endif %}
-                      </span>
                     </td>
                     <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{instance.ram}}</td>
                     <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">

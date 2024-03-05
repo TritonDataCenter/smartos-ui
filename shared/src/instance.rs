@@ -130,11 +130,11 @@ impl Generic {
 
     /// Return CPU Cap / 100 or 0
     pub fn get_cpus(&self) -> f32 {
-        return if self.cpu_cap > 0 {
+        if self.cpu_cap > 0 {
             self.cpu_cap as f32 / 100.0
         } else {
             0.0
-        };
+        }
     }
 }
 
@@ -159,16 +159,12 @@ impl HVM {
 
     /// Return CPU Cap / 100 or vCPUs, whichever is larger
     pub fn get_cpus(&self, cpu_cap: u64) -> f32 {
-        let cap = if cpu_cap > 0 {
-            cpu_cap as f32 / 100.0
-        } else {
-            0.0
-        };
-        return if cap > self.vcpus as f32 {
+        let cap = if cpu_cap > 0 { cpu_cap as f32 / 100.0 } else { 0.0 };
+        if cap > self.vcpus as f32 {
             cap
         } else {
             self.vcpus as f32
-        };
+        }
     }
 }
 
@@ -525,7 +521,6 @@ pub struct Vnc {
 pub struct Info {
     pub vnc: Vnc,
 }
-
 
 pub fn default_u64() -> u64 {
     0
