@@ -29,7 +29,7 @@ window.inputBoundToMin = ($element) => {
 // elements that have no type attr
 function encodeFormParameters ($targets, props = {}) {
   $targets.forEach($element => {
-    let value
+    let value = null
     switch (($element.dataset && $element.dataset.encType) || $element.type) {
       case 'number':
         try {
@@ -52,7 +52,7 @@ function encodeFormParameters ($targets, props = {}) {
         value = $element.value
         break
     }
-    if (value) {
+    if (value || value === 0) {
       props[$element.name] = value
     } else {
       delete props[$element.name]
@@ -171,6 +171,10 @@ window.updateEditors = () => {
       root_pw: props.root_pw
     }
     delete props.root_pw
+  }
+
+  if (props.alias) {
+    props.hostname = props.alias
   }
 
   try {
