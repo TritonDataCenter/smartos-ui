@@ -88,6 +88,8 @@ pub struct Generic {
     pub last_modified: String,
     pub platform_buildstamp: String,
     pub nics: Vec<Nic>,
+    #[serde(default = "default_u64")]
+    pub cpu_cap: u64,
     // snapshots
     // tags
     // routes
@@ -125,6 +127,15 @@ impl Generic {
         }
         first_address
     }
+
+    /// Return CPU Cap / 100 or 0
+    pub fn get_cpus(&self) -> f32 {
+        return if self.cpu_cap > 0 {
+            self.cpu_cap as f32 / 100.0
+        } else {
+            0.0
+        };
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -132,7 +143,6 @@ pub struct HVM {
     pub ram: u64,
     pub disks: Vec<Disk>,
     pub vcpus: u64,
-    // device
 }
 
 impl HVM {
@@ -146,6 +156,20 @@ impl HVM {
             UuidBuilder::nil().into_uuid()
         }
     }
+
+    /// Return CPU Cap / 100 or vCPUs, whichever is larger
+    pub fn get_cpus(&self, cpu_cap: u64) -> f32 {
+        let cap = if cpu_cap > 0 {
+            cpu_cap as f32 / 100.0
+        } else {
+            0.0
+        };
+        return if cap > self.vcpus as f32 {
+            cap
+        } else {
+            self.vcpus as f32
+        };
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -153,7 +177,6 @@ pub struct Native {
     pub image_uuid: Uuid,
     pub tmpfs: u64,
     pub datasets: Option<Vec<String>>,
-    // if dataset
     pub zfs_data_recsize: Option<u64>,
 }
 
@@ -292,6 +315,7 @@ impl TryFrom<KVM> for InstanceView {
 
     fn try_from(value: KVM) -> Result<Self, Self::Error> {
         let primary_ip = value.generic.primary_ip();
+
         Ok(InstanceView {
             uuid: value.generic.uuid,
             alias: value.generic.alias,
@@ -301,7 +325,7 @@ impl TryFrom<KVM> for InstanceView {
             state: value.generic.state,
             disk_usage: value.hvm.get_disk_usage(),
             image_uuid: value.hvm.get_boot_image_uuid(),
-            cpu: value.hvm.vcpus as f32,
+            cpu: value.hvm.get_cpus(value.generic.cpu_cap),
             primary_ip,
         })
     }
@@ -321,7 +345,7 @@ impl TryFrom<Bhyve> for InstanceView {
             state: value.generic.state,
             disk_usage: value.hvm.get_disk_usage(),
             image_uuid: value.hvm.get_boot_image_uuid(),
-            cpu: value.hvm.vcpus as f32,
+            cpu: value.hvm.get_cpus(value.generic.cpu_cap),
             primary_ip,
         })
     }
@@ -332,6 +356,7 @@ impl TryFrom<JoyentMinimal> for InstanceView {
 
     fn try_from(value: JoyentMinimal) -> Result<Self, Self::Error> {
         let primary_ip = value.generic.primary_ip();
+        let cpu = value.generic.get_cpus();
         Ok(InstanceView {
             uuid: value.generic.uuid,
             alias: value.generic.alias,
@@ -341,7 +366,7 @@ impl TryFrom<JoyentMinimal> for InstanceView {
             state: value.generic.state,
             disk_usage: value.generic.quota * 1024,
             image_uuid: value.native.image_uuid,
-            cpu: value.generic.cpu_shares as f32 / 100.0,
+            cpu,
             primary_ip,
         })
     }
@@ -352,6 +377,7 @@ impl TryFrom<Joyent> for InstanceView {
 
     fn try_from(value: Joyent) -> Result<Self, Self::Error> {
         let primary_ip = value.generic.primary_ip();
+        let cpu = value.generic.get_cpus();
         Ok(InstanceView {
             uuid: value.generic.uuid,
             alias: value.generic.alias,
@@ -361,7 +387,7 @@ impl TryFrom<Joyent> for InstanceView {
             state: value.generic.state,
             disk_usage: value.generic.quota * 1024,
             image_uuid: value.native.image_uuid,
-            cpu: value.generic.cpu_shares as f32 / 100.0,
+            cpu,
             primary_ip,
         })
     }
@@ -372,6 +398,7 @@ impl TryFrom<LX> for InstanceView {
 
     fn try_from(value: LX) -> Result<Self, Self::Error> {
         let primary_ip = value.generic.primary_ip();
+        let cpu = value.generic.get_cpus();
         Ok(InstanceView {
             uuid: value.generic.uuid,
             alias: value.generic.alias,
@@ -381,7 +408,7 @@ impl TryFrom<LX> for InstanceView {
             state: value.generic.state,
             disk_usage: value.generic.quota * 1024,
             image_uuid: value.native.image_uuid,
-            cpu: value.generic.cpu_shares as f32 / 100.0,
+            cpu,
             primary_ip,
         })
     }
@@ -497,4 +524,9 @@ pub struct Vnc {
 #[derive(Deserialize, Debug, JsonSchema)]
 pub struct Info {
     pub vnc: Vnc,
+}
+
+
+pub fn default_u64() -> u64 {
+    0
 }
