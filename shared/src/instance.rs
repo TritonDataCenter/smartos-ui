@@ -136,6 +136,13 @@ impl Generic {
             0.0
         }
     }
+    pub fn alias(&self) -> String {
+        if let Some(alias) = &self.alias {
+            alias.clone()
+        } else {
+            self.uuid.to_string().split('-').nth(0).unwrap_or("-").to_string()
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -224,7 +231,7 @@ pub struct LX {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct InstanceView {
     pub uuid: Uuid,
-    pub alias: Option<String>,
+    pub alias: String,
     pub brand: Brand,
     pub state: String,
     pub ram: u64,
@@ -276,18 +283,12 @@ impl Instance {
     }
 
     pub fn alias(&self) -> String {
-        let alias = match self {
-            Instance::Joyent(i) => &i.generic.alias,
-            Instance::JoyentMinimal(i) => &i.generic.alias,
-            Instance::Bhyve(i) => &i.generic.alias,
-            Instance::KVM(i) => &i.generic.alias,
-            Instance::LX(i) => &i.generic.alias,
-        };
-
-        if let Some(alias) = alias {
-            alias.clone()
-        } else {
-            self.uuid().to_string()
+        match self {
+            Instance::Joyent(i) => i.generic.alias(),
+            Instance::JoyentMinimal(i) => i.generic.alias(),
+            Instance::Bhyve(i) => i.generic.alias(),
+            Instance::KVM(i) => i.generic.alias(),
+            Instance::LX(i) => i.generic.alias(),
         }
     }
 }
@@ -314,7 +315,7 @@ impl TryFrom<KVM> for InstanceView {
 
         Ok(InstanceView {
             uuid: value.generic.uuid,
-            alias: value.generic.alias,
+            alias: value.generic.alias(),
             brand: Brand::KVM,
             ram: value.hvm.ram,
             hvm: true,
@@ -334,7 +335,7 @@ impl TryFrom<Bhyve> for InstanceView {
         let primary_ip = value.generic.primary_ip();
         Ok(InstanceView {
             uuid: value.generic.uuid,
-            alias: value.generic.alias,
+            alias: value.generic.alias(),
             brand: Brand::Bhyve,
             ram: value.hvm.ram,
             hvm: true,
@@ -355,7 +356,7 @@ impl TryFrom<JoyentMinimal> for InstanceView {
         let cpu = value.generic.get_cpus();
         Ok(InstanceView {
             uuid: value.generic.uuid,
-            alias: value.generic.alias,
+            alias: value.generic.alias(),
             brand: Brand::JoyentMinimal,
             ram: value.generic.max_physical_memory,
             hvm: false,
@@ -376,7 +377,7 @@ impl TryFrom<Joyent> for InstanceView {
         let cpu = value.generic.get_cpus();
         Ok(InstanceView {
             uuid: value.generic.uuid,
-            alias: value.generic.alias,
+            alias: value.generic.alias(),
             brand: Brand::Joyent,
             ram: value.generic.max_physical_memory,
             hvm: false,
@@ -397,7 +398,7 @@ impl TryFrom<LX> for InstanceView {
         let cpu = value.generic.get_cpus();
         Ok(InstanceView {
             uuid: value.generic.uuid,
-            alias: value.generic.alias,
+            alias: value.generic.alias(),
             brand: Brand::LX,
             ram: value.generic.max_physical_memory,
             hvm: false,
