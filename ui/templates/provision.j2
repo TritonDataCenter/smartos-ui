@@ -236,6 +236,7 @@
                           class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
                           {# All of our HVM images have a minimum of 10 GiB, can't set this to any lower value than 10 #}
                           onblur="window.inputBoundToMin(this)"
+                          onchange="window.inputBoundToMin(this)"
                           value="{% if primary_disk_size == 0 %}10{% else %}{{primary_disk_size}}{% endif %}">
                       </div>
                     </div>
@@ -352,8 +353,23 @@
                     id="root_authorized_keys"
                     name="root_authorized_keys"
                     rows="3"
+                    onblur="window.authorizedKeysOnChange(this)"
+                    onchange="window.authorizedKeysOnChange(this)"
                     autocomplete
                     class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">{{root_authorized_keys}}</textarea>
+                </div>
+              </div>
+
+              <div class="col-span-full">
+                <label for="user_script" class="block text-sm font-medium leading-6 text-white">
+                  User Script
+                </label>
+                <div class="mt-2">
+                  <textarea
+                    id="user_script"
+                    name="user_script"
+                    rows="3"
+                    class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6">{{user_script}}</textarea>
                 </div>
               </div>
 

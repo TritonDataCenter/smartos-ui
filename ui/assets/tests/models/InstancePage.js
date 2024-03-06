@@ -38,7 +38,7 @@ class InstancePage extends Page {
     const deleteButton = await this.page.locator(`button[data-hx-delete="/instances/${this.uuid}"]`)
     await expect(deleteButton).toContainText('Delete')
     deleteButton.click()
-    const successText = `(${this.uuid}) successfully deleted`
+    const successText = 'successfully deleted'
     const [locator, close] = this.getNotification(this.uuid)
     await expect(locator).toContainText(successText, instanceActionTimeout)
     await close.click()

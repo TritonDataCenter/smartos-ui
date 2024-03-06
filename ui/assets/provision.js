@@ -44,6 +44,21 @@ window.vCpuOnChange = ($element) => {
   }
 }
 
+// When authorized keys have been added, update the user script field.
+window.authorizedKeysOnChange = ($element) => {
+  if (!$element.value) {
+    return
+  }
+
+  const $userScript = $('[name=user_script]')
+  const addAuthkeys = '/usr/sbin/mdata-get root_authorized_keys > /root/.ssh/authorized_keys'
+  if ($userScript.value && $userScript.value.indexOf(addAuthkeys) === -1) {
+    $userScript.value = $userScript.value += `\n${addAuthkeys}`
+  } else if (!$userScript.value) {
+    $userScript.value = addAuthkeys
+  }
+}
+
 // Will interrogate input types for a given <form> and attempt to massage
 // them into basic JSON types.
 // A data attr named data-enctype="TYPE" can be used on any element with a name
@@ -95,6 +110,8 @@ window.updateEditors = () => {
   const nicTag = $('[name=nic_tag').value
   const $ipv4Setup = $('[name=ipv4_setup')
   const $ipv6Setup = $('[name=ipv6_setup')
+  const $cpuCap = $('[name=cpu_cap')
+  const $userScript = $('[name=user_script')
 
   if (nicTag) {
     nic.nic_tag = nicTag
@@ -175,7 +192,14 @@ window.updateEditors = () => {
 
   if (isHvm && props.vcpus && !props.cpu_cap) {
     props.cpu_cap = props.vcpus * 100
-    $('[name=cpu_cap').value = props.cpu_cap
+    $cpuCap.value = props.cpu_cap
+  }
+
+  if ($userScript.value) {
+    if (!props.customer_metadata) {
+      props.customer_metadata = {}
+    }
+    props.customer_metadata['user-script'] = $userScript.value
   }
 
   if (props.root_authorized_keys) {
@@ -183,11 +207,17 @@ window.updateEditors = () => {
       root_authorized_keys: props.root_authorized_keys
     }
     if (!isHvm) {
-      props.customer_metadata['user-script'] =
-        '/usr/sbin/mdata-get root_authorized_keys > /root/.ssh/authorized_keys'
+      const addAuthkeys = '/usr/sbin/mdata-get root_authorized_keys > /root/.ssh/authorized_keys'
+      if ($userScript.value && $userScript.value.indexOf(addAuthkeys) === -1) {
+        $userScript.value += `\n${addAuthkeys}`
+      } else if (!$userScript.value) {
+        $userScript.value = addAuthkeys
+      }
+      props.customer_metadata['user-script'] = $userScript.value
     }
     delete props.root_authorized_keys
   }
+  delete props.user_script
 
   if (props.root_pw) {
     props.internal_metadata = {
