@@ -8,7 +8,21 @@
       </p>
 
       <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-        {% call input::text_view("Image UUID", instance.native.image_uuid) %}
+        <div class="sm:col-span-4">
+          <label for="prop-image-uuid" class="block text-sm font-medium leading-6 text-white">Image</label>
+          <div class="mt-2">
+            <div class="flex">
+              <a
+                class="underline decoration-solid text-blue-600 hover:text-blue-500"
+                href="/images/{{self.image.manifest.uuid}}"
+                {% if let Some(description) = self.image.manifest.description %}
+                  title="{{description}}"
+                {% endif %}>
+                {{self.image.manifest.name}}@{{self.image.manifest.version}} ({{self.image.manifest.uuid}})
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

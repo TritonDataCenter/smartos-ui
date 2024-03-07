@@ -41,6 +41,7 @@ pub struct InstanceTemplate {
     instance_enum: Instance,
     json: Option<String>,
     info: Option<Info>,
+    image: Image,
 }
 
 #[endpoint {
@@ -89,8 +90,22 @@ pub async fn get_by_id(
         );
     }
 
-    let template =
-        InstanceTemplate { title, instance_enum, json: json_string, info };
+    let image_uuid = instance_enum.image_uuid();
+
+    let image = ctx
+        .context()
+        .client
+        .get_image(&image_uuid)
+        .await
+        .map_err(to_internal_error)?;
+
+    let template = InstanceTemplate {
+        title,
+        instance_enum,
+        json: json_string,
+        info,
+        image,
+    };
     let result = template.render().map_err(to_internal_error)?;
 
     htmx_response(response, &format!("/instances/{}", &id), result.into())

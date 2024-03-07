@@ -291,6 +291,16 @@ impl Instance {
             Instance::LX(i) => i.generic.alias(),
         }
     }
+
+    pub fn image_uuid(&self) -> Uuid {
+        match self {
+            Instance::Joyent(i) => i.native.image_uuid,
+            Instance::JoyentMinimal(i) => i.native.image_uuid,
+            Instance::LX(i) => i.native.image_uuid,
+            Instance::Bhyve(i) => i.hvm.get_boot_image_uuid(),
+            Instance::KVM(i) => i.hvm.get_boot_image_uuid(),
+        }
+    }
 }
 
 impl TryFrom<Instance> for InstanceView {
