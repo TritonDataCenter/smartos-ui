@@ -44,12 +44,16 @@ window.vCpuOnChange = ($element) => {
   }
 }
 
-// When authorized keys have been added, update the user script field.
+// When authorized keys have been added, update the user script field (for non
+// HVM instances only)
 window.authorizedKeysOnChange = ($element) => {
   if (!$element.value) {
     return
   }
-
+  const brand = $('[name="brand"]').value
+  if (brand === 'bhyve' || brand === 'kvm') {
+    return
+  }
   const $userScript = $('[name=user_script]')
   const addAuthkeys = '/usr/sbin/mdata-get root_authorized_keys > /root/.ssh/authorized_keys'
   if ($userScript.value && $userScript.value.indexOf(addAuthkeys) === -1) {
