@@ -598,7 +598,8 @@
         data-hx-disabled-elt="this"
         data-hx-indicator="#validate-loader"
         data-hx-post="/provision/validate"
-        data-hx-target="#validate-result"
+        data-hx-target="#notifications"
+        data-hx-swap="beforeend"
         data-hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
         class="btn btn-clear">
         <span class="htmx-indicator" id="validate-loader">

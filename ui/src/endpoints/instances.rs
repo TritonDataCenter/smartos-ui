@@ -658,13 +658,35 @@ pub async fn post_provision_validate(
         .validate_create(req)
         .await
         .map_err(to_internal_error)?;
-    let template = ValidateTemplate {
-        success: validation.success,
-        message: validation.message,
+
+    let template_result = if validation.success {
+        let template = NotificationTemplate {
+            id: ctx.request_id,
+            entity_id: "".to_string(),
+            kind: NotificationKind::Ok,
+            subject: "Valid Instance Details".to_string(),
+            message: validation.message,
+            timeout: Some(String::from("8s")),
+            redirect: None,
+            created_at: "/provision".to_string(),
+        };
+        template.render().map_err(to_internal_error)?
+    } else {
+        let template = NotificationTemplate {
+            id: ctx.request_id,
+            entity_id: "".to_string(),
+            kind: NotificationKind::Error,
+            subject: "Invalid Instance Details".to_string(),
+            message: validation.message,
+            timeout: Some(String::from("8s")),
+            redirect: None,
+            created_at: "/provision".to_string(),
+        };
+        template.render().map_err(to_internal_error)?
     };
-    let result = template.render().map_err(to_internal_error)?;
+
     response
         .status(StatusCode::OK)
-        .body(result.into())
+        .body(template_result.into())
         .map_err(to_internal_error)
 }
