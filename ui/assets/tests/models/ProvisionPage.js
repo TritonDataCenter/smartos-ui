@@ -84,8 +84,9 @@ class ProvisionPage extends Page {
 
   async validate () {
     await this.page.locator('#validate-button').click()
-    const validateResult = this.page.locator('#validate-result')
-    await expect(validateResult).toContainText('Valid Instance Details')
+    const [locator, close] = this.getNotification('')
+    await expect(locator).toContainText('Valid Instance Details')
+    await close.click()
   }
 
   async create () {

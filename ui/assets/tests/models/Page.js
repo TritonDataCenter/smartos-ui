@@ -27,9 +27,10 @@ class Page {
   }
 
   getNotification (uuid) {
+    const uuidLocator = (uuid === undefined) ? this.uuid : uuid
     return [
-      this.page.locator(`.notification[data-for-entity="${this.uuid}"]`),
-      this.page.locator(`.notification[data-for-entity="${this.uuid}"] .notification-close`)
+      this.page.locator(`.notification[data-for-entity="${uuidLocator}"]`),
+      this.page.locator(`.notification[data-for-entity="${uuidLocator}"] .notification-close`)
     ]
   }
 
