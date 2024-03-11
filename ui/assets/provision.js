@@ -63,6 +63,18 @@ window.authorizedKeysOnChange = ($element) => {
   }
 }
 
+// When cloud-init data change is updated, ensure it begins with "#cloud-config\n"
+window.cloudInitDataOnChange = ($element) => {
+  if (!$element.value) {
+    return
+  }
+  if ($element.value === '#cloud-config') {
+    $element.value = '#cloud-config\n'
+  } else if (!$element.value.startsWith('#cloud-config\n')) {
+    $element.value = `#cloud-config\n${$element.value}`
+  }
+}
+
 // Will interrogate input types for a given <form> and attempt to massage
 // them into basic JSON types.
 // A data attr named data-enctype="TYPE" can be used on any element with a name
@@ -222,6 +234,14 @@ window.updateEditors = () => {
     delete props.root_authorized_keys
   }
   delete props.user_script
+
+  if (props.cloudinit_data) {
+    if (!props.customer_metadata) {
+      props.customer_metadata = {}
+    }
+    props.customer_metadata['cloud-init:user-data'] = props.cloudinit_data
+  }
+  delete props.cloudinit_data
 
   if (props.root_pw) {
     props.internal_metadata = {

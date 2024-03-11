@@ -377,6 +377,7 @@ pub struct InstanceCreateTemplate {
     bootrom: String,
     cpu_cap: String,
     user_script: String,
+    cloudinit_data: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -425,6 +426,8 @@ pub struct ProvisionQuery {
     cpu_cap: String,
     #[serde(default)]
     user_script: String,
+    #[serde(default)]
+    cloudinit_data: String,
 }
 
 #[endpoint {
@@ -462,7 +465,7 @@ pub async fn get_provision(
         root_pw,
         bootrom,
         cpu_cap,
-        user_script,
+        user_script, cloudinit_data,
     } = query.into_inner();
 
     let mut selected_brand = Brand::default();
@@ -536,6 +539,7 @@ pub async fn get_provision(
         bootrom,
         cpu_cap,
         user_script,
+        cloudinit_data,
     };
     let result = template.render().map_err(to_internal_error)?;
     htmx_response(response, "/provision", result.into())
