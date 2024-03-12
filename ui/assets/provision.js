@@ -332,6 +332,7 @@ export const setupProvisioningForm = () => {
   const $additionalButton = $('#additional-button')
   const $finalButton = $('#final-button')
   const $validateButton = $('#validate-button')
+  const $actionButtons = $('#action-buttons')
   const $editorTabs = [$additionalTab, $finalTab]
   const $tabs = [$guidedTab, ...$editorTabs]
   const $buttons = [$guidedButton, $additionalButton, $finalButton]
@@ -396,6 +397,20 @@ export const setupProvisioningForm = () => {
       $guidedTab.classList.remove('hidden')
       $guidedButton.classList.remove(inactive)
       $guidedButton.classList.add(active)
+    }
+  })
+
+  $guidedTab.addEventListener('change', e => {
+    if (e.target.id === 'image_uuid') {
+      if (e.target.value) {
+        $additionalButton.classList.remove('hidden')
+        $finalButton.classList.remove('hidden')
+        $actionButtons.classList.remove('hidden')
+      } else {
+        $additionalButton.classList.add('hidden')
+        $finalButton.classList.add('hidden')
+        $actionButtons.classList.add('hidden')
+      }
     }
   })
 }

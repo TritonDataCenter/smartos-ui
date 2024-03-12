@@ -12,21 +12,20 @@
   </header>
 
   <div class="px-8">
-    <div>
-      <div class="hidden sm:block">
-        <div class="border-b border-gray-200">
-          <nav id="tab-navs" class="-mb-px flex space-x-8" aria-label="Tabs">
-            <a href="#" id="guided-button" class="active-editor-tab whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium" aria-current="page">
-              Guided Form
-            </a>
-            <a href="#" id="additional-button" class="inactive-editor-tab whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
-              Additional Properties
-            </a>
-            <a href="#" id="final-button" class="inactive-editor-tab whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
-              Final Properties
-            </a>
-          </nav>
-        </div>
+
+    <div class="sm:block">
+      <div class="border-b border-gray-200">
+        <nav id="tab-navs" class="-mb-px flex space-x-8" aria-label="Tabs">
+          <a href="#" id="guided-button" class="active-editor-tab whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium" aria-current="page">
+            Guided Form
+          </a>
+          <a href="#" id="additional-button" class="hidden inactive-editor-tab whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
+            Additional Properties
+          </a>
+          <a href="#" id="final-button" class="hidden inactive-editor-tab whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
+            Final Properties
+          </a>
+        </nav>
       </div>
     </div>
 
@@ -54,7 +53,7 @@
     <div id="guided-tab">
       <form id="provision" class="mx-auto" method="POST" action="/provision" data-hx-post="/provision">
         <div class="space-y-12">
-          <div class="border-b border-white/10 pb-12">
+          <div class="{% if selected_image.is_some() %}border-b border-white/10{% endif %} pb-12">
             <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
               <div class="col-span-full">
                 <label for="alias" class="block text-sm font-medium leading-6 text-white">Name</label>
@@ -81,6 +80,7 @@
                     data-hx-select="#provision"
                     data-hx-include="#provision [name]"
                     data-hx-swap="outerHTML"
+                    autocomplete="off"
                     class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 [&_*]:text-black">
                     <option value="">Select an Image</option>
                     {% for (kind, list) in images %}
@@ -397,7 +397,7 @@
             </div>
           </div>
 
-          {% if let Some(current_image) = selected_image %}
+          {% if selected_image.is_some() %}
             <h2 class="text-base font-semibold leading-7 text-white">
               Primary NIC
             </h2>
@@ -612,7 +612,7 @@
       </form>
     </div>
 
-    <div class="mt-12 mb-6 flex items-center justify-end gap-x-6 border-t border-white/10 pt-6">
+    <div id="action-buttons" class="hidden mt-12 mb-6 flex items-center justify-end gap-x-6 border-t border-white/10 pt-6">
       <button
         id="validate-button"
         type="button"

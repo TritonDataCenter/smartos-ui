@@ -465,7 +465,8 @@ pub async fn get_provision(
         root_pw,
         bootrom,
         cpu_cap,
-        user_script, cloudinit_data,
+        user_script,
+        cloudinit_data,
     } = query.into_inner();
 
     let mut selected_brand = Brand::default();
