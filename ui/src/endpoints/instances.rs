@@ -308,7 +308,7 @@ pub async fn get_index(
     });
     let provisioned_quota = instance_views.iter().fold(0, |acc, i| {
         if i.disk_usage == 0 {
-            zpool_size_in_gib + acc
+            (zpool_size_in_gib * 1024) + acc
         } else {
             i.disk_usage + acc
         }

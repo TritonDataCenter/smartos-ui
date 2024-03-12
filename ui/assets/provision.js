@@ -44,25 +44,6 @@ window.vCpuOnChange = ($element) => {
   }
 }
 
-// When authorized keys have been added, update the user script field (for non
-// HVM instances only)
-window.authorizedKeysOnChange = ($element) => {
-  if (!$element.value) {
-    return
-  }
-  const brand = $('[name="brand"]').value
-  if (brand === 'bhyve' || brand === 'kvm') {
-    return
-  }
-  const $userScript = $('[name=user_script]')
-  const addAuthkeys = '/usr/sbin/mdata-get root_authorized_keys > /root/.ssh/authorized_keys'
-  if ($userScript.value && $userScript.value.indexOf(addAuthkeys) === -1) {
-    $userScript.value = $userScript.value += `\n${addAuthkeys}`
-  } else if (!$userScript.value) {
-    $userScript.value = addAuthkeys
-  }
-}
-
 // When cloud-init data change is updated, ensure it begins with "#cloud-config\n"
 window.cloudInitDataOnChange = ($element) => {
   if (!$element.value) {
@@ -127,7 +108,6 @@ window.updateEditors = () => {
   const $ipv4Setup = $('[name=ipv4_setup')
   const $ipv6Setup = $('[name=ipv6_setup')
   const $cpuCap = $('[name=cpu_cap')
-  const $userScript = $('[name=user_script')
 
   if (nicTag) {
     nic.nic_tag = nicTag
@@ -211,29 +191,35 @@ window.updateEditors = () => {
     $cpuCap.value = props.cpu_cap
   }
 
-  if ($userScript.value) {
+  if (props.user_script) {
     if (!props.customer_metadata) {
       props.customer_metadata = {}
     }
-    props.customer_metadata['user-script'] = $userScript.value
-  }
-
-  if (props.root_authorized_keys) {
-    props.customer_metadata = {
-      root_authorized_keys: props.root_authorized_keys
-    }
-    if (!isHvm) {
-      const addAuthkeys = '/usr/sbin/mdata-get root_authorized_keys > /root/.ssh/authorized_keys'
-      if ($userScript.value && $userScript.value.indexOf(addAuthkeys) === -1) {
-        $userScript.value += `\n${addAuthkeys}`
-      } else if (!$userScript.value) {
-        $userScript.value = addAuthkeys
-      }
-      props.customer_metadata['user-script'] = $userScript.value
-    }
-    delete props.root_authorized_keys
+    props.customer_metadata['user-script'] = props.user_script
   }
   delete props.user_script
+
+  if (props.root_authorized_keys) {
+    if (!props.customer_metadata) {
+      props.customer_metadata = {}
+    }
+
+    props.customer_metadata.root_authorized_keys = props.root_authorized_keys
+
+    if (!isHvm) {
+      if (!props.internal_metadata) {
+        props.internal_metadata = {}
+      }
+      props.internal_metadata['operator-script'] = `#!/usr/bin/bash
+if ! [[ -d /root/.ssh ]]; then
+  mkdir -p /root/.ssh
+  chmod 0700 /root/.ssh
+fi
+/usr/sbin/mdata-get root_authorized_keys > /root/.ssh/authorized_keys
+/usr/sbin/mdata-delete operator-script`
+    }
+  }
+  delete props.root_authorized_keys
 
   if (props.cloudinit_data) {
     if (!props.customer_metadata) {
