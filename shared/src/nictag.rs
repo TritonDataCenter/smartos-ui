@@ -8,9 +8,10 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct NicTag {
     pub name: String,
     pub mac_address: String,

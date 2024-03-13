@@ -15,7 +15,9 @@ use smartos_shared::instance::{
     InstancePayload, InstanceValidateResponse, PayloadContainer,
 };
 
-use dropshot::{endpoint, HttpError, Path, RequestContext, TypedBody};
+use dropshot::{
+    endpoint, HttpError, HttpResponseOk, Path, RequestContext, TypedBody,
+};
 use hyper::{Body, Response, StatusCode};
 use slog::{debug, error, info};
 use smartos_shared::http_server::{
@@ -40,6 +42,7 @@ pub async fn post_provision_index(
 
     let args = ["create"];
     debug!(ctx.log, "Executing vmadm {:?}", &args);
+
     let mut process = Command::new("vmadm")
         .args(args)
         .stdin(Stdio::piped())
@@ -80,11 +83,8 @@ path = "/validate/create",
 pub async fn post_validate_create(
     _: RequestContext<Context>,
     request_body: TypedBody<InstancePayload>,
-) -> Result<Response<Body>, HttpError> {
+) -> Result<HttpResponseOk<InstanceValidateResponse>, HttpError> {
     let InstancePayload { payload } = request_body.into_inner();
-
-    // Confirm we at least have valid JSON ?
-    //let _ = serde_json::from_str(&payload).map_err(to_bad_request)?;
 
     let mut process = Command::new("vmadm")
         .args(["validate", "create"])
@@ -94,28 +94,25 @@ pub async fn post_validate_create(
         .spawn()
         .map_err(to_internal_error)?;
 
-    let mut stdin = process.stdin.take().expect("waiting get stdin");
+    if let Some(mut stdin) = process.stdin.take() {
+        stdin.write_all(payload.as_bytes()).await.map_err(to_internal_error)?;
 
-    stdin.write_all(payload.as_bytes()).await.map_err(to_internal_error)?;
+        // When dropped, the underlying file handle will be closed.
+        drop(stdin);
 
-    drop(stdin);
+        let out =
+            process.wait_with_output().await.map_err(to_internal_error)?;
+        let stderr = String::from_utf8(out.stderr).unwrap_or_default();
 
-    let out = process.wait_with_output().await.map_err(to_internal_error)?;
-    let stderr = String::from_utf8(out.stderr).unwrap_or_default();
+        let response = InstanceValidateResponse {
+            message: stderr,
+            success: out.status.success(),
+        };
 
-    let response = InstanceValidateResponse {
-        message: stderr,
-        success: out.status.success(),
-    };
+        return Ok(HttpResponseOk(response));
+    }
 
-    let response_body =
-        serde_json::to_string(&response).map_err(to_internal_error)?;
-
-    Response::builder()
-        .status(StatusCode::OK)
-        .header("Content-Type", "application/json")
-        .body(response_body.into())
-        .map_err(to_internal_error)
+    Err(to_internal_error("Failed opening stdin of process"))
 }
 
 #[endpoint {

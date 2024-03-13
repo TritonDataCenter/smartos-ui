@@ -14,9 +14,9 @@ use smartos_shared::http_server::to_internal_error;
 
 use std::fs::read_to_string;
 
-use dropshot::{endpoint, HttpError, RequestContext};
-use hyper::{Body, Response, StatusCode};
-use serde_json;
+use dropshot::{endpoint, HttpError, HttpResponseOk, RequestContext};
+
+type ConfigEntries = Vec<(String, String)>;
 
 #[endpoint {
 method = GET,
@@ -24,10 +24,10 @@ path = "/config/gz",
 }]
 pub async fn get_gz_index(
     ctx: RequestContext<Context>,
-) -> Result<Response<Body>, HttpError> {
+) -> Result<HttpResponseOk<ConfigEntries>, HttpError> {
     let gz_config_path = &ctx.context().config.gz_config_path;
     let config = read_to_string(gz_config_path).map_err(to_internal_error)?;
-    let mut entries: Vec<(&str, &str)> = Vec::new();
+    let mut entries: ConfigEntries = Vec::new();
 
     for line in config.lines() {
         if line.is_empty()
@@ -42,14 +42,7 @@ pub async fn get_gz_index(
         if v.len() != 2 {
             continue;
         }
-        entries.push((v[0], v[1]));
+        entries.push((v[0].to_string(), v[1].to_string()));
     }
-    let response =
-        serde_json::to_string(&entries).map_err(to_internal_error)?;
-
-    Response::builder()
-        .status(StatusCode::OK)
-        .header("Content-Type", "text/plain")
-        .body(response.into())
-        .map_err(to_internal_error)
+    Ok(HttpResponseOk(entries))
 }

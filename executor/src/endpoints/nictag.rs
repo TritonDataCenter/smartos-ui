@@ -10,11 +10,10 @@
 
 use crate::endpoints::{exec, Context};
 
+use smartos_shared::http_server::to_internal_error;
 use smartos_shared::nictag::NicTag;
 
-use dropshot::{endpoint, HttpError, RequestContext};
-use hyper::{Body, Response, StatusCode};
-use smartos_shared::http_server::to_internal_error;
+use dropshot::{endpoint, HttpError, HttpResponseOk, RequestContext};
 
 #[endpoint {
 method = GET,
@@ -22,7 +21,7 @@ path = "/nictag",
 }]
 pub async fn get_index(
     ctx: RequestContext<Context>,
-) -> Result<Response<Body>, HttpError> {
+) -> Result<HttpResponseOk<Vec<NicTag>>, HttpError> {
     let (stdout, _) =
         exec(&ctx, "nictagadm", ["list", "-p", "-d", ","]).await?;
 
@@ -40,11 +39,5 @@ pub async fn get_index(
             r#type: String::from(v[3]),
         });
     }
-
-    let body = serde_json::to_string(&tags).map_err(to_internal_error)?;
-    Response::builder()
-        .status(StatusCode::OK)
-        .header("Content-Type", "application/json")
-        .body(body.into())
-        .map_err(to_internal_error)
+    Ok(HttpResponseOk(tags))
 }
