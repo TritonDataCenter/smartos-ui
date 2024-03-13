@@ -311,9 +311,10 @@
                           <div class="ml-3 text-sm leading-6">
                             <label for="delegate_dataset" class="cursor-pointer font-medium text-white">Delegate Dataset</label>
                             <p id="delegate_dataset-description" class="text-gray-500">
-                              This property indicates whether we should delegate a ZFS dataset to an OS VM.
-                              If true, the VM will get a dataset &lt;zoneroot dataset&gt;/data
-                              (by default: zones/&lt;uuid&gt;/data) added to it.
+                              This property indicates whether we should delegate a ZFS dataset to an OS instance.
+                              If true, the instance will get a dataset at
+                              <code>&lt;zoneroot dataset&gt;/data</code>
+                              (by default: <code>zones/&lt;uuid&gt;/data</code>) added to it.
                             </p>
                           </div>
                         </div>

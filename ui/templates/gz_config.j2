@@ -16,6 +16,16 @@
     <div class="space-y-12">
       <div class="pb-12">
         <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+          <p class="sm:col-span-4 text-gray-500">
+            The Global Zone config is located at <code>/usbkey/config</code>
+            and contains
+            <a
+              href="https://docs.smartos.org/extra-configuration-options/"
+              class="underline decoration-solid text-blue-600 hover:text-blue-500"
+              target="_blank">
+              various persistent configuration options
+            </a>.
+          </p>
           {% for (key, value) in config %}
             {% call input::text_view(key, value) %}
           {% endfor %}
