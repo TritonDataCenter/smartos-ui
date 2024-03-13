@@ -13,7 +13,8 @@ extern crate slog;
 
 use smartos_shared::config::Config;
 use smartos_ui::{
-    endpoints, endpoints::Context, privilege::drop_privileges, VERSION,
+    endpoints, endpoints::Context, privilege::drop_privileges,
+    GIT_COMMIT_SHORT, VERSION,
 };
 
 use dropshot::{
@@ -98,7 +99,10 @@ async fn main() -> Result<(), String> {
     api.register(endpoints::images::get_import_index)?;
     api.register(endpoints::images::post_import_index)?;
 
-    info!(log, "{} v{}", name, VERSION);
+    // /config
+    api.register(endpoints::config::get_gz_index)?;
+
+    info!(log, "{} v{}-{}", name, VERSION, GIT_COMMIT_SHORT);
 
     let server = HttpServerStarter::new(
         &ConfigDropshot {

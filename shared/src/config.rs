@@ -21,6 +21,7 @@ pub struct Config {
     pub request_body_max_bytes: usize,
     pub chroot: String,
     pub shadow_path: String,
+    pub gz_config_path: String,
     pub login_user: String,
     pub exec_cache_seconds: i64,
     pub skip_privilege_drop: bool,
@@ -49,6 +50,8 @@ impl Config {
                 .unwrap_or_else(|_| String::from("/opt/smartos_ui")),
             shadow_path: env::var("SHADOW_PATH")
                 .unwrap_or_else(|_| String::from("/etc/shadow")),
+            gz_config_path: env::var("GZ_CONFIG_PATH")
+                .unwrap_or_else(|_| String::from("/usbkey/config")),
             login_user: env::var("LOGIN_USER")
                 .unwrap_or_else(|_| String::from("root")),
             request_body_max_bytes: env::var("REQ_MAX_BYTES")

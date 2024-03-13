@@ -200,6 +200,12 @@ impl Client {
     pub async fn info(&self, id: &Uuid) -> Result<Info, reqwest::Error> {
         self.exec.info(id).await
     }
+
+    pub async fn get_gz_config(
+        &self,
+    ) -> Result<Vec<(String, String)>, reqwest::Error> {
+        self.exec.get_gz_config().await
+    }
 }
 
 pub struct VminfodClient {
@@ -426,5 +432,11 @@ impl ExecClient {
             .error_for_status()?
             .json()
             .await
+    }
+
+    pub async fn get_gz_config(
+        &self,
+    ) -> Result<Vec<(String, String)>, reqwest::Error> {
+        self.get("config/gz").send().await?.error_for_status()?.json().await
     }
 }

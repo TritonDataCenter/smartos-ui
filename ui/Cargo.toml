@@ -34,3 +34,6 @@ illumos-priv = "0.2.0"
 [target.'cfg(target_os = "illumos")'.dependencies.reqwest]
 version = "0.11"
 features = ["json", "native-tls-vendored"]
+
+[build-dependencies]
+build-data = "0"

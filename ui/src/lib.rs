@@ -9,6 +9,7 @@
  */
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const GIT_COMMIT_SHORT: &str = env!("GIT_COMMIT_SHORT");
 
 #[cfg(debug_assertions)]
 pub const DEBUG: bool = true;

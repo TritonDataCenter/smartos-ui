@@ -1,0 +1,27 @@
+{%- import "macros/icons.j2" as icons -%}
+{%- import "macros/inputs.j2" as input -%}
+{% extends "layout/authed.j2" %}
+{% block title %}{{title}}{% endblock %}
+{% block content %}
+<div id="content">
+
+  <header class="header-bg top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/10 px-4 shadow-sm sm:px-6 lg:px-8">
+    <h1 class="text-base font-semibold leading-7 text-xl text-white">
+      {% call icons::cog("inline w-8 h-8") %}
+      <span class="align-middle pl-2">Global Zone Config</span>
+    </h1>
+  </header>
+
+  <div class="mx-auto px-8">
+    <div class="space-y-12">
+      <div class="pb-12">
+        <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+          {% for (key, value) in config %}
+            {% call input::text_view(key, value) %}
+          {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

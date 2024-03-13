@@ -9,6 +9,7 @@ touch /tmp/smartos_{ui,executor}.log
 
 LOG_FILE=/tmp/smartos_executor.log \
   SHADOW_PATH=test/data/shadow \
+  GZ_CONFIG_PATH=test/data/config \
   PATH=test/mock:$PATH \
 	./target/debug/smartos_executor &
 

@@ -79,6 +79,9 @@ async fn main() -> Result<(), String> {
     // /ping
     api.register(endpoints::get_ping)?;
 
+    // /config
+    api.register(endpoints::config::get_gz_index)?;
+
     info!(log, "{} v{}", name, version);
 
     let server = HttpServerStarter::new(

@@ -9,6 +9,7 @@
  */
 
 pub mod assets;
+pub mod config;
 pub mod dashboard;
 pub mod filters;
 pub mod images;

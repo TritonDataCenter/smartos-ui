@@ -11,7 +11,7 @@
   <div class="xl:fixed xl:inset-y-0 xl:z-50 xl:flex xl:w-72 xl:flex-col">
     <!-- Sidebar component, swap this element with another sidebar if you like -->
     <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-black/10 px-6 ring-1 ring-white/5">
-      <div class="flex h-16 shrink-0 items-center pt-px">
+      <div class="flex h-16 shrink-0 items-center pt-px" title="UI version: {{crate::VERSION}}-{{crate::GIT_COMMIT_SHORT}}">
         {% call icons::smartos("h-10 w-10") %}
         <h1 class="text-white pl-4">SmartOS</h1>
       </div>
@@ -35,12 +35,20 @@
                   Instances
                 </a>
               </li>
-              <li>
+              <li class="pb-2">
                 <a href="/images"
                   data-hx-get="/images"
                   class="{% if title == "Images" %}{{active}}{% else %}{{inactive}}{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer main-nav">
                   {% call icons::box("") %}
                   Images
+                </a>
+              </li>
+              <li class="pt-2 border-t border-white/10">
+                <a href="/config/gz"
+                  data-hx-get="/config/gz"
+                  class="{% if title == "Global Zone Config" %}{{active}}{% else %}{{inactive}}{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer main-nav">
+                  {% call icons::cog("") %}
+                  Global Zone Config
                 </a>
               </li>
             </ul>

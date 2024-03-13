@@ -26,6 +26,7 @@ use smartos_shared::image::Image;
 use tokio::process::Command;
 use uuid::Uuid;
 
+pub mod config;
 pub mod image;
 pub mod instance;
 pub mod nictag;
