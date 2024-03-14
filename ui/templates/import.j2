@@ -41,18 +41,30 @@
                   class="hover:bg-gray-800">
                   <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
                     <div class="flex items-center gap-x-4">
-                      <div class="truncate text-sm font-medium leading-6 text-white">{{image.manifest.name}}</div>
+                      <div class="truncate text-sm font-medium leading-6 text-white">
+                        {{image.manifest.name}}
+                      </div>
                     </div>
                   </td>
-                  <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">{{image.manifest.uuid}}</td>
+                  <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
+                    {{image.manifest.uuid}}
+                  </td>
                   <td class="py-4 pl-0 pr-4 sm:table-cell sm:pr-8">
                     <div class="flex gap-x-3">
-                      <div class="text-sm leading-6 text-gray-400">{{image.manifest.version}}</div>
+                      <div class="text-sm leading-6 text-gray-400">
+                        {{image.manifest.version}}
+                      </div>
                     </div>
                   </td>
-                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.state}}</td>
-                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.type|format_word}}</td>
-                  <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:pr-8 lg:pr-20">{{image.manifest.os|format_word}}</td>
+                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+                    {{image.manifest.state}}
+                  </td>
+                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+                    {{image.manifest.type|format_word}}
+                  </td>
+                  <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:pr-8 lg:pr-20">
+                    {{image.manifest.os|format_word}}
+                  </td>
                   <td class="py-4 pl-0 pr-4 text-sm leading-6 sm:pr-8 lg:pr-20">
                     {% if let Some(source) = image.source %}
                       <form
@@ -96,5 +108,4 @@
 
   </main>
 </div>
-
 {% endblock %}

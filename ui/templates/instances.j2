@@ -6,7 +6,9 @@
   <header class="header-bg top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/10 px-4 shadow-sm sm:px-6 lg:px-8">
     <h1 class="text-base font-semibold leading-7 text-xl text-white">
       {% call icons::servers("inline w-8 h-8") %}
-      <span class="align-middle pl-2">Instances</span>
+      <span class="align-middle pl-2">
+        Instances
+      </span>
     </h1>
     {% if image_count > 0 %}
       <div class="flex flex-1 items-center justify-end gap-x-6 mb-10 my-10">
@@ -36,23 +38,31 @@
     <header>
       <div class="grid grid-cols-1 bg-gray-700/10 sm:grid-cols-2 lg:grid-cols-4">
         <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8">
-          <p class="text-sm font-medium leading-6 text-gray-400">Virtual Machines</p>
+          <p class="text-sm font-medium leading-6 text-gray-400">
+            Virtual Machines
+          </p>
           <p class="mt-2 flex items-baseline gap-x-2">
-            <span class="text-4xl font-semibold tracking-tight text-white">{{instances.len()}}</span>
+            <span class="text-4xl font-semibold tracking-tight text-white">
+              {{instances.len()}}
+            </span>
           </p>
         </div>
         <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
-          <p class="text-sm font-medium leading-6 text-gray-400">Provisioned CPU</p>
+          <p class="text-sm font-medium leading-6 text-gray-400">
+            Provisioned CPU
+          </p>
           <p class="mt-2 flex items-baseline gap-x-2">
             <span class="text-4xl font-semibold tracking-tight text-white">
               {{provisioned_cpu}}
               <span class="text-gray-300 text-3xl font-normal"> / {{total_cpu}}</span>
-              </span>
+            </span>
             <span class="text-sm text-gray-400">vCPUs + CPU Cap</span>
           </p>
         </div>
         <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
-          <p class="text-sm font-medium leading-6 text-gray-400">Provisioned Memory</p>
+          <p class="text-sm font-medium leading-6 text-gray-400">
+            Provisioned Memory
+          </p>
           <p class="mt-2 flex items-baseline gap-x-2">
             <span class="text-4xl font-semibold tracking-tight text-white">
               {{provisioned_ram|mib_to_gib}}
@@ -62,7 +72,9 @@
           </p>
         </div>
         <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 lg:border-l">
-          <p class="text-sm font-medium leading-6 text-gray-400">Provisioned Storage</p>
+          <p class="text-sm font-medium leading-6 text-gray-400">
+            Provisioned Storage
+          </p>
           <p class="mt-2 flex items-baseline gap-x-2">
             <span class="text-4xl font-semibold tracking-tight text-white">
               {{provisioned_quota|mib_to_gib}}
@@ -119,20 +131,22 @@
                         </div>
                       </div>
                     </td>
-                    <td class="hidden py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
+                    <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
                       {{instance.brand}}
                     </td>
-                    <td class="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
-                        <a class="text-sm underline hover:text-gray-300" href="/images/{{instance.image_uuid}}">{{image}}</a>
+                    <td class="py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
+                        <a class="text-sm underline hover:text-gray-300" href="/images/{{instance.image_uuid}}">
+                          {{image}}
+                        </a>
                     </td>
-                    <td class="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
+                    <td class="py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
                       {% if let Some(primary_ip) = instance.primary_ip %}
                         {{ primary_ip }}
                       {% else %}
                         none
                       {% endif %}
                     </td>
-                    <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+                    <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
                       {% if instance.cpu == 0.0 %}
                         <span title="Unlimited">∞</span>
                       {% else %}
@@ -146,8 +160,10 @@
                         </span>
                       {% endif %}
                     </td>
-                    <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{instance.ram}}</td>
-                    <td class="hidden py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+                    <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
+                      {{instance.ram}}
+                    </td>
+                    <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
                       {% if instance.disk_usage == 0 %}
                         <span title="No quota">∞</span>
                       {% else %}
@@ -176,7 +192,7 @@
                           <div class="h-1.5 w-1.5 rounded-full bg-current"></div>
                         </div>
                         {% endif %}
-                        <div class="hidden text-white sm:block">{{instance.state|capitalize}}</div>
+                        <div class="text-white sm:block">{{instance.state|capitalize}}</div>
                       </div>
                     </td>
                   </tr>

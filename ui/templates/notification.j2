@@ -1,12 +1,10 @@
 {%- import "macros/icons.j2" as icons -%}
 <div id="notification-{{id}}"
   data-for-entity="{{entity_id}}"
-  {% match timeout %}
-    {% when Some with (interval) %}
-      data-hx-ext="remove-me"
-      data-remove-me="{{interval}}"
-    {% when None %}
-  {% endmatch %}
+  {% if let Some(interval) = timeout %}
+    data-hx-ext="remove-me"
+    data-remove-me="{{interval}}"
+  {% endif %}
   class="notification pointer-events-none z-[99] fixed inset-0 flex items-end sm:items-start sm:pt-16 sm:pr-8">
   <div class="flex w-full flex-col items-center space-y-4 sm:items-end">
     <div class="border border-slate-700 pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-slate-800 shadow-lg ring-1 ring-black ring-opacity-5 mt-1">
@@ -37,14 +35,12 @@
     </div>
   </div>
   {# Handles redirecting user if requested #}
-  {% match redirect %}
-    {% when Some with (path) %}
-      <div
-        data-hx-get="{{path}}"
-        data-hx-target="#main"
-        data-hx-select="#content"
-        data-hx-trigger="load"
-        data-created-at="{{created_at}}"></div>
-    {% when None %}
-  {% endmatch %}
+  {% if let Some(path) = redirect %}
+    <div
+      data-hx-get="{{path}}"
+      data-hx-target="#main"
+      data-hx-select="#content"
+      data-hx-trigger="load"
+      data-created-at="{{created_at}}"></div>
+  {% endif %}
 </div>

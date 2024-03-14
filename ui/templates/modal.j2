@@ -13,9 +13,9 @@
         <div class="bg-white mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10">
           {% match kind %}
             {% when NotificationKind::Ok %}
-                {% call icons::ok("h-6 w-6 text-green-600") %}
+              {% call icons::ok("h-6 w-6 text-green-600") %}
             {% when NotificationKind::Error %}
-                {% call icons::error("h-6 w-6 text-red-600") %}
+              {% call icons::error("h-6 w-6 text-red-600") %}
           {% endmatch %}
         </div>
         <div class="pt-2 text-center sm:ml-4 sm:mt-0 sm:text-left">

@@ -9,7 +9,6 @@ import 'sortable-tablesort'
 removeMe(htmx)
 
 document.addEventListener('DOMContentLoaded', () => {
-
   // Handle closing modals
   $('#modal').addEventListener('click', e => {
     if (e.target.classList.contains('modal-close') ||
