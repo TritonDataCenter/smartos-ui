@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // this has to be initialized dynamically as the elements we rely on come
   // and go in the DOM
   htmx.on('htmx:afterSettle', ({ detail: { pathInfo: { requestPath } } }) => {
-    if (requestPath === '/provision') {
+    if (requestPath === '/provision' && document.location.pathname === '/provision') {
       setupProvisioningForm()
     } else {
       setupJSONViewer()
