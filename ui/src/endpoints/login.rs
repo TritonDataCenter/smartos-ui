@@ -8,7 +8,7 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use crate::{endpoints::Context, exec::PingResponse, session::Session};
+use crate::{endpoints::Context, session::Session};
 
 use smartos_shared::http_server::to_internal_error;
 
@@ -20,6 +20,7 @@ use dropshot::{
 use hyper::{Body, Response, StatusCode};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use tokio::try_join;
 
 #[derive(Template)]
 #[template(path = "login.j2")]
@@ -62,7 +63,11 @@ pub async fn post_index(
         .await
         .map_err(to_internal_error)?;
     if user == ctx.context().config.login_user && authed {
-        ctx.context().client.warm_cache().await.map_err(to_internal_error)?;
+        try_join!(
+            ctx.context().vminfod.get_instances(),
+            ctx.context().executor.get_images(),
+        )
+        .map_err(to_internal_error)?;
         return Session::create(&ctx, user);
     }
     let login = LoginTemplate {
@@ -82,9 +87,12 @@ path = "/login"
 pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
-    let PingResponse { executor, vminfod } =
-        ctx.context().client.ping().await.map_err(to_internal_error)?;
+    let (vminfod, executor) =
+        try_join!(ctx.context().vminfod.ping(), ctx.context().executor.ping())
+            .map_err(to_internal_error)?;
+
     let login = LoginTemplate { message: None, executor, vminfod };
+
     let result = login.render().map_err(to_internal_error)?;
 
     Response::builder()

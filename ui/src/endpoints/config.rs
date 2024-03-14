@@ -38,7 +38,7 @@ pub async fn get_gz_index(
 
     let config = ctx
         .context()
-        .client
+        .executor
         .get_gz_config()
         .await
         .map_err(to_internal_error)?;

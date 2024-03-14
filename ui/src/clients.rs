@@ -8,21 +8,17 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use smartos_shared::{
-    image::Image, instance::Instance, nictag::NicTag, sysinfo::Sysinfo,
-};
 use std::fmt;
 
-use http::StatusCode;
-use reqwest::{Client as HTTPClient, RequestBuilder, Response};
-use schemars::JsonSchema;
-use serde::Serialize;
-use serde_json::to_string as stringify;
-use smartos_shared::image::{ImageImportParams, Source};
-use smartos_shared::instance::{
-    Info, InstancePayload, InstanceValidateResponse, InstanceView,
+use smartos_shared::{
+    image::Image, image::ImageImportParams, image::Source, instance::Info,
+    instance::Instance, instance::InstancePayload,
+    instance::InstanceValidateResponse, instance::InstanceView, nictag::NicTag,
+    sysinfo::Sysinfo,
 };
-use tokio::try_join;
+
+use reqwest::{Client as HTTPClient, RequestBuilder, Response};
+use serde_json::to_string as stringify;
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -53,167 +49,12 @@ impl fmt::Display for RequestError {
     }
 }
 
-#[derive(Serialize, JsonSchema)]
-pub struct PingResponse {
-    pub executor: bool,
-    pub vminfod: bool,
-}
-
-pub struct Client {
-    exec: ExecClient,
-    vminfo: VminfodClient,
-}
-
-impl Client {
-    #[must_use]
-    pub fn new(exec_address: String, vminfo_address: String) -> Self {
-        Self {
-            exec: ExecClient::new(exec_address),
-            vminfo: VminfodClient::new(vminfo_address),
-        }
-    }
-
-    // Send requests to some of the slower endpoints to warm up their
-    // cache and provide a smoother first-time experience.
-    pub async fn warm_cache(&self) -> Result<(), reqwest::Error> {
-        try_join!(self.vminfo.get_instances(), self.exec.get_images(),)?;
-        Ok(())
-    }
-    pub async fn get_instances(
-        &self,
-    ) -> Result<Vec<InstanceView>, reqwest::Error> {
-        self.vminfo.get_instances().await
-    }
-
-    pub async fn get_instance(
-        &self,
-        id: &Uuid,
-    ) -> Result<Instance, reqwest::Error> {
-        self.vminfo.get_instance(id).await
-    }
-
-    pub async fn get_instance_json(
-        &self,
-        id: &Uuid,
-    ) -> Result<String, reqwest::Error> {
-        self.vminfo.get_instance_json(id).await
-    }
-
-    pub async fn get_instance_view(
-        &self,
-        id: &Uuid,
-    ) -> Result<InstanceView, reqwest::Error> {
-        Ok(self.vminfo.get_instance(id).await?.try_into().expect("failed"))
-    }
-
-    pub async fn get_sysinfo(&self) -> Result<Sysinfo, reqwest::Error> {
-        self.exec.get_sysinfo().await
-    }
-
-    pub async fn get_images(&self) -> Result<Vec<Image>, reqwest::Error> {
-        self.exec.get_images().await
-    }
-    pub async fn get_image(&self, id: &Uuid) -> Result<Image, reqwest::Error> {
-        self.exec.get_image(id).await
-    }
-    pub async fn get_image_json(
-        &self,
-        id: &Uuid,
-    ) -> Result<String, reqwest::Error> {
-        self.exec.get_image_json(id).await
-    }
-
-    pub async fn get_available_images(
-        &self,
-    ) -> Result<Vec<Image>, reqwest::Error> {
-        self.exec.get_available_images().await
-    }
-
-    pub async fn get_sources(&self) -> Result<Vec<Source>, reqwest::Error> {
-        self.exec.get_sources().await
-    }
-
-    pub async fn delete_image(&self, id: &Uuid) -> Result<(), reqwest::Error> {
-        self.exec.delete_image(id).await
-    }
-
-    pub async fn import_image(
-        &self,
-        id: &Uuid,
-        params: &ImageImportParams,
-    ) -> Result<Response, RequestError> {
-        self.exec.import_image(id, params).await
-    }
-
-    pub async fn provision(
-        &self,
-        payload: InstancePayload,
-    ) -> Result<Response, reqwest::Error> {
-        self.exec.provision(payload).await
-    }
-
-    pub async fn validate_create(
-        &self,
-        payload: InstancePayload,
-    ) -> Result<InstanceValidateResponse, reqwest::Error> {
-        self.exec.validate_create(payload).await
-    }
-
-    pub async fn delete_instance(
-        &self,
-        id: &Uuid,
-    ) -> Result<String, reqwest::Error> {
-        self.exec.delete_instance(id).await
-    }
-
-    pub async fn stop_instance(
-        &self,
-        id: &Uuid,
-    ) -> Result<String, reqwest::Error> {
-        self.exec.stop_instance(id).await
-    }
-
-    pub async fn start_instance(
-        &self,
-        id: &Uuid,
-    ) -> Result<String, reqwest::Error> {
-        self.exec.start_instance(id).await
-    }
-
-    pub async fn get_nictags(&self) -> Result<Vec<NicTag>, reqwest::Error> {
-        self.exec.get_nictags().await
-    }
-
-    pub async fn get_pwhash(&self) -> Result<String, reqwest::Error> {
-        self.exec.get_pwhash().await
-    }
-
-    pub async fn ping(&self) -> Result<PingResponse, reqwest::Error> {
-        // TODO: run these together and join
-        let executor =
-            self.exec.ping().await.is_ok_and(|status| status.is_success());
-        let vminfod =
-            self.vminfo.ping().await.is_ok_and(|status| status.is_success());
-        Ok(PingResponse { executor, vminfod })
-    }
-
-    pub async fn info(&self, id: &Uuid) -> Result<Info, reqwest::Error> {
-        self.exec.info(id).await
-    }
-
-    pub async fn get_gz_config(
-        &self,
-    ) -> Result<Vec<(String, String)>, reqwest::Error> {
-        self.exec.get_gz_config().await
-    }
-}
-
-pub struct VminfodClient {
+pub struct VMInfodClient {
     http: HTTPClient,
     url: String,
 }
 
-impl VminfodClient {
+impl VMInfodClient {
     #[must_use]
     pub fn new(address: String) -> Self {
         Self { http: HTTPClient::new(), url: format!("http://{}", address) }
@@ -251,6 +92,13 @@ impl VminfodClient {
             .await
     }
 
+    pub async fn get_instance_view(
+        &self,
+        id: &Uuid,
+    ) -> Result<InstanceView, reqwest::Error> {
+        Ok(self.get_instance(id).await?.try_into().expect("failed"))
+    }
+
     pub async fn get_instance_json(
         &self,
         id: &Uuid,
@@ -263,17 +111,23 @@ impl VminfodClient {
             .await
     }
 
-    pub async fn ping(&self) -> Result<StatusCode, reqwest::Error> {
-        Ok(self.get("ping").send().await?.error_for_status()?.status())
+    pub async fn ping(&self) -> Result<bool, reqwest::Error> {
+        Ok(self
+            .get("ping")
+            .send()
+            .await?
+            .error_for_status()?
+            .status()
+            .is_success())
     }
 }
 
-pub struct ExecClient {
+pub struct ExecutorClient {
     http: HTTPClient,
     url: String,
 }
 
-impl ExecClient {
+impl ExecutorClient {
     #[must_use]
     pub fn new(address: String) -> Self {
         Self { http: HTTPClient::new(), url: format!("http://{}", address) }
@@ -421,8 +275,14 @@ impl ExecClient {
         self.get("pwhash").send().await?.error_for_status()?.text().await
     }
 
-    pub async fn ping(&self) -> Result<StatusCode, reqwest::Error> {
-        Ok(self.get("ping").send().await?.error_for_status()?.status())
+    pub async fn ping(&self) -> Result<bool, reqwest::Error> {
+        Ok(self
+            .get("ping")
+            .send()
+            .await?
+            .error_for_status()?
+            .status()
+            .is_success())
     }
 
     pub async fn info(&self, id: &Uuid) -> Result<Info, reqwest::Error> {

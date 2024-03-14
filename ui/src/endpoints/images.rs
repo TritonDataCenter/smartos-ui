@@ -42,7 +42,7 @@ pub async fn get_index(
     }
 
     let images =
-        ctx.context().client.get_images().await.map_err(to_internal_error)?;
+        ctx.context().executor.get_images().await.map_err(to_internal_error)?;
 
     let template = ImagesTemplate { title: "Images", images };
     let result = template.render().map_err(to_internal_error)?;
@@ -73,8 +73,12 @@ pub async fn get_by_id(
     }
 
     let id = path_params.into_inner().id;
-    let image =
-        ctx.context().client.get_image(&id).await.map_err(to_internal_error)?;
+    let image = ctx
+        .context()
+        .executor
+        .get_image(&id)
+        .await
+        .map_err(to_internal_error)?;
 
     let mut location = format!("/images/{}", id);
     let mut json_string = None;
@@ -82,7 +86,7 @@ pub async fn get_by_id(
         if as_json {
             json_string = Some(
                 ctx.context()
-                    .client
+                    .executor
                     .get_image_json(&id)
                     .await
                     .map_err(to_internal_error)?,
@@ -115,9 +119,13 @@ pub async fn delete_by_id(
         return redirect_login(response, &ctx);
     }
     let id = path_params.into_inner().id;
-    let image =
-        ctx.context().client.get_image(&id).await.map_err(to_internal_error)?;
-    let template = if ctx.context().client.delete_image(&id).await.is_ok() {
+    let image = ctx
+        .context()
+        .executor
+        .get_image(&id)
+        .await
+        .map_err(to_internal_error)?;
+    let template = if ctx.context().executor.delete_image(&id).await.is_ok() {
         NotificationTemplate {
             id: ctx.request_id,
             entity_id: id.to_string(),
@@ -180,13 +188,13 @@ pub async fn get_import_index(
 
     let mut images = ctx
         .context()
-        .client
+        .executor
         .get_available_images()
         .await
         .map_err(to_internal_error)?;
 
     let installed_images =
-        ctx.context().client.get_images().await.map_err(to_internal_error)?;
+        ctx.context().executor.get_images().await.map_err(to_internal_error)?;
 
     images.retain(|available| {
         !installed_images
@@ -222,8 +230,11 @@ pub async fn post_import_index(
 
     let template_result;
 
-    if let Ok(result) =
-        ctx.context().client.import_image(id, &request_body.into_inner()).await
+    if let Ok(result) = ctx
+        .context()
+        .executor
+        .import_image(id, &request_body.into_inner())
+        .await
     {
         let kind = (&result).try_into().unwrap_or_default();
         let import_response: GenericResponse =

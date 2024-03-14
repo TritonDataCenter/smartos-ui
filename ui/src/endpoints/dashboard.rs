@@ -39,12 +39,16 @@ pub async fn get_index(
         return redirect_login(response, &ctx);
     }
 
-    let sysinfo =
-        ctx.context().client.get_sysinfo().await.map_err(to_internal_error)?;
+    let sysinfo = ctx
+        .context()
+        .executor
+        .get_sysinfo()
+        .await
+        .map_err(to_internal_error)?;
 
     let image_count = ctx
         .context()
-        .client
+        .executor
         .get_images()
         .await
         .map_err(to_internal_error)?
@@ -52,7 +56,7 @@ pub async fn get_index(
 
     let instance_count = ctx
         .context()
-        .client
+        .vminfod
         .get_instances()
         .await
         .map_err(to_internal_error)?

@@ -43,7 +43,7 @@ async fn main() -> Result<(), String> {
         .to_logger(env!("CARGO_PKG_NAME"))
         .map_err(|error| format!("Failed to create logger: {}", error))?;
 
-    info!(log, "CONFIG: {:#?}", &config);
+    debug!(log, "CONFIG: {:#?}", &config);
 
     let ctx = Context::new(config);
 

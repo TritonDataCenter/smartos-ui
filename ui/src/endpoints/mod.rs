@@ -19,7 +19,7 @@ pub mod login;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-use crate::exec::{Client, PingResponse};
+use crate::clients::{ExecutorClient, VMInfodClient};
 use crate::session::{Session, UserSession};
 
 use smartos_shared::{config::Config, http_server::to_internal_error};
@@ -33,7 +33,8 @@ use http::response::Builder;
 use hyper::{Body, Response, StatusCode};
 use pwhash::unix;
 use schemars::JsonSchema;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use tokio::try_join;
 use uuid::Uuid;
 
 #[derive(Default)]
@@ -96,7 +97,8 @@ pub struct AsJson {
 pub struct Context {
     pub config: Config,
     pub sessions: Arc<Mutex<HashMap<String, UserSession>>>,
-    pub client: Client,
+    pub executor: ExecutorClient,
+    pub vminfod: VMInfodClient,
 }
 
 impl Context {
@@ -107,7 +109,8 @@ impl Context {
         let vminfo_bind_address = config.vminfo_bind_address.clone();
         Self {
             config,
-            client: Client::new(exec_bind_address, vminfo_bind_address),
+            executor: ExecutorClient::new(exec_bind_address),
+            vminfod: VMInfodClient::new(vminfo_bind_address),
             sessions: Arc::new(Mutex::new(map)),
         }
     }
@@ -116,7 +119,7 @@ impl Context {
         &self,
         password: String,
     ) -> Result<bool, reqwest::Error> {
-        let hash = self.client.get_pwhash().await?;
+        let hash = self.executor.get_pwhash().await?;
         Ok(unix::verify(password, &hash))
     }
 }
@@ -178,6 +181,12 @@ pub async fn get_index(
     http_response_see_other(location.to_string())
 }
 
+#[derive(Serialize, JsonSchema)]
+pub struct PingResponse {
+    pub executor: bool,
+    pub vminfod: bool,
+}
+
 #[endpoint {
 method = GET,
 path = "/ping"
@@ -185,7 +194,8 @@ path = "/ping"
 pub async fn get_ping(
     ctx: RequestContext<Context>,
 ) -> Result<HttpResponseOk<PingResponse>, HttpError> {
-    let response =
-        ctx.context().client.ping().await.map_err(to_internal_error)?;
-    Ok(HttpResponseOk(response))
+    let (vminfod, executor) =
+        try_join!(ctx.context().vminfod.ping(), ctx.context().executor.ping())
+            .map_err(to_internal_error)?;
+    Ok(HttpResponseOk(PingResponse { executor, vminfod }))
 }

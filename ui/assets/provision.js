@@ -340,6 +340,7 @@ export const setupProvisioningForm = () => {
   // Setup each CodeMirror editor
   $editorTabs.forEach($tab => {
     const editors = window.editors
+    console.log('$tab', $tab)
     const { name } = $tab.dataset
     if ($tab.querySelector('.cm-editor')) {
       editorsSetup = true

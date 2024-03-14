@@ -61,7 +61,7 @@ pub async fn get_by_id(
 
     let instance_enum = ctx
         .context()
-        .client
+        .vminfod
         .get_instance(&id)
         .await
         .map_err(to_internal_error)?;
@@ -74,7 +74,7 @@ pub async fn get_by_id(
         if as_json {
             json_string = Some(
                 ctx.context()
-                    .client
+                    .vminfod
                     .get_instance_json(&id)
                     .await
                     .map_err(to_internal_error)?,
@@ -83,7 +83,7 @@ pub async fn get_by_id(
     } else if instance_enum.is_hvm() && instance_enum.state() == "running" {
         info = Some(
             ctx.context()
-                .client
+                .executor
                 .info(&instance_enum.uuid())
                 .await
                 .map_err(to_internal_error)?,
@@ -94,7 +94,7 @@ pub async fn get_by_id(
 
     let image = ctx
         .context()
-        .client
+        .executor
         .get_image(&image_uuid)
         .await
         .map_err(to_internal_error)?;
@@ -127,11 +127,12 @@ pub async fn delete_by_id(
     let id = path_params.into_inner().id;
     let instance = ctx
         .context()
-        .client
+        .vminfod
         .get_instance_view(&id)
         .await
         .map_err(to_internal_error)?;
-    let template = if ctx.context().client.delete_instance(&id).await.is_ok() {
+    let template = if ctx.context().executor.delete_instance(&id).await.is_ok()
+    {
         NotificationTemplate {
             id: ctx.request_id,
             entity_id: id.to_string(),
@@ -180,7 +181,7 @@ pub async fn start_by_id(
     }
 
     let id = path_params.into_inner().id;
-    let template = if ctx.context().client.start_instance(&id).await.is_ok() {
+    let template = if ctx.context().executor.start_instance(&id).await.is_ok() {
         NotificationTemplate {
             id: ctx.request_id,
             entity_id: id.to_string(),
@@ -226,7 +227,7 @@ pub async fn stop_by_id(
     }
 
     let id = path_params.into_inner().id;
-    let template = if ctx.context().client.stop_instance(&id).await.is_ok() {
+    let template = if ctx.context().executor.stop_instance(&id).await.is_ok() {
         NotificationTemplate {
             id: ctx.request_id,
             entity_id: id.to_string(),
@@ -285,16 +286,20 @@ pub async fn get_index(
     }
     let mut instances: Vec<(InstanceView, String)> = Vec::new();
 
-    let Sysinfo { cpu_count, mib_of_memory, zpool_size_in_gib, .. } =
-        ctx.context().client.get_sysinfo().await.map_err(to_internal_error)?;
+    let Sysinfo { cpu_count, mib_of_memory, zpool_size_in_gib, .. } = ctx
+        .context()
+        .executor
+        .get_sysinfo()
+        .await
+        .map_err(to_internal_error)?;
 
     let images =
-        ctx.context().client.get_images().await.map_err(to_internal_error)?;
+        ctx.context().executor.get_images().await.map_err(to_internal_error)?;
     let image_count = images.len();
 
     let mut instance_views = ctx
         .context()
-        .client
+        .vminfod
         .get_instances()
         .await
         .map_err(to_internal_error)?;
@@ -473,12 +478,16 @@ pub async fn get_provision(
 
     let title = String::from("Create Instance");
 
-    let nictags =
-        ctx.context().client.get_nictags().await.map_err(to_internal_error)?;
+    let nictags = ctx
+        .context()
+        .executor
+        .get_nictags()
+        .await
+        .map_err(to_internal_error)?;
 
     let mut image_list = BTreeMap::<String, Vec<Image>>::new();
     let mut images =
-        ctx.context().client.get_images().await.map_err(to_internal_error)?;
+        ctx.context().executor.get_images().await.map_err(to_internal_error)?;
 
     while let Some(image) = images.pop() {
         if image_uuid == image.manifest.uuid.to_string() {
@@ -580,8 +589,12 @@ pub async fn post_provision(
     let PayloadContainer { uuid } =
         serde_json::from_str(&req.payload).map_err(to_bad_request)?;
 
-    let result =
-        ctx.context().client.provision(req).await.map_err(to_internal_error)?;
+    let result = ctx
+        .context()
+        .executor
+        .provision(req)
+        .await
+        .map_err(to_internal_error)?;
 
     let exec_result = if result.status().is_success() {
         let buttons = vec![
@@ -659,7 +672,7 @@ pub async fn post_provision_validate(
     let req = request_body.into_inner();
     let validation = ctx
         .context()
-        .client
+        .executor
         .validate_create(req)
         .await
         .map_err(to_internal_error)?;
