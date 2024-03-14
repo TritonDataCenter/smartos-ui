@@ -9,63 +9,58 @@
       {% when Instance::Joyent with (instance) %}
         {% let brand = "joyent" %}
         {% include "include/instance_header.j2" %}
-        {% match json %}
-          {% when Some with (json_string) %}
-            {% include "include/json_viewer.j2" %}
-          {% when None %}
-            {% include "include/instance_connection_info.j2" %}
-            {% include "include/instance_generic.j2" %}
-            {% include "include/instance_native.j2" %}
-        {% endmatch %}
+        {% if let Some(json_string) = json %}
+          {% include "include/json_viewer.j2" %}
+        {% else %}
+          {% include "include/instance_connection_info.j2" %}
+          {% include "include/instance_generic.j2" %}
+          {% include "include/instance_native.j2" %}
+        {% endif %}
 
       {% when Instance::JoyentMinimal with (instance) %}
         {% let brand = "joyent-minimal" %}
         {% include "include/instance_header.j2" %}
-        {% match json %}
-          {% when Some with (json_string) %}
-            {% include "include/json_viewer.j2" %}
-          {% when None %}
-            {% include "include/instance_connection_info.j2" %}
-            {% include "include/instance_generic.j2" %}
-            {% include "include/instance_native.j2" %}
-        {% endmatch %}
+        {% if let Some(json_string) = json %}
+          {% include "include/json_viewer.j2" %}
+        {% else %}
+          {% include "include/instance_connection_info.j2" %}
+          {% include "include/instance_generic.j2" %}
+          {% include "include/instance_native.j2" %}
+        {% endif %}
 
       {% when Instance::LX with (instance) %}
-          {% let brand = "lx" %}
-          {% include "include/instance_header.j2" %}
-          {% match json %}
-          {% when Some with (json_string) %}
-            {% include "include/json_viewer.j2" %}
-          {% when None %}
-            {% include "include/instance_connection_info.j2" %}
-            {% include "include/instance_generic.j2" %}
-            {% include "include/instance_native.j2" %}
-            {% include "include/instance_lx.j2" %}
-        {% endmatch %}
+        {% let brand = "lx" %}
+        {% include "include/instance_header.j2" %}
+        {% if let Some(json_string) = json %}
+          {% include "include/json_viewer.j2" %}
+        {% else %}
+          {% include "include/instance_connection_info.j2" %}
+          {% include "include/instance_generic.j2" %}
+          {% include "include/instance_native.j2" %}
+          {% include "include/instance_lx.j2" %}
+        {% endif %}
 
-        {% when Instance::Bhyve with (instance) %}
-          {% let brand = "bhyve" %}
-          {% include "include/instance_header.j2" %}
-          {% match json %}
-          {% when Some with (json_string) %}
-            {% include "include/json_viewer.j2" %}
-          {% when None %}
-            {% include "include/instance_connection_info.j2" %}
-            {% include "include/instance_generic.j2" %}
-            {% include "include/instance_hvm.j2" %}
-        {% endmatch %}
+      {% when Instance::Bhyve with (instance) %}
+        {% let brand = "bhyve" %}
+        {% include "include/instance_header.j2" %}
+        {% if let Some(json_string) = json %}
+          {% include "include/json_viewer.j2" %}
+        {% else %}
+          {% include "include/instance_connection_info.j2" %}
+          {% include "include/instance_generic.j2" %}
+          {% include "include/instance_hvm.j2" %}
+        {% endif %}
 
       {% when Instance::KVM with (instance) %}
         {% let brand = "kvm" %}
         {% include "include/instance_header.j2" %}
-        {% match json %}
-          {% when Some with (json_string) %}
-            {% include "include/json_viewer.j2" %}
-          {% when None %}
-            {% include "include/instance_connection_info.j2" %}
-            {% include "include/instance_generic.j2" %}
-            {% include "include/instance_hvm.j2" %}
-        {% endmatch %}
+        {% if let Some(json_string) = json %}
+          {% include "include/json_viewer.j2" %}
+        {% else %}
+          {% include "include/instance_connection_info.j2" %}
+          {% include "include/instance_generic.j2" %}
+          {% include "include/instance_hvm.j2" %}
+        {% endif %}
 
     {% endmatch %}
 

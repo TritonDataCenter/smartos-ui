@@ -8,33 +8,25 @@
       </p>
       <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
         {% if instance_enum.is_hvm() %}
-          {% match self.info %}
-            {% when Some with (vnc_info) %}
-                {% call input::link("VNC Info",
-                  format!("vnc://{}:{}", vnc_info.vnc.host, vnc_info.vnc.port)) %}
-            {% when None %}
-          {% endmatch %}
+          {% if let Some(vnc_info) = self.info %}
+            {% call input::link("VNC Info",
+              format!("vnc://{}:{}", vnc_info.vnc.host, vnc_info.vnc.port)) %}
+          {% endif %}
         {% endif %}
         {% for nic in instance.generic.nics %}
-          {% match nic.nic_tag %}
-            {% when Some with (tag) %}
-              {% call input::text_view("NIC Tag", tag) %}
-            {% when None %}
-          {% endmatch %}
-          {% match nic.ips %}
-            {% when Some with (ips) %}
-              {% for ip in ips %}
-                {% call input::text_view("IP", ip) %}
-              {% endfor %}
-            {% when None %}
-          {% endmatch %}
-          {% match nic.gateways %}
-            {% when Some with (gateways) %}
-              {% for gateway in gateways %}
-                {% call input::text_view("Gateway", gateway) %}
-              {% endfor %}
-            {% when None %}
-          {% endmatch %}
+          {% if let Some(tag) = nic.nic_tag %}
+            {% call input::text_view("NIC Tag", tag) %}
+          {% endif %}
+          {% if let Some(ips) = nic.ips %}
+            {% for ip in ips %}
+              {% call input::text_view("IP", ip) %}
+            {% endfor %}
+          {% endif %}
+          {% if let Some(gateways) = nic.gateways %}
+            {% for gateway in gateways %}
+              {% call input::text_view("Gateway", gateway) %}
+            {% endfor %}
+          {% endif %}
         {% endfor %}
       </div>
     </div>
