@@ -86,277 +86,241 @@
             {% call input::text_view("UUID", image.manifest.uuid) %}
             {% call input::text_view("Name", image.manifest.name) %}
             {% call input::text_view("Version", image.manifest.version) %}
-            {% match image.manifest.published_at %}
-              {% when Some with (published_at) %}
-                {% call input::text_view("Published", published_at) %}
-              {% when None %}
-            {% endmatch %}
+            {% if let Some(published_at) = image.manifest.published_at %}
+              {% call input::text_view("Published", published_at) %}
+            {% endif %}
             {% call input::text_view("Type", image.manifest.type) %}
             {% call input::text_view("OS", image.manifest.os) %}
-            {% match image.manifest.homepage %}
-              {% when Some with (homepage) %}
-                {% call input::link_new_tab("Homepage", homepage) %}
-              {% when None %}
-            {% endmatch %}
-            {% match image.manifest.description %}
-              {% when Some with (description) %}
-                {% call input::textarea_view("Description", description) %}
-              {% when None %}
-            {% endmatch %}
-            {% match image.manifest.eula %}
-              {% when Some with (eula) %}
-                {% call input::text_view("EULA", eula) %}
-              {% when None %}
-            {% endmatch %}
-            {% match image.manifest.icon %}
-              {% when Some with (icon) %}
-                {% call input::bool_view(
-                  "Icon",
-                  "icon",
-                  icon,
-                  "Indicates if the image has an icon file.")
-                %}
-              {% when None %}
-            {% endmatch %}
-
-            {% match image.manifest.generate_passwords %}
-              {% when Some with (generate_passwords) %}
-                {% call input::bool_view(
-                  "Generate Passwords",
-                  "generate_passwords",
-                  generate_passwords,
-                  "A boolean indicating whether to generate passwords for the users in the \"users\" field.")
-                %}
-              {% when None %}
-            {% endmatch %}
-            {% match image.manifest.users %}
-              {% when Some with (users) %}
-                <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
-                  <span class="text-base font-semibold leading-7 text-white">Users</span>
-                </div>
-                {% for user in users %}
-                  <div class="sm:col-span-4 sm:col-start-1">
-                    <label for="user_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">Name</label>
-                    <div class="mt-2">
-                      <input
-                        type="text"
-                        name="user_{{loop.index}}"
-                        id="user_{{loop.index}}"
-                        class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-                        value="{{user.name}}" readonly>
-                    </div>
+            {% if let Some(homepage) = image.manifest.homepage %}
+              {% call input::link_new_tab("Homepage", homepage) %}
+            {% endif %}
+            {% if let Some(description) = image.manifest.description %}
+              {% call input::textarea_view("Description", description) %}
+            {% endif %}
+            {% if let Some(eula) = image.manifest.eula %}
+              {% call input::text_view("EULA", eula) %}
+            {% endif %}
+            {% if let Some(icon) = image.manifest.icon %}
+              {% call input::bool_view(
+                "Icon",
+                "icon",
+                icon,
+                "Indicates if the image has an icon file.")
+              %}
+            {% endif %}
+            {% if let Some(generate_passwords) = image.manifest.generate_passwords %}
+              {% call input::bool_view(
+                "Generate Passwords",
+                "generate_passwords",
+                generate_passwords,
+                "A boolean indicating whether to generate passwords for the users in the \"users\" field.")
+              %}
+            {% endif %}
+            {% if let Some(users) = image.manifest.users%}
+              <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+                <span class="text-base font-semibold leading-7 text-white">Users</span>
+              </div>
+              {% for user in users %}
+                <div class="sm:col-span-1 sm:col-start-1">
+                  <label for="user_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">
+                    Name
+                  </label>
+                  <div class="mt-2">
+                    <input
+                      type="text"
+                      name="user_{{loop.index}}"
+                      id="user_{{loop.index}}"
+                      class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                      value="{{user.name}}" readonly>
                   </div>
-
-                {% endfor %}
-              {% when None %}
-            {% endmatch %}
-            {% match image.manifest.inherited_directories %}
-              {% when Some with (inherited_directories) %}
-                <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
-                  <span class="text-base font-semibold leading-7 text-white">
-                    Inherited Directories
-                  </span>
                 </div>
-                {% for dir in inherited_directories %}
-                  <div class="sm:col-span-4 sm:col-start-1">
-                    <label for="inherited_directories_{{loop.index}}_image_uuid" class="block text-sm font-medium leading-6 text-white">Directory</label>
-                    <div class="mt-2">
-                      <input type="text"
-                        name="inherited_directories_{{loop.index}}"
-                        id="inherited_directories_{{loop.index}}"
-                        class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-                        value="{{dir}}" readonly>
-                    </div>
+              {% endfor %}
+              <div class="sm:col-span-full border-b border-white/10 mt-4 pt-4"></div>
+            {% endif %}
+            {% if let Some(inherited_directories) = image.manifest.inherited_directories %}
+              <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+                <span class="text-base font-semibold leading-7 text-white">
+                  Inherited Directories
+                </span>
+              </div>
+              {% for dir in inherited_directories %}
+                <div class="sm:col-span-4 sm:col-start-1">
+                  <label for="inherited_directories_{{loop.index}}_image_uuid" class="block text-sm font-medium leading-6 text-white">Directory</label>
+                  <div class="mt-2">
+                    <input type="text"
+                      name="inherited_directories_{{loop.index}}"
+                      id="inherited_directories_{{loop.index}}"
+                      class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                      value="{{dir}}" readonly>
                   </div>
-
-                {% endfor %}
-              {% when None %}
-            {% endmatch %}
-            {% match image.manifest.nic_driver %}
-              {% when Some with (nic_driver) %}
-                {% call input::text_view("Nic Driver", nic_driver) %}
-              {% when None %}
-            {% endmatch %}
-            {% match image.manifest.disk_driver %}
-              {% when Some with (disk_driver) %}
-                {% call input::text_view("Disk Driver", disk_driver) %}
-              {% when None %}
-            {% endmatch %}
-            {% match image.manifest.cpu_type %}
-              {% when Some with (cpu_type) %}
-                {% call input::text_view("CPU Type", cpu_type) %}
-              {% when None %}
-            {% endmatch %}
-            {% match image.manifest.image_size %}
-              {% when Some with (image_size) %}
-                {% call input::text_view("Image Size (MiB)", image_size) %}
-              {% when None %}
-            {% endmatch %}
-            {% match image.manifest.channels %}
-              {% when Some with (channels) %}
-                <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
-                  <span class="text-base font-semibold leading-7 text-white">Channels</span>
                 </div>
-                {% for channel in channels %}
-                  <div class="sm:col-span-2 sm:col-start-1">
-                    <label for="channel_{{loop.index}}_image_uuid" class="block text-sm font-medium leading-6 text-white">Channel</label>
-                    <div class="mt-2">
-                      <input type="text"
-                        name="inherited_directories_{{loop.index}}"
-                        id="inherited_directories_{{loop.index}}"
-                        class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-                        value={{channel}} readonly>
-                    </div>
+              {% endfor %}
+            {% endif %}
+            {% if let Some(nic_driver) = image.manifest.nic_driver%}
+              {% call input::text_view("Nic Driver", nic_driver) %}
+            {% endif %}
+            {% if let Some(disk_driver) = image.manifest.disk_driver %}
+              {% call input::text_view("Disk Driver", disk_driver) %}
+            {% endif %}
+            {% if let Some(cpu_type) = image.manifest.cpu_type %}
+              {% call input::text_view("CPU Type", cpu_type) %}
+            {% endif %}
+            {% if let Some(image_size) = image.manifest.image_size %}
+              {% call input::text_view("Image Size (MiB)", image_size) %}
+            {% endif %}
+            {% if let Some(channels) = image.manifest.channels %}
+              <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+                <span class="text-base font-semibold leading-7 text-white">
+                  Channels
+                </span>
+              </div>
+              {% for channel in channels %}
+                <div class="sm:col-span-2 sm:col-start-1">
+                  <label for="channel_{{loop.index}}_image_uuid" class="block text-sm font-medium leading-6 text-white">Channel</label>
+                  <div class="mt-2">
+                    <input type="text"
+                      name="inherited_directories_{{loop.index}}"
+                      id="inherited_directories_{{loop.index}}"
+                      class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                      value={{channel}} readonly>
                   </div>
-                {% endfor %}
-              {% when None %}
-            {% endmatch %}
+                </div>
+              {% endfor %}
+            {% endif %}
             {% call input::text_view("Owner", image.manifest.owner) %}
           </div>
         </div>
       </div>
     </div>
 
-    {% match image.manifest.requirements %}
-      {% when Some with (requirements) %}
+    {% if let Some(requirements) = image.manifest.requirements %}
+      <div class="mx-auto px-8">
+        <div class="space-y-12">
+          <div class="pb-12">
+            <h2 class="text-base font-semibold leading-7 text-white">
+              Requirements
+            </h2>
+            <p class="mt-1 text-sm leading-6 text-gray-600">
+              The requirements for provisioning a VM with this image
+            </p>
 
-        <div class="mx-auto px-8">
-          <div class="space-y-12">
-            <div class="pb-12">
-              <h2 class="text-base font-semibold leading-7 text-white">Requirements</h2>
-              <p class="mt-1 text-sm leading-6 text-gray-600">
-                The requirements for provisioning a VM with this image
-              </p>
+            <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+              {% if let Some(brand) = requirements.brand %}
+                {% call input::text_view("Brand", brand) %}
+              {% endif %}
 
-              <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                {% match requirements.brand %}
-                  {% when Some with (brand) %}
-                    {% call input::text_view("Brand", brand) %}
-                  {% when None %}
-                {% endmatch %}
+              {% if let Some(bootrom) = requirements.bootrom %}
+                {% call input::text_view("Boot ROM", bootrom) %}
+              {% endif %}
 
-                {% match requirements.bootrom %}
-                  {% when Some with (bootrom) %}
-                    {% call input::text_view("Boot ROM", bootrom) %}
-                  {% when None %}
-                {% endmatch %}
+              {% if let Some(min_ram) = requirements.min_ram %}
+                {% call input::text_view("Minimum RAM", min_ram) %}
+              {% endif %}
 
-                {% match requirements.min_ram %}
-                  {% when Some with (min_ram) %}
-                    {% call input::text_view("Minimum RAM", min_ram) %}
-                  {% when None %}
-                {% endmatch %}
+              {% if let Some(max_ram) = requirements.max_ram %}
+                {% call input::text_view("Maximum RAM", max_ram) %}
+              {% endif %}
 
-                {% match requirements.max_ram %}
-                  {% when Some with (max_ram) %}
-                    {% call input::text_view("Maximum RAM", max_ram) %}
-                  {% when None %}
-                {% endmatch %}
+              {% if let Some(bootrom) = requirements.bootrom %}
+                {% call input::text_view("Boot ROM", bootrom) %}
+              {% endif %}
 
-                {% match requirements.bootrom %}
-                  {% when Some with (bootrom) %}
-                    {% call input::text_view("Boot ROM", bootrom) %}
-                  {% when None %}
-                {% endmatch %}
+              {% if let Some(ssh_key) = requirements.ssh_key %}
+                {% call input::bool_view("SSH Key", "ssh_key_required", ssh_key,
+                  "Indicates that provisioning with this image requires that an SSH public key be provided.") %}
+              {% endif %}
 
-                {% match requirements.ssh_key %}
-                  {% when Some with (ssh_key) %}
-                    {% call input::bool_view("SSH Key", "ssh_key_required", ssh_key, "Indicates that provisioning with this image requires that an SSH public key be provided.") %}
-                  {% when None %}
-                {% endmatch %}
-
-                {% match requirements.min_platform %}
-                  {% when Some with (min_platform) %}
-                      <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
-                        <span class="text-base font-semibold leading-7 text-white">Minimum Platform Requirements</span>
+              {% if let Some(min_platform) = requirements.min_platform %}
+                <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+                  <span class="text-base font-semibold leading-7 text-white">
+                    Minimum Platform Requirements
+                  </span>
+                </div>
+                {% if let Some(min_platform_obj) = min_platform.as_object() %}
+                  {% for (sdc_version, platform) in min_platform_obj %}
+                    <div class="sm:col-span-2 sm:col-start-1">
+                      <label for="min_plat_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">
+                        SDC v{{sdc_version}}
+                      </label>
+                      <div class="mt-2">
+                        <input
+                          type="text"
+                          name="min_plat_{{loop.index}}"
+                          id="min_plat_{{loop.index}}"
+                          class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                          value="{{platform}}" readonly>
                       </div>
-                      {% match min_platform.as_object() %}
-                        {% when Some with (min_platform_obj) %}
-                          {% for (sdc_version, platform) in min_platform_obj %}
-                            <div class="sm:col-span-2 sm:col-start-1">
-                              <label for="min_plat_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">SDC v{{sdc_version}}</label>
-                              <div class="mt-2">
-                                <input
-                                  type="text"
-                                  name="min_plat_{{loop.index}}"
-                                  id="min_plat_{{loop.index}}"
-                                  class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-                                  value="{{platform}}" readonly>
-                              </div>
-                            </div>
-                            {% endfor %}
-                          {% when None %}
-                        {% endmatch %}
-                  {% when None %}
-                {% endmatch %}
+                    </div>
+                  {% endfor %}
+                {% endif %}
+              {% endif %}
 
-                {% match requirements.max_platform %}
-                  {% when Some with (max_platform) %}
-                      <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
-                        <span class="text-base font-semibold leading-7 text-white">Maximum Platform Requirements</span>
+              {% if let Some with (max_platform) = requirements.max_platform %}
+                <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+                  <span class="text-base font-semibold leading-7 text-white">
+                    Maximum Platform Requirements
+                  </span>
+                </div>
+                {% if let Some(max_platform_obj) = max_platform.as_object()%}
+                  {% for (sdc_version, platform) in max_platform_obj %}
+                    <div class="sm:col-span-2 sm:col-start-1">
+                      <label for="max_plat_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">
+                        SDC v{{sdc_version}}
+                      </label>
+                      <div class="mt-2">
+                        <input
+                          type="text"
+                          name="max_plat_{{loop.index}}"
+                          id="max_plat_{{loop.index}}"
+                          class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                          value="{{platform}}" readonly>
                       </div>
-                      {% match max_platform.as_object() %}
-                        {% when Some with (max_platform_obj) %}
-                          {% for (sdc_version, platform) in max_platform_obj %}
-                            <div class="sm:col-span-2 sm:col-start-1">
-                              <label for="max_plat_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">SDC v{{sdc_version}}</label>
-                              <div class="mt-2">
-                                <input
-                                  type="text"
-                                  name="max_plat_{{loop.index}}"
-                                  id="max_plat_{{loop.index}}"
-                                  class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-                                  value="{{platform}}" readonly>
-                              </div>
-                            </div>
-                            {% endfor %}
-                          {% when None %}
-                        {% endmatch %}
-                  {% when None %}
-                {% endmatch %}
+                    </div>
+                  {% endfor %}
+                {% endif %}
+              {% endif %}
+              {% if let Some(networks) = requirements.networks %}
+                {% for network in networks %}
+                  <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+                    <span class="text-base font-semibold leading-7 text-white">
+                      Required Network {{loop.index}}
+                    </span>
+                  </div>
 
-                {% match requirements.networks %}
-                  {% when Some with (networks) %}
-                    {% for network in networks %}
+                  <div class="sm:col-span-2 sm:col-start-1">
+                    <label for="network_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">
+                      Name
+                    </label>
+                    <div class="mt-2">
+                      <input
+                        type="text"
+                        name="network_{{loop.index}}"
+                        id="network_{{loop.index}}"
+                        class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                        value="{{network.name}}" readonly>
+                    </div>
+                  </div>
 
-                      <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
-                        <span class="text-base font-semibold leading-7 text-white">Required Network {{loop.index}}</span>
-                      </div>
-
-                      <div class="sm:col-span-2 sm:col-start-1">
-                        <label for="network_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">Name</label>
-                        <div class="mt-2">
-                          <input
-                            type="text"
-                            name="network_{{loop.index}}"
-                            id="network_{{loop.index}}"
-                            class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-                            value="{{network.name}}" readonly>
-                        </div>
-                      </div>
-
-                      <div class="sm:col-span-2">
-                        <label for="network_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">Description</label>
-                        <div class="mt-2">
-                          <input
-                            type="text"
-                            name="network_{{loop.index}}"
-                            id="network_{{loop.index}}"
-                            class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-                            value="{{network.description}}" readonly>
-                        </div>
-                      </div>
-
-                    {% endfor %}
-                  {% when None %}
-                {% endmatch %}
-              </div>
+                  <div class="sm:col-span-2">
+                    <label for="network_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">
+                      Description
+                    </label>
+                    <div class="mt-2">
+                      <input
+                        type="text"
+                        name="network_{{loop.index}}"
+                        id="network_{{loop.index}}"
+                        class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                        value="{{network.description}}" readonly>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endif %}
             </div>
           </div>
         </div>
-
-      {% when None %}
-    {% endmatch %}
+      </div>
+    {% endif %}
   {% endif %}
 </form>
 {% endblock %}

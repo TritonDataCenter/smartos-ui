@@ -257,6 +257,12 @@
                   <div class="col-span-full">
                     <label for="quota" class="block text-sm font-medium leading-6 text-white">
                       vCPUs
+                      <span class="has-tooltip cursor-pointer">
+                        {% call icons::info("h-4 w-h inline mb-1") %}
+                        <span class="tooltip rounded shadow-lg p-1 bg-slate-800 text-white -mt-8 p-4 max-w-80">
+                          The number of virtual CPUs the guest will see. CPU Cap should be set to 100x of this value.
+                        </span>
+                      </span>
                     </label>
                     <div class="mt-2">
                       <input
@@ -278,9 +284,7 @@
                     <span class="has-tooltip cursor-pointer">
                       {% call icons::info("h-4 w-h inline mb-1") %}
                       <span class="tooltip rounded shadow-lg p-1 bg-slate-800 text-white -mt-8 p-4 max-w-80">
-                        Sets a limit on the amount of CPU time that can be used by a VM. The
-                        unit used is the percentage of a single CPU that can be used by the VM.
-                        Eg. a value of 300 means up to 3 full CPUs.
+                        Sets a limit on the amount of CPU time that can be used by an instance measured in percent.
                       </span>
                     </span>
                   </label>

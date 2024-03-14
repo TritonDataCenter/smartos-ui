@@ -44,7 +44,7 @@ window.vCpuOnChange = ($element) => {
   }
 }
 
-// When cloud-init data change is updated, ensure it begins with "#cloud-config\n"
+// When cloud-init data is updated, ensure it begins with "#cloud-config\n"
 window.cloudInitDataOnChange = ($element) => {
   if (!$element.value) {
     return
@@ -56,11 +56,11 @@ window.cloudInitDataOnChange = ($element) => {
   }
 }
 
-// Will interrogate input types for a given <form> and attempt to massage
-// them into basic JSON types.
+// This function willl interrogate input types for a given <form> and attempt to
+// massage them into basic JSON types.
 // A data attr named data-enctype="TYPE" can be used on any element with a name
-// attr for preferred type hinting this is especially useful for <select>
-// elements that have no type attr
+// attr for type hinting this is especially useful for <select> elements that
+// have no type attr
 function encodeFormParameters ($targets, props = {}) {
   $targets.forEach($element => {
     let value = null
@@ -95,6 +95,9 @@ function encodeFormParameters ($targets, props = {}) {
   return props
 }
 
+// Collect all of the data from inputs on the guided form, massage it as
+// needed, merge it with the additional properties tab and then write the
+// resulting object to the final properties JSON editor.
 window.updateEditors = () => {
   const editors = window.editors
   const $form = $('#content form')
@@ -292,8 +295,7 @@ fi
 window.getFinalEditor = () => {
   window.updateEditors()
   // We need a UUID on the instance payload so we can keep track of it
-  // vmadm will generate one if it's not provided so if the user didn't add one
-  // generate it here so we know what it is.
+  // If the user didn't add one generate it here so we know what it is.
   let payload = window.editors.final.state.doc.toString()
   try {
     const instancePayload = JSON.parse(payload)
@@ -335,6 +337,7 @@ export const setupProvisioningForm = () => {
     })
   }
 
+  // Setup each CodeMirror editor
   $editorTabs.forEach($tab => {
     const editors = window.editors
     const { name } = $tab.dataset
@@ -386,6 +389,7 @@ export const setupProvisioningForm = () => {
     }
   })
 
+  // Show/Hide major inputs and controls when an image_uuid is selected
   $guidedTab.addEventListener('change', e => {
     if (e.target.id === 'image_uuid') {
       if (e.target.value) {
