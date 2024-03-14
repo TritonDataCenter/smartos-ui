@@ -37,6 +37,7 @@
                 {% for attr in button.attributes %}
                   {{attr|safe}}
                 {% endfor %}
+                data-hx-on::after-request="window.scrollTo({top: 0, behavior: 'instant'})"
                 class="modal-close mr-2 btn {% for class in button.classes %}{{class}} {% endfor %}">
                 {{ button.text }}
               </button>
