@@ -34,7 +34,7 @@ ui/assets/node_modules: ui/assets/package.json ui/assets/package-lock.json
 ui/assets/main.css: ui/assets/main.in.css ui/assets/tailwind.config.js $(J2_FILES)
 	cd ui/assets && \
 		./node_modules/.bin/tailwindcss -m -i ./main.in.css -o ./main.css && \
-		sed -ie 's/\/\*\#\ sourceMappingURL=main.css.map\ \*\///' ./main.css
+		sed -i '' -e 's/\/\*\#\ sourceMappingURL=main.css.map\ \*\///' ./main.css
 
 ui/assets/main.css.gz: ui/assets/node_modules ui/assets/main.css
 	cd ui/assets && rm -f ./main.css.gz && gzip ./main.css
