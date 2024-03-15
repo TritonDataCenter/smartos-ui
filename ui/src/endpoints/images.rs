@@ -170,10 +170,6 @@ pub struct ImportTemplate {
     images: Vec<Image>,
 }
 
-// TODO: if you navigate here, then quickly navigate elsewhere before it has
-// loaded, you will be redirected here when it later loads, instead of aborting
-// the request like the other side-panel navigation entries (need to grok how to
-// make hx-sync work here too.)
 #[endpoint {
 method = GET,
 path = "/import",
