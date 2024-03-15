@@ -89,4 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault()
     }
   })
+
+  htmx.on('htmx:historyCacheError', e => console.log('historyCacheError', e))
 })
