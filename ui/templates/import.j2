@@ -2,7 +2,12 @@
 {% extends "layout/authed.j2" %}
 {% block title %}{{title}}{% endblock %}
 {% block content %}
-<div id="content">
+{#
+  History is disabled for this view as the response is large and HTMX stores
+  history in LocalStorage. Some `historyCacheError`s were being thrown because
+  the LocalStorage quota was being exceeded on Safari.
+#}
+<div id="content" hx-history="false">
 
   <header class="header-bg top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/10 bg-gray-900 px-4 shadow-sm sm:px-6 lg:px-8">
     <h1 class="text-base font-semibold leading-7 text-xl text-white">
