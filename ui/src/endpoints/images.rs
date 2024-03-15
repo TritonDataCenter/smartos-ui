@@ -91,7 +91,6 @@ pub async fn get_by_id(
                     .await
                     .map_err(to_internal_error)?,
             );
-            // TODO: Back button works but the "View JSON" button no longer works
             location = format!("/images/{}?json=true", id)
         }
     }

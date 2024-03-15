@@ -70,6 +70,7 @@ pub async fn get_by_id(
 
     let mut info: Option<Info> = None;
     let mut json_string = None;
+    let mut location = format!("/instances/{}", &id);
     if let Some(as_json) = query_params.into_inner().json {
         if as_json {
             json_string = Some(
@@ -79,6 +80,7 @@ pub async fn get_by_id(
                     .await
                     .map_err(to_internal_error)?,
             );
+            location = format!("/instances/{}?json=true", id)
         }
     } else if instance_enum.is_hvm() && instance_enum.state() == "running" {
         info = Some(
@@ -108,7 +110,7 @@ pub async fn get_by_id(
     };
     let result = template.render().map_err(to_internal_error)?;
 
-    htmx_response(response, &format!("/instances/{}", &id), result.into())
+    htmx_response(response, &location, result.into())
 }
 
 #[endpoint {
