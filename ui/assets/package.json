@@ -12,7 +12,7 @@
     "@tpaul/codemirror6-json-rolledup": "^1.0.1",
     "bunyan": "^1.8.15",
     "esbuild": "^0.20.0",
-    "htmx.org": "^1.9.10",
+    "htmx.org": "^1.9.11",
     "postcss-import": "^16.0.1",
     "sortable-tablesort": "^3.2.2",
     "standard": "^17.1.0",
