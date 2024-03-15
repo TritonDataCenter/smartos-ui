@@ -14,13 +14,14 @@ use crate::endpoints::{
 };
 use crate::session::Session;
 
+use smartos_shared::http_server::{to_internal_error, GenericResponse};
 use smartos_shared::image::{Image, ImageImportParams};
 
 use askama::Template;
 use dropshot::{endpoint, HttpError, Path, Query, RequestContext, TypedBody};
 use http::StatusCode;
 use hyper::{Body, Response};
-use smartos_shared::http_server::{to_internal_error, GenericResponse};
+use serde_json::json;
 
 #[derive(Template)]
 #[template(path = "images.j2")]
@@ -224,6 +225,7 @@ pub async fn post_import_index(
     let id = &path_params.into_inner().id;
 
     let template_result;
+    let mut event_data = String::new();
 
     if let Ok(result) = ctx
         .context()
@@ -239,6 +241,15 @@ pub async fn post_import_index(
             NotificationKind::Ok => String::from("Image Import Complete"),
             NotificationKind::Error => String::from("Image Import Failed"),
         };
+
+        if kind == NotificationKind::Ok {
+            event_data = json!({
+                "removeElement": {
+                    "id": format!("image-{}", id)
+                }
+            })
+            .to_string();
+        }
 
         let template = NotificationTemplate {
             id: ctx.request_id,
@@ -267,6 +278,7 @@ pub async fn post_import_index(
 
     response
         .status(StatusCode::OK)
+        .header("HX-Trigger", event_data)
         .body(template_result.into())
         .map_err(to_internal_error)
 }

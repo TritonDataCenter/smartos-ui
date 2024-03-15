@@ -37,7 +37,7 @@ use serde::{Deserialize, Serialize};
 use tokio::try_join;
 use uuid::Uuid;
 
-#[derive(Default)]
+#[derive(Default, PartialEq)]
 enum NotificationKind {
     Ok,
     #[default]
@@ -73,10 +73,10 @@ pub struct NotificationTemplate {
     /// If Some, will load the specified path after showing the notification
     redirect: Option<String>,
 
-    /// The path where the notification was created.
+    /// The path where the notification was created
     created_at: String,
 
-    /// Arbitrary string for the front-end and e2e tests to use, usually a UUI
+    /// Arbitrary string for the front-end and e2e tests to use, usually a UUID
     /// but not necessarily
     entity_id: String,
 }

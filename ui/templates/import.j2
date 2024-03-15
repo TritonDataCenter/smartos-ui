@@ -43,6 +43,7 @@
               <tbody class="divide-y divide-white/5">
                 {% for image in images %}
                 <tr
+                  id="image-{{image.manifest.uuid}}"
                   class="hover:bg-gray-800">
                   <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
                     <div class="flex items-center gap-x-4">

@@ -48,7 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // this has to be initialized dynamically as the elements we rely on come
   // and go in the DOM
   htmx.on('htmx:afterSettle', ({ detail: { pathInfo: { requestPath } } }) => {
-    if (requestPath === '/provision' && document.location.pathname === '/provision') {
+    if (requestPath === '/provision' &&
+      document.location.pathname === '/provision') {
       setupProvisioningForm()
     } else {
       setupJSONViewer()
@@ -90,5 +91,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })
 
-  htmx.on('htmx:historyCacheError', e => console.log('historyCacheError', e))
+  // Respond to an element removal request from the server. This is currently
+  // used when an image is successfully imported. The row in the table of
+  // available images is removed without a full page or view reload.
+  document.body.addEventListener('removeElement', ({ detail: { id } }) => {
+    const element = document.getElementById(id)
+    if (!element) {
+      console.error('Requested element to remove not found', id)
+    }
+    element.remove()
+  })
 })
