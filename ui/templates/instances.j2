@@ -91,7 +91,14 @@
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="flow-root">
         <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
-          <div class="inline-block min-w-full py-2 align-middle">
+          <div
+            id="instance-list"
+            data-hx-get="/instances"
+            data-hx-trigger="every 8s"
+            data-hx-target="#instance-list"
+            data-hx-select="#instance-list"
+            data-hx-swap="outerHTML"
+            class="inline-block min-w-full py-2 align-middle">
             {% if image_count < 1 %}
               {% include "include/no_images.j2" %}
             {% else if instances.len() < 1 %}
@@ -123,6 +130,7 @@
                     data-hx-get="/instances/{{instance.uuid}}"
                     data-hx-target="#main"
                     data-hx-select="#content"
+                    data-hx-swap="innerHTML"
                     class="hover:bg-gray-800 cursor-pointer">
                     <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
                       <div class="flex items-center gap-x-4">
@@ -135,7 +143,9 @@
                       {{instance.brand}}
                     </td>
                     <td class="py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
-                        <a class="text-sm underline hover:text-gray-300" href="/images/{{instance.image_uuid}}">
+                        <a
+                          href="/images/{{instance.image_uuid}}"
+                          class="text-sm underline hover:text-gray-300">
                           {{image}}
                         </a>
                     </td>
