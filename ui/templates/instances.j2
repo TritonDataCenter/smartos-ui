@@ -37,7 +37,7 @@
   {% if (image_count > 0) && (instances.len() > 0) %}
     <header>
       <div class="grid grid-cols-1 bg-gray-700/10 sm:grid-cols-2 lg:grid-cols-4">
-        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8">
+        <div class="border-t border-b border-white/5 py-6 px-4 sm:px-6 lg:px-8">
           <p class="text-sm font-medium leading-6 text-gray-400">
             Virtual Machines
           </p>
@@ -47,7 +47,7 @@
             </span>
           </p>
         </div>
-        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
+        <div class="border-t border-b border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
           <p class="text-sm font-medium leading-6 text-gray-400">
             Provisioned CPU
           </p>
@@ -59,7 +59,7 @@
             <span class="text-sm text-gray-400">vCPUs + CPU Cap</span>
           </p>
         </div>
-        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
+        <div class="border-t border-b border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
           <p class="text-sm font-medium leading-6 text-gray-400">
             Provisioned Memory
           </p>
@@ -71,7 +71,7 @@
             <span class="text-sm text-gray-400">GiB</span>
           </p>
         </div>
-        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 lg:border-l">
+        <div class="border-t border-b border-white/5 py-6 px-4 sm:px-6 lg:px-8 lg:border-l">
           <p class="text-sm font-medium leading-6 text-gray-400">
             Provisioned Storage
           </p>
@@ -88,6 +88,14 @@
   {% endif %}
 
   <main>
+    <div class="grid grid-cols-4">
+      <input
+        type="search"
+        data-rows="#provisioned-instances tr"
+        placeholder="Filter instances..."
+        class="filterable bg-transparent border-0 text-white focus:ring-0 sm:text-sm sm:leading-6 col-span-1"/>
+      {% call icons::close("hidden text-white w-6 h-6 mt-2 cursor-pointer inline-block filter-clear col-span-1") %}
+    </div>
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="flow-root">
         <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
@@ -112,7 +120,7 @@
                   <col class="lg:w-2/12">
                   <col class="lg:w-2/12">
                 </colgroup>
-                <thead class="border-b border-white/10 text-sm leading-6 text-white">
+                <thead class="border-b border-t border-white/10 text-sm leading-6 text-white">
                   <tr class="sticky-header">
                     <th scope="col" class="sticky top-0 z-10 py-2 pl-4 pr-8 sm:pl-6 lg:pl-8 font-semibold sm:table-cell bg-gray-900">Alias</th>
                     <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold sm:table-cell bg-gray-900">Brand</th>
@@ -124,7 +132,7 @@
                     <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold md:table-cell bg-gray-900">Status</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-white/5">
+                <tbody id="provisioned-instances" class="divide-y divide-white/5">
                   {% for (instance, image) in instances %}
                   <tr
                     data-hx-get="/instances/{{instance.uuid}}"
@@ -134,20 +142,14 @@
                     class="hover:bg-gray-800 cursor-pointer">
                     <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
                       <div class="flex items-center gap-x-4">
-                        <div class="truncate text-sm font-medium leading-6 text-white">
-                          {{instance.alias}}
-                        </div>
+                        <div class="truncate text-sm font-medium leading-6 text-white filter-subject">{{instance.alias}}</div>
                       </div>
                     </td>
-                    <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
-                      {{instance.brand}}
-                    </td>
+                    <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8 filter-subject">{{instance.brand}}</td>
                     <td class="py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
                         <a
                           href="/images/{{instance.image_uuid}}"
-                          class="text-sm underline hover:text-gray-300">
-                          {{image}}
-                        </a>
+                          class="text-sm underline hover:text-gray-300 filter-subject">{{image}}</a>
                     </td>
                     <td class="py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
                       {% if let Some(primary_ip) = instance.primary_ip %}

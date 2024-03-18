@@ -17,13 +17,15 @@
   </header>
 
   <main>
-    <input
-      id="available-filter"
-      type="search"
-      data-rows="#available-images tr"
-      placeholder="Filter..."
-      class="filterable bg-transparent border-0 text-white focus:ring-0 sm:text-sm sm:leading-6"/>
-    {% call icons::close("hidden text-white w-6 h-6 -ml-8 cursor-pointer inline-block filter-clear") %}
+    <div class="grid grid-cols-4">
+      <input
+        type="search"
+        data-rows="#available-images tr"
+        placeholder="Filter available images..."
+        class="filterable bg-transparent border-0 text-white focus:ring-0 sm:text-sm sm:leading-6 col-span-1"/>
+      {% call icons::close("hidden text-white w-6 h-6 mt-2 cursor-pointer inline-block filter-clear col-span-1") %}
+    </div>
+
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="flow-root">
         <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
@@ -36,7 +38,7 @@
                 <col class="lg:w-2/12">
                 <col class="lg:w-2/12">
               </colgroup>
-              <thead class="border-b border-white/10 text-sm leading-6 text-white">
+              <thead class="border-b border-t border-white/10 text-sm leading-6 text-white">
                 <tr class="sticky-header">
                   <th scope="col" class="sticky top-0 z-10 py-2 pl-4 pr-8 sm:pl-6 lg:pl-8 font-semibold sm:table-cell bg-gray-900">Name</th>
                   <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold sm:table-cell bg-gray-900">UUID</th>

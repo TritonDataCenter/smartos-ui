@@ -4,7 +4,14 @@ import { $, $$ } from './global'
 document.addEventListener('DOMContentLoaded', () => {
   const $main = $('#main')
 
-  function filterTable ({ target }) {
+  function filterTable (e) {
+    const target = e.target
+
+    // If ESC key is pressed, clear out input
+    if (e.keyCode === 27) {
+      target.value = ''
+    }
+
     if (target.classList.contains('filterable')) {
       const value = target.value.trim().toLowerCase()
       const $rows = $$(target.dataset.rows)
@@ -27,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $main.addEventListener('keyup', filterTable)
   $main.addEventListener('change', filterTable)
+  $main.addEventListener('blur', filterTable)
   $main.addEventListener('click', ({ target }) => {
     const $target = target.classList.contains('filter-clear')
       ? target
