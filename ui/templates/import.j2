@@ -17,6 +17,13 @@
   </header>
 
   <main>
+    <input
+      id="available-filter"
+      type="search"
+      data-rows="#available-images tr"
+      placeholder="Filter..."
+      class="filterable bg-transparent border-0 text-white focus:ring-0 sm:text-sm sm:leading-6"/>
+    {% call icons::close("hidden text-white w-6 h-6 -ml-8 cursor-pointer inline-block filter-clear") %}
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="flow-root">
         <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
@@ -40,37 +47,25 @@
                   <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold md:table-cell bg-gray-900"></th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-white/5">
+              <tbody id="available-images" class="divide-y divide-white/5">
                 {% for image in images %}
                 <tr
                   id="image-{{image.manifest.uuid}}"
                   class="hover:bg-gray-800">
                   <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
                     <div class="flex items-center gap-x-4">
-                      <div class="truncate text-sm font-medium leading-6 text-white">
-                        {{image.manifest.name}}
-                      </div>
+                      <div class="truncate text-sm font-medium leading-6 text-white filter-subject">{{image.manifest.name}}</div>
                     </div>
                   </td>
-                  <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">
-                    {{image.manifest.uuid}}
-                  </td>
+                  <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">{{image.manifest.uuid}}</td>
                   <td class="py-4 pl-0 pr-4 sm:table-cell sm:pr-8">
                     <div class="flex gap-x-3">
-                      <div class="text-sm leading-6 text-gray-400">
-                        {{image.manifest.version}}
-                      </div>
+                      <div class="text-sm leading-6 text-gray-400">{{image.manifest.version}}</div>
                     </div>
                   </td>
-                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
-                    {{image.manifest.state}}
-                  </td>
-                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">
-                    {{image.manifest.type|format_word}}
-                  </td>
-                  <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:pr-8 lg:pr-20">
-                    {{image.manifest.os|format_word}}
-                  </td>
+                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.state}}</td>
+                  <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20 filter-subject">{{image.manifest.type|format_word}}</td>
+                  <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:pr-8 lg:pr-20 filter-subject">{{image.manifest.os|format_word}}</td>
                   <td class="py-4 pl-0 pr-4 text-sm leading-6 sm:pr-8 lg:pr-20">
                     {% if let Some(source) = image.source %}
                       <form
