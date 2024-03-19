@@ -1,4 +1,4 @@
-// The HTMX extensions don't have ES6 module support (thouhg HTMX itself does),
+// The HTMX extensions don't have ES6 module support (though HTMX itself does),
 // so any extensions we need can be copied here (they're usually very small),
 // wrapped in a function, and exported.
 

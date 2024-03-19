@@ -16,6 +16,10 @@ const ImagesPage = require('./models/ImagesPage')
 const ImagePage = require('./models/ImagePage')
 const AvailableImagesPage = require('./models/AvailableImagesPage')
 
+test.use({
+  ignoreHTTPSErrors: true,
+})
+
 test('Check installed images', async ({ page }) => {
   const loginPage = new LoginPage(page)
   await loginPage.login()

@@ -23,7 +23,7 @@ use dropshot::{
 async fn main() -> Result<(), String> {
     let name = option_env!("CARGO_PKG_NAME").unwrap_or("?");
     let version = option_env!("CARGO_PKG_VERSION").unwrap_or("v?");
-    let config = Config::new(name);
+    let config = Config::new();
 
     let config_logging = ConfigLogging::File {
         level: dropshot::ConfigLoggingLevel::Debug,
@@ -32,7 +32,7 @@ async fn main() -> Result<(), String> {
     };
 
     let log = config_logging
-        .to_logger(String::from("smartos_executor"))
+        .to_logger(name)
         .map_err(|error| format!("Failed to create logger: {}", error))?;
 
     let mut api = ApiDescription::new();

@@ -16,6 +16,10 @@ const InstanceKvmPage = require('./models/InstanceKvmPage')
 // For additional manual testing, set to false so instances can be inspected
 const deleteInstances = true
 
+test.use({
+  ignoreHTTPSErrors: true,
+})
+
 test.describe.configure({ mode: 'serial' })
 
 test('Create Bhyve (all defaults)', async ({ page }, { title }) => {

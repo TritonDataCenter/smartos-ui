@@ -26,8 +26,9 @@ use smartos_shared::{config::Config, http_server::to_internal_error};
 
 use askama::Template;
 use dropshot::{
-    endpoint, http_response_see_other, HttpError, HttpResponseOk,
-    HttpResponseSeeOther, RequestContext,
+    endpoint, http_response_see_other, http_response_temporary_redirect,
+    HttpError, HttpResponseOk, HttpResponseSeeOther,
+    HttpResponseTemporaryRedirect, RequestContext,
 };
 use http::response::Builder;
 use hyper::{Body, Response, StatusCode};
@@ -166,6 +167,27 @@ pub fn htmx_response(
         .header("Content-Type", "text/html")
         .body(body)
         .map_err(to_internal_error)
+}
+
+/// Redirect to HTTPS port if loaded from non-HTTPS port
+#[endpoint {
+method = GET,
+path = "/"
+}]
+pub async fn get_tls_index(
+    ctx: RequestContext<String>,
+) -> Result<HttpResponseTemporaryRedirect, HttpError> {
+    http_response_temporary_redirect(ctx.context().to_string())
+}
+
+#[endpoint {
+method = GET,
+path = "/login"
+}]
+pub async fn get_tls_login_index(
+    ctx: RequestContext<String>,
+) -> Result<HttpResponseTemporaryRedirect, HttpError> {
+    http_response_temporary_redirect(ctx.context().to_string())
 }
 
 /// Redirect / to either /dashboard (if user has a valid session) or /login
