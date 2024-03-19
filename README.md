@@ -17,7 +17,4 @@ password "root"
 
 ### Running in the Global Zone
 
-Copy `smartos_executor` and `smartos_ui` into the GZ and run:
-
-    ./smartos_executor &
-    UI_BIND_HTTP_ADDRESS=0.0.0.0:8080 UI_BIND_HTTPS_ADDRESS=192.16.1.5:4443 ./smartos_ui
+See [tools/gzrun.sh](tools/gzrun.sh) for an example of running in the GZ.
