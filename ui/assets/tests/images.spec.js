@@ -17,7 +17,7 @@ const ImagePage = require('./models/ImagePage')
 const AvailableImagesPage = require('./models/AvailableImagesPage')
 
 test.use({
-  ignoreHTTPSErrors: true,
+  ignoreHTTPSErrors: true
 })
 
 test('Check installed images', async ({ page }) => {

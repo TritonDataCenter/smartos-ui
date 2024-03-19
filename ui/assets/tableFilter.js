@@ -55,4 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
       filterTable({ target: $input })
     }
   })
+
+  // This is intended to be called via a HX-Trigger-After-Swap header and allows
+  // for re-filtering a table if the content has been reloaded.
+  document.body.addEventListener('filterTable', ({ detail: { selector } }) => {
+    filterTable({ target: $(selector) })
+  })
 })

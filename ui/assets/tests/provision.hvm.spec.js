@@ -17,7 +17,7 @@ const InstanceKvmPage = require('./models/InstanceKvmPage')
 const deleteInstances = true
 
 test.use({
-  ignoreHTTPSErrors: true,
+  ignoreHTTPSErrors: true
 })
 
 test.describe.configure({ mode: 'serial' })

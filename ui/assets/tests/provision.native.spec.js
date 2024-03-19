@@ -19,7 +19,7 @@ const InstanceLxPage = require('./models/InstanceLxPage')
 const deleteInstances = true
 
 test.use({
-  ignoreHTTPSErrors: true,
+  ignoreHTTPSErrors: true
 })
 
 test.describe.configure({ mode: 'serial' })

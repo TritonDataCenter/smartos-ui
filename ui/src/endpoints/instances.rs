@@ -17,11 +17,14 @@ use crate::endpoints::{
 };
 use crate::session::Session;
 
+use smartos_shared::http_server::to_bad_request;
 use smartos_shared::http_server::to_internal_error;
+use smartos_shared::image::{Image, Type as ImageType};
 use smartos_shared::instance::{
     Brand, Info, Instance, InstancePayload, InstanceView, PayloadContainer,
 };
 use smartos_shared::nictag::NicTag;
+use smartos_shared::sysinfo::Sysinfo;
 
 use askama::Template;
 use dropshot::{endpoint, HttpError, Path, Query, RequestContext, TypedBody};
@@ -29,10 +32,8 @@ use http::StatusCode;
 use hyper::{Body, Response};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use slog::info;
-use smartos_shared::http_server::to_bad_request;
-use smartos_shared::image::{Image, Type as ImageType};
-use smartos_shared::sysinfo::Sysinfo;
 
 #[derive(Template)]
 #[template(path = "instance.j2")]
@@ -275,12 +276,19 @@ pub struct InstancesTemplate<'a> {
     instances: Vec<(InstanceView, String)>,
 }
 
+#[derive(Deserialize, Debug, JsonSchema)]
+pub struct InstanceListParams {
+    #[serde(default)]
+    pub reload: Option<bool>,
+}
+
 #[endpoint {
 method = GET,
 path = "/instances"
 }]
 pub async fn get_index(
     ctx: RequestContext<Context>,
+    query_params: Query<InstanceListParams>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
     if !Session::is_valid(&ctx) {
@@ -328,6 +336,7 @@ pub async fn get_index(
             i.cpu + acc
         }
     });
+
     for instance in instance_views.drain(..) {
         let image_name = if let Some(image) =
             images.iter().find(|&i| i.manifest.uuid == instance.image_uuid)
@@ -352,7 +361,23 @@ pub async fn get_index(
     };
     let result = template.render().map_err(to_internal_error)?;
 
-    htmx_response(response, "/instances", result.into())
+    if query_params.into_inner().reload.is_some() {
+        let event_data = json!({
+            "filterTable": {
+                "selector": "#filter-instances"
+            }
+        })
+        .to_string();
+        response
+            .status(StatusCode::OK)
+            .header("HX-Push-Url", "/instances")
+            .header("HX-Trigger-After-Swap", event_data)
+            .header("Content-Type", "text/html")
+            .body(result.into())
+            .map_err(to_internal_error)
+    } else {
+        htmx_response(response, "/instances", result.into())
+    }
 }
 
 #[derive(Template)]
