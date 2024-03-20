@@ -80,24 +80,13 @@
         </div>
       </div>
     </div>
-    <footer class="sticky w-full  top-[100vh]">
+    <footer class="sticky w-full top-[100vh]">
       <div class="mx-auto max-w-7xl overflow-hidden">
       <p class="mt-10 mb-10 text-center text-xs leading-5 text-gray-400">
         Powered by <a class="underline hover:text-gray-300" href="https://smartos.org" target="_blank">SmartOS</a>
       </p>
       </div>
     </footer>
-  {% endif %}
-  {% if crate::DEBUG %}
-  <script type="application/javascript">
-  document.addEventListener('DOMContentLoaded', () => {
-    if (document.location.host === 'localhost:8080') {
-      document.getElementById('user').value = 'root'
-      document.getElementById('password').value = 'root'
-      document.getElementById('login').submit()
-    }
-  })
-  </script>
   {% endif %}
 </body>
 {% endblock %}
