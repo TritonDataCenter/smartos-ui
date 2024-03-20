@@ -17,13 +17,14 @@
   </header>
 
   <main>
+    {% call icons::search("text-slate-500 w-6 h-6 ml-2 mt-2 inline-block float-left") %}
     <div class="grid grid-cols-4">
       <input
         type="search"
         data-rows="#available-images tr"
         placeholder="Filter available images..."
         class="filterable bg-transparent border-0 text-white focus:ring-0 sm:text-sm sm:leading-6 col-span-1"/>
-      {% call icons::close("hidden text-white w-6 h-6 mt-2 cursor-pointer inline-block filter-clear col-span-1") %}
+      {% call icons::close("hidden text-slate-500 w-6 h-6 mt-2 cursor-pointer inline-block filter-clear col-span-1") %}
     </div>
 
     <div class="px-4 sm:px-6 lg:px-8">

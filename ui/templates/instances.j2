@@ -88,6 +88,7 @@
   {% endif %}
 
   <main>
+    {% call icons::search("text-slate-500 w-6 h-6 ml-2 mt-2 inline-block float-left") %}
     <div class="grid grid-cols-4">
       <input
         id="filter-instances"
@@ -95,7 +96,7 @@
         data-rows="#provisioned-instances tr"
         placeholder="Filter instances..."
         class="filterable bg-transparent border-0 text-white focus:ring-0 sm:text-sm sm:leading-6 col-span-1"/>
-      {% call icons::close("hidden text-white w-6 h-6 mt-2 cursor-pointer inline-block filter-clear col-span-1") %}
+      {% call icons::close("hidden text-slate-500 w-6 h-6 mt-2 cursor-pointer inline-block filter-clear col-span-1") %}
     </div>
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="flow-root">
@@ -152,7 +153,7 @@
                           href="/images/{{instance.image_uuid}}"
                           class="text-sm underline hover:text-gray-300 filter-subject">{{image}}</a>
                     </td>
-                    <td class="py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
+                    <td class="text-sm py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
                       {% if let Some(primary_ip) = instance.primary_ip %}
                         {{ primary_ip }}
                       {% else %}

@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html class="h-full bg-gray-900" lang="en">
 {% block head %}
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}{% endblock %}</title>
-        <link href="/css/main.css?v={{crate::VERSION}}-{{crate::GIT_COMMIT_SHORT}}" rel="stylesheet">
-        <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-        {% block scripts %}
-            <script src="/js/main.js?v={{crate::VERSION}}-{{crate::GIT_COMMIT_SHORT}}" type="module"></script>
-        {% endblock %}
-    </head>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link href="/css/main.css?v={{crate::VERSION}}-{{crate::GIT_COMMIT_SHORT}}" rel="stylesheet">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    {% block scripts %}
+      <script src="/js/main.js?v={{crate::VERSION}}-{{crate::GIT_COMMIT_SHORT}}" type="module"></script>
+    {% endblock %}
+  </head>
 {% endblock %}
 {% block body %}
-    <body class="h-full">
-        {% block content %}{% endblock %}
-    </body>
+  <body class="h-full">
+    {% block content %}{% endblock %}
+  </body>
 {% endblock %}
 </html>

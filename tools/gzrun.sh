@@ -5,11 +5,9 @@ trap "kill 0" EXIT
 mkdir -p /tmp/smartos_ui/chroot
 touch /tmp/smartos_ui/smartos_{ui,executor}.log
 
-# Get NIC with the admin tag
-nic_if=$(nictagadm list -p -d, | grep '^admin' | awk -F, '{print $3}')
-
-# Get IP address (This is needed for working redirect from http to https)
-ip=$(ipadm show-addr -p -o addr "$nic_if/_a" | awk -F/ '{print $1}')
+[[ -f /tmp/.sysinfo.parsable ]] || sysinfo -u
+source /tmp/.sysinfo.parsable
+ip="$Admin_IP"
 
 CERT_FILE=/tmp/smartos_ui/cert.pem
 KEY_FILE=/tmp/smartos_ui/key.pem
