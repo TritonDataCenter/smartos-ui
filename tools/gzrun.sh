@@ -26,7 +26,7 @@ LOG_FILE=/tmp/smartos_ui/smartos_executor.log \
 LOG_FILE=/tmp/smartos_ui/smartos_ui.log \
 	CERT_FILE="$CERT_FILE" \
 	KEY_FILE="$KEY_FILE" \
-	UI_BIND_HTTP_ADDRESS=0.0.0.0:8080 \
+	UI_BIND_HTTP_ADDRESS=$ip:8080 \
 	UI_BIND_HTTPS_ADDRESS=$ip:4443 \
 	CHROOT=/tmp/smartos_ui/chroot \
 	./smartos_ui &
