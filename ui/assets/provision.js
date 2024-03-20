@@ -291,13 +291,19 @@ fi
     return false
   }
 
-  editors.final.dispatch({
-    changes: {
-      from: 0,
-      to: editors.final.state.doc.length,
-      insert: JSON.stringify(final, null, 2)
-    }
-  })
+  // Only update the final properties editor if the final payload has actually
+  // changed. This prevents unecessary requests to validate the payload.
+  const payload = JSON.stringify(final, null, 2)
+
+  if (payload !== editors.final.state.doc.toString()) {
+    editors.final.dispatch({
+      changes: {
+        from: 0,
+        to: editors.final.state.doc.length,
+        insert: payload
+      }
+    })
+  }
 
   return true
 }
@@ -321,6 +327,32 @@ window.getFinalEditor = () => {
 
   return payload
 }
+
+window.finalPropertiesChanged = () => {
+  const $validationResult = $('.validation')
+  const $createButton = $('#create-button')
+  if ($validationResult) {
+    $validationResult.remove()
+    toggleCreateButton(false)
+  }
+}
+
+function toggleCreateButton (validPayload) {
+  const $createButton = $('#create-button')
+  if (validPayload) {
+    $createButton.disabled = false
+    $createButton.classList.remove('btn-disabled')
+    $createButton.title = ''
+  } else {
+    $createButton.disabled = true
+    $createButton.classList.add('btn-disabled')
+    $createButton.title = 'Properties not yet successfully validated.'
+  }
+}
+
+document.body.addEventListener('validationResult', ({ detail: { valid } }) => {
+  toggleCreateButton(valid)
+})
 
 export const setupProvisioningForm = () => {
   const $guidedTab = $('#guided-tab')
@@ -359,17 +391,32 @@ export const setupProvisioningForm = () => {
     const extensions = [basicSetup, json(), oneDark]
     if ($tab.dataset.readOnly) {
       extensions.push(EditorState.readOnly.of(true))
+      extensions.push(EditorView.updateListener.of(({ docChanged }) => {
+        if (docChanged) {
+          window.finalPropertiesChanged()
+        }
+      }))
     }
+
     editors[name] = new EditorView({
       extensions,
       parent
     })
   })
 
+  toggleCreateButton(false)
+
   if (editorsSetup) {
     // Don't need to re-create event handlers
     return
   }
+
+  $validateButton.addEventListener('click', () => {
+    if ($validationResult) {
+      $validationResult.remove()
+      toggleCreateButton(false)
+    }
+  })
 
   $finalButton.addEventListener('click', () => {
     if (updateEditors()) {

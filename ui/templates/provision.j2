@@ -638,6 +638,7 @@
       </button>
 
       <button
+        disabled
         id="create-button"
         type="button"
         data-hx-disabled-elt="this"
@@ -645,7 +646,7 @@
         data-hx-post="/provision"
         data-hx-target="#modal"
         data-hx-on:htmx:config-request="event.detail.parameters.payload = getFinalEditor()"
-        class="btn btn-primary">
+        class="btn btn-primary btn-disabled">
         <span class="htmx-indicator" id="create-loader">
           <span class="loader-icon">
             {% call icons::loading("h-6 w-6 inline pr-1") %}

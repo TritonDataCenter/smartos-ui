@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@tailwindcss/forms": "^0.5.7",
-    "@tpaul/codemirror6-json-rolledup": "^1.0.1",
+    "@tpaul/codemirror6-json-rolledup": "^1.0.2",
     "bunyan": "^1.8.15",
     "esbuild": "^0.20.0",
     "htmx.org": "^1.9.11",

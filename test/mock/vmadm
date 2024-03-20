@@ -111,14 +111,16 @@ const cmd = {
     setTimeout(() => setPayload(vm), 2000)
   },
   validate: ([subcmd]) => {
-    const { brand } = getPayload()
-    if (!brand) {
-      fatal('{"bad_brand": "undefined"}')
-    }
-    if (subcmd === 'create') {
-      return console.error(`VALID 'create' payload for ${brand} brand VMs.`)
-    }
-    fatal(`${subcmd} is currently unsupported in the mock scripts`)
+    setTimeout(() => {
+      const { brand } = getPayload()
+      if (!brand) {
+        fatal('{"bad_brand": "undefined"}')
+      }
+      if (subcmd === 'create') {
+        return console.error(`VALID 'create' payload for ${brand} brand VMs.`)
+      }
+      fatal(`${subcmd} is currently unsupported in the mock scripts`)
+    }, 3000)
   },
   delete: ([uuid]) => unlinkSync(join(root, `${uuid}.json`)),
   start: ([uuid]) => {

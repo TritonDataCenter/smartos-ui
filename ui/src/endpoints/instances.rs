@@ -704,6 +704,13 @@ pub async fn post_provision_validate(
         .await
         .map_err(to_internal_error)?;
 
+    let trigger = json!({
+        "validationResult": {
+            "valid": validation.success
+        }
+    })
+    .to_string();
+
     let template = ValidateTemplate {
         success: validation.success,
         message: validation.message,
@@ -711,6 +718,7 @@ pub async fn post_provision_validate(
     let template_result = template.render().map_err(to_internal_error)?;
     response
         .status(StatusCode::OK)
+        .header("HX-Trigger", trigger)
         .body(template_result.into())
         .map_err(to_internal_error)
 }

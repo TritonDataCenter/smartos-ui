@@ -1,9 +1,6 @@
 {%- import "macros/icons.j2" as icons -%}
 {% if success -%}
-  <div
-    data-hx-ext="remove-me"
-    data-remove-me="5s"
-    class="rounded border-l-4 border-green-400 bg-green-50 p-4">
+  <div class="validation rounded border-l-4 border-green-400 bg-green-50 p-4">
     <div class="flex">
       <div class="flex-shrink-0">
         {% call icons::ok("h-6 w-6 text-green-700") %}
@@ -16,10 +13,7 @@
     </div>
   </div>
 {% else -%}
-  <div
-    data-hx-ext="remove-me"
-    data-remove-me="5s"
-    class="rounded border-l-4 border-red-400 bg-red-50 p-4">
+  <div class="validation rounded border-l-4 border-red-400 bg-red-50 p-4">
     <div class="flex">
       <div class="flex-shrink-0">
         {% call icons::error("h-6 w-6 text-red-700") %}

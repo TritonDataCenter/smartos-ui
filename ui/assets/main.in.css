@@ -108,6 +108,16 @@
         @apply focus-visible:outline-amber-500;
     }
 
+    /*
+     * A disabled button
+     */
+    .btn-disabled {
+        @apply text-slate-400;
+        @apply bg-slate-500;
+        @apply hover:bg-slate-500;
+        @apply focus-visible:outline-slate-500;
+    }
+
     .sticky-header > th {
         @apply bg-gray-800;
     }
