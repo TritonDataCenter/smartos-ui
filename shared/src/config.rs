@@ -32,7 +32,7 @@ pub struct Config {
 
 impl Config {
     #[must_use]
-    pub fn new() -> Self {
+    pub fn new(log_file: &str) -> Self {
         let skip_privilege_drop =
             if let Ok(priv_drop) = env::var("SKIP_PRIVILEGE_DROP") {
                 !priv_drop.is_empty()
@@ -40,10 +40,8 @@ impl Config {
                 false
             };
         Self {
-            log_file: env::var("LOG_FILE").unwrap_or(format!(
-                "/var/log/{}.log",
-                option_env!("CARGO_PKG_NAME").unwrap_or("smartos_ui")
-            )),
+            log_file: env::var("LOG_FILE")
+                .unwrap_or(format!("/var/log/{}.log", log_file)),
             ui_bind_http_address: env::var("UI_BIND_HTTP_ADDRESS")
                 .unwrap_or_else(|_| String::from("127.0.0.1:8880")),
             ui_bind_https_address: env::var("UI_BIND_HTTPS_ADDRESS")
@@ -76,11 +74,5 @@ impl Config {
                 String::from("/usbkey/tls/smartos_ui_key.pem")
             }),
         }
-    }
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self::new()
     }
 }

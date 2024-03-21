@@ -330,7 +330,6 @@ window.getFinalEditor = () => {
 
 window.finalPropertiesChanged = () => {
   const $validationResult = $('.validation')
-  const $createButton = $('#create-button')
   if ($validationResult) {
     $validationResult.remove()
     toggleCreateButton(false)
@@ -412,6 +411,7 @@ export const setupProvisioningForm = () => {
   }
 
   $validateButton.addEventListener('click', () => {
+    const $validationResult = $('.validation')
     if ($validationResult) {
       $validationResult.remove()
       toggleCreateButton(false)

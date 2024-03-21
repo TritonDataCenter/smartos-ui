@@ -23,7 +23,7 @@ use dropshot::{
 async fn main() -> Result<(), String> {
     let name = option_env!("CARGO_PKG_NAME").unwrap_or("?");
     let version = option_env!("CARGO_PKG_VERSION").unwrap_or("v?");
-    let config = Config::new();
+    let config = Config::new(name);
 
     let config_logging = ConfigLogging::File {
         level: dropshot::ConfigLoggingLevel::Debug,

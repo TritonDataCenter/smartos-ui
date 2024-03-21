@@ -29,7 +29,7 @@ use tokio::try_join;
 #[tokio::main]
 async fn main() -> Result<(), String> {
     let name = option_env!("CARGO_PKG_NAME").unwrap_or("?");
-    let config = Config::new();
+    let config = Config::new(name);
 
     let request_body_max_bytes = config.request_body_max_bytes;
     let bind_https_address = config

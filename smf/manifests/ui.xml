@@ -1,19 +1,16 @@
 <?xml version="1.0"?>
 <!DOCTYPE service_bundle SYSTEM "/usr/share/lib/xml/dtd/service_bundle.dtd.1">
 <service_bundle type="manifest" name="smartos-ui">
-    <service name="smartos-ui" type="service" version="0.0.1">
+    <service name="system/smartdc/smartos-ui" type="service" version="0">
         <create_default_instance enabled="true"/>
         <single_instance/>
-        <dependency name="network" grouping="require_all" restart_on="error" type="service">
-            <service_fmri value="svc:/milestone/network:default"/>
-        </dependency>
-        <dependency name="filesystem" grouping="require_all" restart_on="error" type="service">
-            <service_fmri value="svc:/system/filesystem/local"/>
+        <dependency name='smartos-ui-executor' grouping='require_all' restart_on='none' type='service'>
+            <service_fmri value='svc:/system/smartdc/smartos-ui-executor:default'/>
         </dependency>
         <exec_method type="method" name="start" timeout_seconds="30" exec="/opt/smartos/ui/bin/ui.sh &amp;">
             <method_context working_directory="/opt/smartos/ui">
-                <!-- The executable will change user to nobody, chroot, and do privdrop -->
-                <method_credential user="root" group="root"/>
+                <!-- The executable will change user to nobody, chroot, and drop privs -->
+                <method_credential user="root" group="staff"/>
                 <method_environment>
                     <envvar name="RUST_BACKTRACE" value="full"/>
                 </method_environment>

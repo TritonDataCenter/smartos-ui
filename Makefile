@@ -144,10 +144,14 @@ release: all
 	cp $(TOP)/smf/manifests/executor.xml \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/smf/manifests
 
-	cp $(TOP)/smf/manifests/ui.sh \
+	cp $(TOP)/tools/ui.sh \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin
 
 	@mkdir -p $(RELSTAGEDIR)/root/var/log
+
+	touch $(RELSTAGEDIR)/root/var/log/smartos_ui.log
+	chmod g+rw $(RELSTAGEDIR)/root/var/log/smartos_ui.log
+	chown nobody $(RELSTAGEDIR)/root/var/log/smartos_ui.log
 
 	cd $(RELSTAGEDIR) && $(TAR) -I pigz -cf $(TOP)/$(RELEASE_TARBALL) root
 
