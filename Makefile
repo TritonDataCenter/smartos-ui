@@ -9,7 +9,7 @@
 # Copyright 2024 MNX Cloud, Inc.
 #
 
-NAME = smartos_ui
+NAME = smartos-ui
 RUST_TOOLCHAIN = 1.75.0
 
 ENGBLD_USE_BUILDIMAGE = false
@@ -21,10 +21,15 @@ include ./deps/eng/tools/mk/Makefile.defs
 include ./deps/eng/tools/mk/Makefile.rust.defs
 
 BUILD_PLATFORM = 20210826T002459Z
+RELEASE_TARBALL :=	$(NAME)-pkg-$(STAMP).tar.gz
+RELSTAGEDIR :=		/tmp/$(NAME)-$(STAMP)
+
+SMF_MANIFESTS =	smf/manifests/ui.xml smf/manifests/executor.xml
 
 J2_FILES ?= $(shell find $(TOP)/ui/templates -name *.j2)
 JS_FILES ?= $(wildcard $(TOP)/ui/assets/*.js)
 
+# Playwright is a dev dependency, and not needed to build css/js assets
 ui/assets/node_modules/@playwright/package.json:
 	cd ui/assets && npm install
 
@@ -69,10 +74,10 @@ fmt-js:
 	cd ui/assets && npm run fmt
 
 .PHONY: all
-all: release
+all: release_build
 
-.PHONY: release
-release: assets $(RS_FILES) | $(CARGO_EXEC)
+.PHONY: release_build
+release_build: assets $(RS_FILES) | $(CARGO_EXEC)
 	$(CARGO) build --release
 
 .PHONY: debug
@@ -118,6 +123,35 @@ playwright-native: ui/assets/node_modules/@playwright/package.json
 .PHONY: playwright-hvm
 playwright-hvm: ui/assets/node_modules/@playwright/package.json
 	cd ui/assets && npx playwright test --ui provision.hvm.spec.js
+
+.PHONY: release
+release: all
+	@echo "Building $(RELEASE_TARBALL)"
+
+	@mkdir -p $(RELSTAGEDIR)/root/opt/smartos/ui/bin \
+		$(RELSTAGEDIR)/root/opt/smartos/ui/chroot
+
+	cp $(CARGO_TARGET_DIR)/release/smartos_ui \
+		$(RELSTAGEDIR)/root/opt/smartos/ui/bin/ui
+
+	cp $(CARGO_TARGET_DIR)/release/smartos_executor \
+		$(RELSTAGEDIR)/root/opt/smartos/ui/bin/executor
+
+	@mkdir -p $(RELSTAGEDIR)/root/opt/smartos/ui/smf/manifests
+	cp $(TOP)/smf/manifests/ui.xml \
+		$(RELSTAGEDIR)/root/opt/smartos/ui/smf/manifests
+
+	cp $(TOP)/smf/manifests/executor.xml \
+		$(RELSTAGEDIR)/root/opt/smartos/ui/smf/manifests
+
+	cp $(TOP)/smf/manifests/ui.sh \
+		$(RELSTAGEDIR)/root/opt/smartos/ui/bin
+
+	@mkdir -p $(RELSTAGEDIR)/root/var/log
+
+	cd $(RELSTAGEDIR) && $(TAR) -I pigz -cf $(TOP)/$(RELEASE_TARBALL) root
+
+	@rm -rf $(RELSTAGEDIR)
 
 include ./deps/eng/tools/mk/Makefile.deps
 include ./deps/eng/tools/mk/Makefile.targ
