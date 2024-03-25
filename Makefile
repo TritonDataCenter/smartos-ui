@@ -130,7 +130,7 @@ playwright-hvm: ui/assets/node_modules/@playwright/package.json
 
 .PHONY: release
 release: all
-	@echo "Building $(NAME)-$(shell ./release/target/smartos_ui version).tar.gz"
+	@echo "Building $(NAME)-$(shell ./target/release/smartos_ui version).tar.gz"
 
 	@mkdir -p $(RELSTAGEDIR)/root/opt/smartos/ui/bin \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/chroot
@@ -141,27 +141,29 @@ release: all
 	cp $(CARGO_TARGET_DIR)/release/smartos_executor \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin/executor
 
-	@mkdir -p $(RELSTAGEDIR)/root/opt/smartos/ui/smf/manifests
-	cp $(TOP)/smf/manifests/ui.xml \
-		$(RELSTAGEDIR)/root/opt/smartos/ui/smf/manifests
+	@mkdir -p $(RELSTAGEDIR)/root/opt/custom
+	cp $(TOP)/smf/manifests/smartos-ui.xml \
+		$(RELSTAGEDIR)/root/opt/custom
 
-	cp $(TOP)/smf/manifests/executor.xml \
-		$(RELSTAGEDIR)/root/opt/smartos/ui/smf/manifests
+	cp $(TOP)/smf/manifests/smartos-ui-executor.xml \
+		$(RELSTAGEDIR)/root/opt/custom
 
 	cp $(TOP)/tools/ui.sh \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin
 
+	# TODO Remove when merged into smartos-live
 	cp $(TOP)/tools/uiadm.sh \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin/uiadm
 
 	@mkdir -p $(RELSTAGEDIR)/root/var/log
 
+	# UI process doesn't have permission to create this file
 	touch $(RELSTAGEDIR)/root/var/log/smartos_ui.log
 	chmod g+rw $(RELSTAGEDIR)/root/var/log/smartos_ui.log
 	chown nobody $(RELSTAGEDIR)/root/var/log/smartos_ui.log
 
 	cd $(RELSTAGEDIR) && $(TAR) -I pigz -cf \
-		$(TOP)/$(NAME)-$(shell ./release/target/smartos_ui version).tar.gz root
+		$(TOP)/$(NAME)-$(shell ./target/release/smartos_ui version).tar.gz root
 
 	@rm -rf $(RELSTAGEDIR)
 
