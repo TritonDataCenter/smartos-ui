@@ -12,6 +12,7 @@
 extern crate slog;
 
 use std::fs;
+use std::env;
 
 use smartos_shared::config::Config;
 
@@ -29,6 +30,15 @@ use tokio::try_join;
 #[tokio::main]
 async fn main() -> Result<(), String> {
     let name = option_env!("CARGO_PKG_NAME").unwrap_or("?");
+    let full_version = format!("{}-{}", VERSION, GIT_COMMIT_SHORT);
+
+    // If provided with a single argument of "version", print version and exit.
+    let mut args = env::args();
+    if args.len() > 1 && args.nth(1).is_some_and(|arg| arg == "version") {
+        println!("{}", full_version);
+        return Ok(())
+    }
+
     let config = Config::new(name);
 
     let request_body_max_bytes = config.request_body_max_bytes;
@@ -121,7 +131,7 @@ async fn main() -> Result<(), String> {
     // /config
     api.register(endpoints::config::get_gz_index)?;
 
-    info!(log, "{} v{}-{}", name, VERSION, GIT_COMMIT_SHORT);
+    info!(log, "{} v{}", name, full_version);
 
     let https_server = HttpServerStarter::new_with_tls(
         &ConfigDropshot {

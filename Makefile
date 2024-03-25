@@ -92,6 +92,10 @@ fmt: | $(CARGO_EXEC)
 clippy: | $(CARGO_EXEC)
 	$(CARGO) clippy
 
+.PHONY: version
+version:
+	@$(CARGO) metadata --format-version 1 --offline
+
 .PHONY: license-check
 license-check: | $(CARGO_EXEC)
 	$(CARGO) install cargo-license
@@ -126,7 +130,7 @@ playwright-hvm: ui/assets/node_modules/@playwright/package.json
 
 .PHONY: release
 release: all
-	@echo "Building $(RELEASE_TARBALL)"
+	@echo "Building $(NAME)-$(shell ./release/target/smartos_ui version).tar.gz"
 
 	@mkdir -p $(RELSTAGEDIR)/root/opt/smartos/ui/bin \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/chroot
@@ -147,13 +151,17 @@ release: all
 	cp $(TOP)/tools/ui.sh \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin
 
+	cp $(TOP)/tools/uiadm.sh \
+		$(RELSTAGEDIR)/root/opt/smartos/ui/bin/uiadm
+
 	@mkdir -p $(RELSTAGEDIR)/root/var/log
 
 	touch $(RELSTAGEDIR)/root/var/log/smartos_ui.log
 	chmod g+rw $(RELSTAGEDIR)/root/var/log/smartos_ui.log
 	chown nobody $(RELSTAGEDIR)/root/var/log/smartos_ui.log
 
-	cd $(RELSTAGEDIR) && $(TAR) -I pigz -cf $(TOP)/$(RELEASE_TARBALL) root
+	cd $(RELSTAGEDIR) && $(TAR) -I pigz -cf \
+		$(TOP)/$(NAME)-$(shell ./release/target/smartos_ui version).tar.gz root
 
 	@rm -rf $(RELSTAGEDIR)
 
