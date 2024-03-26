@@ -15,6 +15,8 @@
 # Copyright 2024 MNX Cloud, Inc.
 #
 
+set -euo pipefail
+
 # Default well-known source of SmartOS UI Images
 URL_PREFIX=https://us-central.manta.mnx.io/tpaul/public/smartos_ui/release
 #URL_PREFIX=https://us-central.manta.mnx.io/Joyent_Dev/public/SmartOS-UI
@@ -63,6 +65,7 @@ usage() {
 	eecho ""
 	eecho "    uiadm avail"
 	eecho "    uiadm install [version]"
+	eecho "    uiadm version"
 	eecho "    uiadm remove"
 	err ""
 }
@@ -94,27 +97,43 @@ generate_cert() {
 	fi
 }
 
+version() {
+	ui="$INSTALL_PREFIX/bin/ui"
+	if [[ -f "$ui" ]]; then
+		"$ui" version
+	else
+		echo "Not currently installed".	
+	fi
+}
+
+get_avail_versions() {
+	vcurl "${URL_PREFIX}/?limit=1000" | \
+	  json -ga name | \
+	  sed -e 's/^smartos\-ui\-//' -e 's/\.tar\.gz$//'
+	
+}
+
 avail() {
 	ui="$INSTALL_PREFIX/bin/ui"
 	if [[ -f "$ui" ]]; then
 		version="$("$ui" version)"
-		vcurl "${URL_PREFIX}/?limit=1000" | \
-		  json -ga name | grep -v "$version" | \
-		  sed -e 's/^smartos\-ui\-//' -e 's/\.tar\.gz$//'
+		get_avail_versions | grep -v "$version"
 	else
-		vcurl "${URL_PREFIX}/?limit=1000" | json -ga name | \
-		  sed -e 's/^smartos\-ui\-//' -e 's/\.tar\.gz$//'
+		get_avail_versions
 	fi
 }
 
 install() {
 	if [[ "$1" == "latest" ]]; then
-		version=$(avail | tail -n1)
+		ui="$INSTALL_PREFIX/bin/ui"
+		version="$(get_avail_versions | tail -n1)"
+		if [[ -f "$ui" ]] && [[ "$("$ui" version)" == "$version" ]]; then
+			err "Latest version is already installed: $version"
+		fi
+		echo "Installing latest version: $version"
 	else
 		version="$1"
 	fi
-
-	vecho "Installing ${URL_PREFIX}/smartos-ui-$version.tar.gz"
 
 	"${VCURL[@]}" "${URL_PREFIX}/smartos-ui-$version.tar.gz" | \
 		gtar --strip-components=1 -xzf - -C /
@@ -124,6 +143,8 @@ install() {
 	remove_services
 
 	install_services
+
+	# TODO wait for service to come online and/or for /ping to respond?
 
 	echo "Service running at https://$Admin_IP:4443"
 }
@@ -196,6 +217,11 @@ case $cmd in
 	install )
 		install "$@"
 		;;
+
+	version )
+		version "$@"
+		;;
+
 
 	remove )
 		remove "$@"
