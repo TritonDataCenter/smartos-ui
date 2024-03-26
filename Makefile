@@ -151,10 +151,6 @@ release: all
 	cp $(TOP)/tools/ui.sh \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin
 
-	# TODO Remove when merged into smartos-live
-	cp $(TOP)/tools/uiadm.sh \
-		$(RELSTAGEDIR)/root/opt/smartos/ui/bin/uiadm
-
 	@mkdir -p $(RELSTAGEDIR)/root/var/log
 
 	# UI process doesn't have permission to create this file

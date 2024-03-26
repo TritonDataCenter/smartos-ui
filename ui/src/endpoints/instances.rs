@@ -410,6 +410,7 @@ pub struct InstanceCreateTemplate {
     cpu_cap: String,
     user_script: String,
     cloudinit_data: String,
+    dns_domain: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -460,6 +461,8 @@ pub struct ProvisionQuery {
     user_script: String,
     #[serde(default)]
     cloudinit_data: String,
+    #[serde(default)]
+    dns_domain: String,
 }
 
 #[endpoint {
@@ -499,6 +502,7 @@ pub async fn get_provision(
         cpu_cap,
         user_script,
         cloudinit_data,
+        dns_domain,
     } = query.into_inner();
 
     let mut selected_brand = Brand::default();
@@ -577,6 +581,7 @@ pub async fn get_provision(
         cpu_cap,
         user_script,
         cloudinit_data,
+        dns_domain,
     };
     let result = template.render().map_err(to_internal_error)?;
     htmx_response(response, "/provision", result.into())

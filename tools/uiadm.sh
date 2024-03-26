@@ -45,15 +45,6 @@ err() {
 	exit 1
 }
 
-fatal() {
-	eecho
-	if [[ -n "$1" ]]; then
-		eecho "ERROR: $1"
-	fi
-	eecho
-	exit 2
-}
-
 # Only run in the global zone.
 [[ "$(zonename)" == "global" ]] || err "Must run uiadm in the global zone"
 
@@ -65,7 +56,6 @@ bootparams | grep -q "smartos=" || err "Must run on stand-alone SmartOS"
 
 [[ -f /tmp/.sysinfo.parsable ]] || sysinfo -u
 source /tmp/.sysinfo.parsable
-ip="$Admin_IP"
 
 usage() {
 	eecho ""
@@ -118,13 +108,23 @@ avail() {
 }
 
 install() {
-	vecho "${URL_PREFIX}/smartos-ui-$1.tar.gz"
-	"${VCURL[@]}" "${URL_PREFIX}/smartos-ui-$1.tar.gz" | \
+	if [[ "$1" == "latest" ]]; then
+		version=$(avail | tail -n1)
+	else
+		version="$1"
+	fi
+
+	vecho "Installing ${URL_PREFIX}/smartos-ui-$version.tar.gz"
+
+	"${VCURL[@]}" "${URL_PREFIX}/smartos-ui-$version.tar.gz" | \
 		gtar --strip-components=1 -xzf - -C /
+	
 	generate_cert
+
 	remove_services
+
 	install_services
-	# TODO: Poll /ping to wait for services to come up
+
 	echo "Service running at https://$Admin_IP:4443"
 }
 
@@ -171,9 +171,6 @@ remove() {
 	remove_services
 	rm -rf "$INSTALL_PREFIX"
 	rm -f "$EXECUTOR_MANIFEST" "$UI_MANIFEST"
-	# TODO:
-	# Clean up logs?
-	# Prompt to remove certs?
 }
 
 if [[ "$1" == "-v" ]]; then

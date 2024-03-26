@@ -11,8 +11,8 @@
 #[macro_use]
 extern crate slog;
 
-use std::fs;
 use std::env;
+use std::fs;
 
 use smartos_shared::config::Config;
 
@@ -36,7 +36,7 @@ async fn main() -> Result<(), String> {
     let mut args = env::args();
     if args.len() > 1 && args.nth(1).is_some_and(|arg| arg == "version") {
         println!("{}", full_version);
-        return Ok(())
+        return Ok(());
     }
 
     let config = Config::new(name);
