@@ -141,12 +141,12 @@ release: all
 	cp $(CARGO_TARGET_DIR)/release/smartos_executor \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin/executor
 
-	@mkdir -p $(RELSTAGEDIR)/root/opt/custom
+	@mkdir -p $(RELSTAGEDIR)/root/opt/custom/smf
 	cp $(TOP)/smf/manifests/smartos-ui.xml \
-		$(RELSTAGEDIR)/root/opt/custom
+		$(RELSTAGEDIR)/root/opt/custom/smf
 
 	cp $(TOP)/smf/manifests/smartos-ui-executor.xml \
-		$(RELSTAGEDIR)/root/opt/custom
+		$(RELSTAGEDIR)/root/opt/custom/smf
 
 	cp $(TOP)/tools/ui.sh \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin

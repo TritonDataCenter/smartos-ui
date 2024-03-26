@@ -100,6 +100,46 @@ Imported image ${uuid} (${manifest.name}@${manifest.version})`)
           },
           source: url
         })
+        // Doesn't strictly comply to: https://images.tritondatacenter.com/docs
+        list.push({
+          manifest: {
+            v: '2',
+            name: 'not-strict-minimal-64-trunk',
+            version: '20181018',
+            type: 'zone-dataset',
+            description: 'A 64-bit SmartOS image with just bootstrap packages installed. Ideal for users who want the smallest possible image upon which to build.',
+            homepage: 'https://docs.joyent.com/images/smartos/minimal',
+            published_at: '2018-10-18T10:21:26Z',
+            owner: '00000000-0000-0000-0000-000000000000',
+            public: 'false',
+            os: 'smartos',
+            urn: 'sdc:sdc:minimal-64-trunk:20181018',
+            files: [
+              {
+                compression: 'gzip',
+                sha1: '7eed76719f8f06bba785e3f883234ee3bd22afa6',
+                size: 28949229
+              }
+            ],
+            requirements: {
+              min_platform: {
+                '7.0': '20141030T081701Z'
+              },
+              networks: [
+                {
+                  name: 'net0',
+                  description: 'public'
+                }
+              ]
+            },
+            uuid: '91b904c0-d2bf-11e8-b86c-eb4613bea6ce',
+            tags: {
+              role: 'os',
+              group: 'minimal-64-trunk'
+            }
+          },
+          zpool: 'zones'
+        })
         console.log(JSON.stringify(list, null, 2))
       })
   }

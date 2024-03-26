@@ -23,9 +23,9 @@ URL_PREFIX=https://us-central.manta.mnx.io/tpaul/public/smartos_ui/release
 INSTALL_PREFIX=/opt/smartos/ui
 
 EXECUTOR_FMRI=svc:/system/smartdc/smartos-ui-executor
-EXECUTOR_MANIFEST=/opt/custom/smartos-ui-executor.xml
+EXECUTOR_MANIFEST=/opt/custom/smf/smartos-ui-executor.xml
 UI_FMRI=svc:/system/smartdc/smartos-ui
-UI_MANIFEST=/opt/custom/smartos-ui.xml
+UI_MANIFEST=/opt/custom/smf/smartos-ui.xml
 
 CERT_INSTALL_PREFIX=/usbkey/tls
 CERT_FILE=$CERT_INSTALL_PREFIX/smartos_ui_cert.pem
@@ -65,7 +65,7 @@ usage() {
 	eecho ""
 	eecho "    uiadm avail"
 	eecho "    uiadm install [version]"
-	eecho "    uiadm version"
+	eecho "    uiadm info"
 	eecho "    uiadm remove"
 	err ""
 }
@@ -97,10 +97,11 @@ generate_cert() {
 	fi
 }
 
-version() {
+info() {
 	ui="$INSTALL_PREFIX/bin/ui"
 	if [[ -f "$ui" ]]; then
-		"$ui" version
+		echo "Version: $("$ui" version)"
+		echo "URL: https://$Admin_IP:4443"
 	else
 		echo "Not currently installed".	
 	fi
@@ -140,31 +141,23 @@ install() {
 	
 	generate_cert
 
-	remove_services
-
 	install_services
-
-	# TODO wait for service to come online and/or for /ping to respond?
 
 	echo "Service running at https://$Admin_IP:4443"
 }
 
 vsvcadm() {
-	if [[ $VERBOSE -eq 1 ]]; then
-		# Verbose 
+	if [[ $VERBOSE -gt 0 ]]; then
 		svcadm -v "$@"
 	else
-		# Non-verbose
 		svcadm "$@"
 	fi
 }
 
 vsvccfg() {
-	if [[ $VERBOSE -eq 1 ]]; then
-		# Verbose 
+	if [[ $VERBOSE -gt 0 ]]; then
 		svccfg -v "$@"
 	else
-		# Non-verbose
 		svccfg "$@"
 	fi
 }
@@ -184,8 +177,21 @@ remove_services() {
 }
 
 install_services() {
-	vsvccfg import "$EXECUTOR_MANIFEST"
-	vsvccfg import "$UI_MANIFEST"
+	vecho "Checking if UI service is installed"
+	if svcs -H -o state "$UI_FMRI" &> /dev/null; then
+		vsvccfg import "$UI_MANIFEST"
+		vsvcadm restart "$UI_MANIFEST"
+	else
+		vsvccfg import "$UI_MANIFEST"
+	fi
+
+	vecho "Checking if UI Exectuor service is installed"
+	if svcs -H -o state "$EXECUTOR_FMRI" &> /dev/null; then
+		vsvccfg import "$EXECUTOR_MANIFEST"
+		vsvcadm restart "$EXECUTOR_MANIFEST"
+	else
+		vsvccfg import "$EXECUTOR_MANIFEST"
+	fi
 }
 
 remove() {
@@ -218,8 +224,8 @@ case $cmd in
 		install "$@"
 		;;
 
-	version )
-		version "$@"
+	info )
+		info "$@"
 		;;
 
 

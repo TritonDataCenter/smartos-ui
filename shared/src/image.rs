@@ -10,7 +10,7 @@
 
 use crate::instance::Brand;
 use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 use std::fmt::{Display, Error, Formatter};
 use std::str::FromStr;
@@ -31,6 +31,7 @@ pub struct ImageImportParams {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Manifest {
     /// Version of the manifest format/spec. The current value is 2.
+    #[serde(deserialize_with = "deserialize_into_u64")]
     pub v: u64,
 
     /// The unique identifier for a UUID. This is set by the IMGAPI server.
@@ -64,16 +65,14 @@ pub struct Manifest {
     pub error: Option<Value>,
 
     /// Indicates if this image is available for provisioning.
+    #[serde(default)]
     pub disabled: bool,
 
     /// Indicates if this image is publicly available.
+    #[serde(deserialize_with = "deserialize_into_bool")]
     pub public: bool,
 
     /// The date at which the image is activated. Set by the IMGAPI server.
-    // #[serde(
-    //     deserialize_with = "time::serde::iso8601::deserialize"
-    // )]
-    // deserialize_with = "time::serde::iso8601::deserialize" can't be use with Option, add deserializer
     pub published_at: Option<String>,
 
     /// The image type. One of "zone-dataset" for a ZFS dataset used to create
@@ -107,6 +106,7 @@ pub struct Manifest {
 
     /// A boolean indicating whether to generate passwords for the users in the
     /// "users" field. If not present, the default value is true.
+    #[serde(default)]
     pub generate_passwords: Option<bool>,
 
     /// A list of inherited directories (other than the defaults for the brand).
@@ -169,6 +169,54 @@ impl Manifest {
             public: false,
             channels: None,
         }
+    }
+}
+
+/// Some manifests in-the-wild have strings where integers are expected
+fn deserialize_into_u64<'de, D>(data: D) -> Result<u64, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let json_value: Value = Deserialize::deserialize(data)?;
+
+    match json_value {
+        Value::Number(number_value) => Ok(number_value.as_u64().unwrap_or(0)),
+        Value::String(string_value) => {
+            Ok(string_value.parse().map_err(|err| {
+                de::Error::custom(format!(
+                    "Failed parsing string to u64: {}",
+                    err
+                ))
+            })?)
+        }
+        _ => Err(de::Error::unknown_variant(
+            json_value.to_string().as_str(),
+            &["String", "u64"],
+        )),
+    }
+}
+
+/// Some manifests in-the-wild have strings where bools are expected
+fn deserialize_into_bool<'de, D>(data: D) -> Result<bool, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let json_value: Value = Deserialize::deserialize(data)?;
+
+    match json_value {
+        Value::Bool(bool_value) => Ok(bool_value),
+        Value::String(string_value) => {
+            let val = string_value.to_lowercase();
+            match val.as_str() {
+                "true" | "yes" => Ok(true),
+                "false" | "no" | "" => Ok(false),
+                _ => Err(de::Error::unknown_variant(
+                    val.as_str(),
+                    &["true", "false"],
+                )),
+            }
+        }
+        _ => Err(de::Error::custom("Expected either boolean or String")),
     }
 }
 
@@ -306,7 +354,6 @@ impl Image {
             }
         }
         match self.manifest.r#type {
-            // TODO: for images of a certain vintage should we default to KVM?
             Type::ZVol => Brand::Bhyve,
             Type::LXDataset => Brand::LX,
             Type::LXD => Brand::LXD,
@@ -326,7 +373,6 @@ impl Image {
             }
         }
         match &self.manifest.r#type {
-            // TODO: for images of a certain vintage should we default to KVM?
             Type::ZVol => {
                 if brand == &Brand::Bhyve || brand == &Brand::KVM {
                     return true;
@@ -361,8 +407,9 @@ impl Image {
         let mut values: Vec<Value> =
             serde_json::from_str(list).unwrap_or(Vec::new());
         for value in values.drain(..) {
-            if let Ok(image) = serde_json::from_value(value) {
-                images.push(image)
+            match serde_json::from_value(value) {
+                Ok(image) => images.push(image),
+                Err(err) => eprintln!("\n\nERROR: {:?}", err),
             }
         }
         images
