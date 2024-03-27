@@ -138,7 +138,7 @@ install() {
 
 	"${VCURL[@]}" "${URL_PREFIX}/smartos-ui-$version.tar.gz" | \
 		gtar --strip-components=1 -xzf - -C /
-	
+
 	generate_cert
 
 	install_services
@@ -180,7 +180,7 @@ install_services() {
 	vecho "Checking if UI service is installed"
 	if svcs -H -o state "$UI_FMRI" &> /dev/null; then
 		vsvccfg import "$UI_MANIFEST"
-		vsvcadm restart "$UI_MANIFEST"
+		vsvcadm restart "$UI_FMRI"
 	else
 		vsvccfg import "$UI_MANIFEST"
 	fi
@@ -188,7 +188,7 @@ install_services() {
 	vecho "Checking if UI Exectuor service is installed"
 	if svcs -H -o state "$EXECUTOR_FMRI" &> /dev/null; then
 		vsvccfg import "$EXECUTOR_MANIFEST"
-		vsvcadm restart "$EXECUTOR_MANIFEST"
+		vsvcadm restart "$EXECUTOR_FMRI"
 	else
 		vsvccfg import "$EXECUTOR_MANIFEST"
 	fi
