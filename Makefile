@@ -105,6 +105,10 @@ license-check: | $(CARGO_EXEC)
 update: | $(CARGO_EXEC)
 	$(CARGO) update
 
+.PHONY: doc
+doc: | $(CARGO_EXEC)
+	$(CARGO) doc --open
+
 .PHONY: devrun
 devrun: debug
 	./tools/devrun.sh

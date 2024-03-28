@@ -53,6 +53,7 @@ async fn main() -> Result<(), String> {
     let chroot = config.chroot.clone();
     let skip_privilege_drop = config.skip_privilege_drop;
 
+    // Note that we need to read the TLS key and cert before dropping privileges
     let config_tls = Some(ConfigTls::AsBytes {
         certs: fs::read(&config.cert_file).unwrap_or_else(|_| {
             panic!("Failed reading TLS certificate at {}", config.key_file)
@@ -83,6 +84,8 @@ async fn main() -> Result<(), String> {
     }
 
     let mut api = ApiDescription::new();
+
+    // Endpoint registration
 
     // /
     api.register(endpoints::get_index)?;
@@ -133,6 +136,7 @@ async fn main() -> Result<(), String> {
 
     info!(log, "{} v{}", name, full_version);
 
+    // Start the HTTPS Server
     let https_server = HttpServerStarter::new_with_tls(
         &ConfigDropshot {
             bind_address: bind_https_address,
@@ -147,9 +151,9 @@ async fn main() -> Result<(), String> {
     .map_err(|error| format!("failed to start https server: {}", error))?
     .start();
 
+    // Register endpoints for an HTTP server that exists solely to redirect
+    // HTTP requests from http://x.x.x.x/ to https://x.x.x.x/login
     let mut redir = ApiDescription::new();
-
-    // redirect / and /login requests on http to https
     redir.register(endpoints::get_tls_index)?;
     redir.register(endpoints::get_tls_login_index)?;
 

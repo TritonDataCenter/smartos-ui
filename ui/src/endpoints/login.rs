@@ -8,7 +8,7 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use crate::{endpoints::Context, session::Session};
+use crate::{endpoints::Context, session};
 
 use smartos_shared::http_server::to_internal_error;
 
@@ -43,7 +43,7 @@ path = "/logout"
 pub async fn get_logout(
     ctx: RequestContext<Context>,
 ) -> Result<HttpResponseTemporaryRedirect, HttpError> {
-    Session::destroy(&ctx)
+    session::destroy(&ctx)
 }
 
 /// Authenticates POSTed user/pass, created a session and redirects to /dashboard
@@ -68,7 +68,7 @@ pub async fn post_index(
             ctx.context().executor.get_images(),
         )
         .map_err(to_internal_error)?;
-        return Session::create(&ctx, user);
+        return session::create(&ctx, user);
     }
     let login = LoginTemplate {
         message: Some("Invalid username or password"),

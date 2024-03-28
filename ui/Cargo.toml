@@ -1,6 +1,6 @@
 [package]
 name = "smartos_ui"
-version = "0.1.6"
+version = "0.1.7"
 homepage = "https://github.com/tritondatacenter/smartos_ui"
 description = "SmartOS UI"
 edition = "2021"
@@ -11,6 +11,7 @@ authors = [
 ]
 
 [dependencies]
+smartos_shared = { path = "../shared" }
 tokio = "1.35"
 hyper = "0.14"
 dropshot = "0.10"
@@ -22,14 +23,14 @@ nanoid = "0.4"
 askama = "0.12"
 reqwest = { version = "0.11", features = ["json"] }
 privdrop = "0.5"
-uuid = { version = "1.7.0", features = ["serde", "v4"] }
-smartos_shared = { path = "../shared" }
-http = "0.2.11"
-pwhash = "1.0.0"
-url = { version = "2.5.0", features = ["serde"] }
+uuid = { version = "1.7", features = ["serde", "v4"] }
+http = "0.2"
+pwhash = "1.0"
+url = { version = "2.5", features = ["serde"] }
+time = "0.3"
 
 [target.'cfg(target_os = "illumos")'.dependencies]
-illumos-priv = "0.2.0"
+illumos-priv = "0.2"
 
 [target.'cfg(target_os = "illumos")'.dependencies.reqwest]
 version = "0.11"

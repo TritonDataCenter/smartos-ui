@@ -13,18 +13,24 @@ use std::str::FromStr;
 
 use crate::endpoints::{
     filters, htmx_response, redirect_login, AsJson, Context, NotificationKind,
-    NotificationTemplate, PathParams,
+    NotificationTemplate, PathParams
 };
-use crate::session::Session;
+use crate::session;
 
-use smartos_shared::http_server::to_bad_request;
-use smartos_shared::http_server::to_internal_error;
-use smartos_shared::image::{Image, Type as ImageType};
-use smartos_shared::instance::{
-    Brand, Info, Instance, InstancePayload, InstanceView, PayloadContainer,
+use smartos_shared::{
+    http_server::to_bad_request,
+    http_server::to_internal_error,
+    image::Image,
+    image::Type as ImageType,
+    nictag::NicTag,
+    sysinfo::Sysinfo,
+    instance::Brand,
+    instance::Info,
+    instance::Instance,
+    instance::InstancePayload,
+    instance::InstanceView,
+    instance::PayloadContainer
 };
-use smartos_shared::nictag::NicTag;
-use smartos_shared::sysinfo::Sysinfo;
 
 use askama::Template;
 use dropshot::{endpoint, HttpError, Path, Query, RequestContext, TypedBody};
@@ -55,7 +61,7 @@ pub async fn get_by_id(
     query_params: Query<AsJson>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if !Session::is_valid(&ctx) {
+    if !session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
     let id = path_params.into_inner().id;
@@ -123,7 +129,7 @@ pub async fn delete_by_id(
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if !Session::is_valid(&ctx) {
+    if !session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
 
@@ -179,7 +185,7 @@ pub async fn start_by_id(
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if !Session::is_valid(&ctx) {
+    if !session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
 
@@ -225,7 +231,7 @@ pub async fn stop_by_id(
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if !Session::is_valid(&ctx) {
+    if !session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
 
@@ -291,7 +297,7 @@ pub async fn get_index(
     query_params: Query<InstanceListParams>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if !Session::is_valid(&ctx) {
+    if !session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
     let mut instances: Vec<(InstanceView, String)> = Vec::new();
@@ -474,7 +480,7 @@ pub async fn get_provision(
     query: Query<ProvisionQuery>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if !Session::is_valid(&ctx) {
+    if !session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
     let mut selected_image = None;
@@ -612,7 +618,7 @@ pub async fn post_provision(
     request_body: TypedBody<InstancePayload>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if !Session::is_valid(&ctx) {
+    if !session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
 
@@ -697,7 +703,7 @@ pub async fn post_provision_validate(
     request_body: TypedBody<InstancePayload>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if !Session::is_valid(&ctx) {
+    if !session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
 

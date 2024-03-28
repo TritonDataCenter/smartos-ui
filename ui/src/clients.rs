@@ -8,6 +8,9 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
+//! HTTP Clients that are accessible from the [dropshot::RequestContext] struct
+//! provided to each endpoint handler.
+
 use std::fmt;
 
 use smartos_shared::{
@@ -21,6 +24,8 @@ use reqwest::{Client as HTTPClient, RequestBuilder, Response};
 use serde_json::to_string as stringify;
 use uuid::Uuid;
 
+/// A generic handler that consists of either an HTTP request error or a JSON
+/// serialization or deserialization error.
 #[derive(Debug)]
 pub enum RequestError {
     ReqwestError(reqwest::Error),
@@ -49,6 +54,7 @@ impl fmt::Display for RequestError {
     }
 }
 
+/// HTTP Client for interacting with vminfod
 pub struct VMInfodClient {
     http: HTTPClient,
     url: String,
@@ -67,6 +73,7 @@ impl VMInfodClient {
     pub fn get(&self, path: &str) -> RequestBuilder {
         self.http.get(format!("{}/{path}", self.url))
     }
+
 
     pub async fn get_instances(
         &self,
@@ -122,6 +129,8 @@ impl VMInfodClient {
     }
 }
 
+/// HTTP Client for interacting with the executor service which executes
+/// programs on behalf of the UI process.
 pub struct ExecutorClient {
     http: HTTPClient,
     url: String,

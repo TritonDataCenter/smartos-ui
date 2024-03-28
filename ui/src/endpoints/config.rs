@@ -9,7 +9,7 @@
  */
 
 use crate::endpoints::{htmx_response, redirect_login, Context};
-use crate::session::Session;
+use crate::session;
 
 use smartos_shared::http_server::to_internal_error;
 
@@ -32,7 +32,7 @@ pub async fn get_gz_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if !Session::is_valid(&ctx) {
+    if !session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
 

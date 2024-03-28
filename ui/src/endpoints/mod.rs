@@ -20,7 +20,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use crate::clients::{ExecutorClient, VMInfodClient};
-use crate::session::{Session, UserSession};
+use crate::session::{self, Session};
 
 use smartos_shared::{config::Config, http_server::to_internal_error};
 
@@ -67,11 +67,11 @@ pub struct NotificationTemplate {
     subject: String,
     message: String,
 
-    /// Parsed by: https://htmx.org/api/#parseInterval
-    /// None == no timeout, must be closed manually
+    /// Parsed by: <https://htmx.org/api/#parseInterval>
+    /// None == no timeout, notification must be closed manually
     timeout: Option<String>,
 
-    /// If Some, will load the specified path after showing the notification
+    /// If [Some], will load the specified path after showing the notification
     redirect: Option<String>,
 
     /// The path where the notification was created
@@ -97,7 +97,7 @@ pub struct AsJson {
 /// user sessions
 pub struct Context {
     pub config: Config,
-    pub sessions: Arc<Mutex<HashMap<String, UserSession>>>,
+    pub sessions: Arc<Mutex<HashMap<String, Session>>>,
     pub executor: ExecutorClient,
     pub vminfod: VMInfodClient,
 }
@@ -105,7 +105,7 @@ pub struct Context {
 impl Context {
     #[must_use]
     pub fn new(config: Config) -> Self {
-        let map: HashMap<String, UserSession> = HashMap::new();
+        let map: HashMap<String, Session> = HashMap::new();
         let exec_bind_address = config.exec_bind_address.clone();
         let vminfo_bind_address = config.vminfo_bind_address.clone();
         Self {
@@ -190,7 +190,8 @@ pub async fn get_tls_login_index(
     http_response_temporary_redirect(ctx.context().to_string())
 }
 
-/// Redirect / to either /dashboard (if user has a valid session) or /login
+/// Redirect a request to "/" to either "/dashboard" (if user has a valid
+/// session) or "/login" (if user doesn't have a valid session.)
 #[endpoint {
 method = GET,
 path = "/"
@@ -199,13 +200,17 @@ pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<HttpResponseSeeOther, HttpError> {
     let location =
-        if Session::is_valid(&ctx) { "/dashboard" } else { "/login" };
+        if session::is_valid(&ctx) { "/dashboard" } else { "/login" };
     http_response_see_other(location.to_string())
 }
 
 #[derive(Serialize, JsonSchema)]
 pub struct PingResponse {
+    /// Result of pinging the executor HTTP server, [true] if a 200 response was
+    /// received
     pub executor: bool,
+    /// Result of pinging the vminfod HTTP server, [true] if a 200 response was
+    /// received
     pub vminfod: bool,
 }
 

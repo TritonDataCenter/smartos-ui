@@ -10,12 +10,16 @@
 
 use crate::endpoints::{
     filters, htmx_response, redirect_login, AsJson, Context, NotificationKind,
-    NotificationTemplate, PathParams,
+    NotificationTemplate, PathParams
 };
-use crate::session::Session;
+use crate::session;
 
-use smartos_shared::http_server::{to_internal_error, GenericResponse};
-use smartos_shared::image::{Image, ImageImportParams};
+use smartos_shared::{
+    http_server::to_internal_error,
+    http_server::GenericResponse,
+    image::Image,
+    image::ImageImportParams
+};
 
 use askama::Template;
 use dropshot::{endpoint, HttpError, Path, Query, RequestContext, TypedBody};
@@ -38,7 +42,7 @@ pub async fn get_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if !Session::is_valid(&ctx) {
+    if !session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
 
@@ -69,7 +73,7 @@ pub async fn get_by_id(
     query_params: Query<AsJson>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if !Session::is_valid(&ctx) {
+    if !session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
 
@@ -115,7 +119,7 @@ pub async fn delete_by_id(
     path_params: Path<PathParams>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if !Session::is_valid(&ctx) {
+    if !session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
     let id = path_params.into_inner().id;
@@ -178,7 +182,7 @@ pub async fn get_import_index(
     ctx: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if !Session::is_valid(&ctx) {
+    if !session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
 
@@ -218,7 +222,7 @@ pub async fn post_import_index(
     request_body: TypedBody<ImageImportParams>,
 ) -> Result<Response<Body>, HttpError> {
     let response = Response::builder();
-    if !Session::is_valid(&ctx) {
+    if !session::is_valid(&ctx) {
         return redirect_login(response, &ctx);
     }
 
