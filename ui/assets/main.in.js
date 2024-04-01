@@ -22,7 +22,7 @@ removeMe(htmx)
 
 document.addEventListener('DOMContentLoaded', () => {
   // Handle closing modals
-  $('#modal').addEventListener('click', e => {
+  document.body.addEventListener('click', e => {
     if (e.target.classList.contains('modal-close') ||
       e.target.closest('.modal-close')) {
       $('#modal-content').classList.add('hidden')
