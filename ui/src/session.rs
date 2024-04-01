@@ -46,7 +46,7 @@ const SESSION_ID_LENGTH: usize = 64;
 const COOKIE_ATTRS: &str = "HttpOnly; SameSite=Strict; Secure; Path=/";
 
 /// How many hours a session/cookie is valid
-const SESSION_HOURS: u8 = 1;
+const SESSION_HOURS: u8 = 8;
 
 #[derive(Serialize)]
 /// Holds active Session information that can be access in the [RequestContext]
@@ -110,10 +110,7 @@ pub fn create(
                 "Set-Cookie",
                 format!(
                     "{}={}; {}; Expires={}",
-                    COOKIE_NAME,
-                    &session_id,
-                    COOKIE_ATTRS,
-                    expires_formatted
+                    COOKIE_NAME, &session_id, COOKIE_ATTRS, expires_formatted
                 ),
             )
             .header("Location", "/dashboard")
@@ -140,9 +137,7 @@ pub fn destroy(
                     "{}; {}; Max-Age=0;",
                     session_id, COOKIE_ATTRS
                 ))
-                .map_err(|e| {
-                    HttpError::for_bad_request(None, e.to_string())
-                })?;
+                .map_err(|e| HttpError::for_bad_request(None, e.to_string()))?;
                 headers.insert("Set-Cookie", cookie);
             }
         }

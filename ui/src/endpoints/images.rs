@@ -10,15 +10,13 @@
 
 use crate::endpoints::{
     filters, htmx_response, redirect_login, AsJson, Context, NotificationKind,
-    NotificationTemplate, PathParams
+    NotificationTemplate, PathParams,
 };
 use crate::session;
 
 use smartos_shared::{
-    http_server::to_internal_error,
-    http_server::GenericResponse,
-    image::Image,
-    image::ImageImportParams
+    http_server::to_internal_error, http_server::GenericResponse, image::Image,
+    image::ImageImportParams,
 };
 
 use askama::Template;

@@ -13,23 +13,15 @@ use std::str::FromStr;
 
 use crate::endpoints::{
     filters, htmx_response, redirect_login, AsJson, Context, NotificationKind,
-    NotificationTemplate, PathParams
+    NotificationTemplate, PathParams,
 };
 use crate::session;
 
 use smartos_shared::{
-    http_server::to_bad_request,
-    http_server::to_internal_error,
-    image::Image,
-    image::Type as ImageType,
-    nictag::NicTag,
-    sysinfo::Sysinfo,
-    instance::Brand,
-    instance::Info,
-    instance::Instance,
-    instance::InstancePayload,
-    instance::InstanceView,
-    instance::PayloadContainer
+    http_server::to_bad_request, http_server::to_internal_error, image::Image,
+    image::Type as ImageType, instance::Brand, instance::Info,
+    instance::Instance, instance::InstancePayload, instance::InstanceView,
+    instance::PayloadContainer, nictag::NicTag, sysinfo::Sysinfo,
 };
 
 use askama::Template;

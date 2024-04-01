@@ -8,7 +8,7 @@
  * Copyright 2024 MNX Cloud, Inc.
  */
 
-use crate::endpoints::{htmx_response, redirect_login, Context, filters};
+use crate::endpoints::{filters, htmx_response, redirect_login, Context};
 use crate::session;
 
 use smartos_shared::{http_server::to_internal_error, sysinfo::Sysinfo};

@@ -16,12 +16,11 @@
   <div class="mt-6">
     <button
       type="button"
-      href="/import"
+      data-skip-swap-check="true"
       data-hx-get="/import"
       data-hx-target="#main"
       data-hx-select="#content"
       data-hx-indicator="#import-main-loader"
-      data-hx-disabled-elt="this"
       title="Import Image"
       class="btn btn-primary">
         {% call icons::import("h-6 w-6 inline pr-1") %}

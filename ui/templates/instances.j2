@@ -88,26 +88,30 @@
   {% endif %}
 
   <main>
-    {% call icons::search("text-slate-500 w-6 h-6 ml-2 mt-2 inline-block float-left") %}
-    <div class="grid grid-cols-4">
-      <input
-        id="filter-instances"
-        type="search"
-        data-rows="#provisioned-instances tr"
-        placeholder="Filter instances..."
-        class="filterable bg-transparent border-0 text-white focus:ring-0 sm:text-sm sm:leading-6 col-span-1"/>
-      {% call icons::close("hidden text-slate-500 w-6 h-6 mt-2 cursor-pointer inline-block filter-clear col-span-1") %}
-    </div>
+    {% if instances.len() > 0 %}
+      {% call icons::search("text-slate-500 w-6 h-6 ml-2 mt-2 inline-block float-left") %}
+      <div class="grid grid-cols-4">
+        <input
+          id="filter-instances"
+          type="search"
+          data-rows="#provisioned-instances tr"
+          placeholder="Filter instances..."
+          class="filterable bg-transparent border-0 text-white focus:ring-0 sm:text-sm sm:leading-6 col-span-1"/>
+        {% call icons::close("hidden text-slate-500 w-6 h-6 mt-2 cursor-pointer inline-block filter-clear col-span-1") %}
+      </div>
+    {% endif %}
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="flow-root">
         <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
           <div
             id="instance-list"
-            data-hx-get="/instances?reload=true"
-            data-hx-trigger="every 7s"
-            data-hx-target="#instance-list"
-            data-hx-select="#instance-list"
-            data-hx-swap="outerHTML"
+            {% if instances.len() > 0 %}
+              data-hx-get="/instances?reload=true"
+              data-hx-trigger="every 7s"
+              data-hx-target="#instance-list"
+              data-hx-select="#instance-list"
+              data-hx-swap="outerHTML"
+            {% endif %}
             class="inline-block min-w-full py-2 align-middle">
             {% if image_count < 1 %}
               {% include "include/no_images.j2" %}

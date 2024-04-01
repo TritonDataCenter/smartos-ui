@@ -71,8 +71,8 @@ usage() {
 }
 
 # Defined as a variable in case we need to add parameters (like -o) to it.
-CURL=(curl -s -f)
-VCURL=(curl -f --progress-bar)
+CURL=(curl -k -s -f)
+VCURL=(curl -k -f --progress-bar)
 
 vcurl() {
 	if [[ $VERBOSE -gt 0 ]]; then

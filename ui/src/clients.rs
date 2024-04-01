@@ -74,7 +74,6 @@ impl VMInfodClient {
         self.http.get(format!("{}/{path}", self.url))
     }
 
-
     pub async fn get_instances(
         &self,
     ) -> Result<Vec<InstanceView>, reqwest::Error> {

@@ -97,8 +97,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // kind of situations but the "Available Images" button is currently the only
   // place this occurs.
   htmx.on('htmx:beforeSwap', e => {
-    const { detail: { pathInfo: { requestPath } } } = e
-    if (requestPath === '/import' && document.location.pathname !== '/images') {
+    const { detail: { pathInfo, requestConfig } } = e
+
+    // On the first run when no images are yet available, the "Import Images"
+    // buttons are excempt from this check (else they don't work)
+    if (requestConfig.elt.dataset && requestConfig.elt.dataset.skipSwapCheck) {
+      return
+    }
+
+    if (pathInfo.requestPath === '/import' &&
+      document.location.pathname !== '/images') {
       e.preventDefault()
     }
   })

@@ -31,15 +31,17 @@
   </header>
 
   <main>
-    {% call icons::search("text-slate-500 w-6 h-6 ml-2 mt-2 inline-block float-left") %}
-    <div class="grid grid-cols-4">
-      <input
-        type="search"
-        data-rows="#installed-images tr"
-        placeholder="Filter installed images..."
-        class="filterable bg-transparent border-0 text-white focus:ring-0 sm:text-sm sm:leading-6 col-span-1"/>
-      {% call icons::close("hidden text-slate-500 w-6 h-6 mt-2 cursor-pointer inline-block filter-clear col-span-1") %}
-    </div>
+    {% if !images.is_empty() %}
+      {% call icons::search("text-slate-500 w-6 h-6 ml-2 mt-2 inline-block float-left") %}
+      <div class="grid grid-cols-4">
+        <input
+          type="search"
+          data-rows="#installed-images tr"
+          placeholder="Filter installed images..."
+          class="filterable bg-transparent border-0 text-white focus:ring-0 sm:text-sm sm:leading-6 col-span-1"/>
+        {% call icons::close("hidden text-slate-500 w-6 h-6 mt-2 cursor-pointer inline-block filter-clear col-span-1") %}
+      </div>
+    {% endif %}
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="flow-root">
         <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
