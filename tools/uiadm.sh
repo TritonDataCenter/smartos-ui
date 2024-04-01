@@ -15,7 +15,7 @@
 # Copyright 2024 MNX Cloud, Inc.
 #
 
-set -euo pipefail
+set -o pipefail
 
 # Default well-known source of SmartOS UI Images
 URL_PREFIX=https://us-central.manta.mnx.io/tpaul/public/smartos_ui/release
@@ -75,7 +75,7 @@ CURL=(curl -s -f)
 VCURL=(curl -f --progress-bar)
 
 vcurl() {
-	if [[ $VERBOSE -eq 1 ]]; then
+	if [[ $VERBOSE -gt 0 ]]; then
 		# Verbose curls show progress.
 		"${VCURL[@]}" "$@"
 	else
@@ -111,7 +111,6 @@ get_avail_versions() {
 	vcurl "${URL_PREFIX}/?limit=1000" | \
 	  json -ga name | \
 	  sed -e 's/^smartos\-ui\-//' -e 's/\.tar\.gz$//'
-	
 }
 
 avail() {
@@ -125,6 +124,7 @@ avail() {
 }
 
 install() {
+  current_pi=$(sysinfo | json "Live Image")
 	if [[ "$1" == "latest" ]]; then
 		ui="$INSTALL_PREFIX/bin/ui"
 		version="$(get_avail_versions | tail -n1)"
@@ -134,6 +134,13 @@ install() {
 		echo "Installing latest version: $version"
 	else
 		version="$1"
+	fi
+
+	minimium_pi=$("${CURL[@]}" -I -o /dev/null -w '%header{m-minimum-pi}' \
+	  "${URL_PREFIX}/smartos-ui-$version.tar.gz")
+
+	if [[ "$current_pi" < "$minimium_pi" ]]; then
+		err "Version $version requires a platform image of $minimium_pi or newer"
 	fi
 
 	"${VCURL[@]}" "${URL_PREFIX}/smartos-ui-$version.tar.gz" | \
@@ -227,7 +234,6 @@ case $cmd in
 	info )
 		info "$@"
 		;;
-
 
 	remove )
 		remove "$@"
