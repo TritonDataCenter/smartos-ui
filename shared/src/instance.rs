@@ -69,32 +69,18 @@ pub struct Generic {
     pub owner_uuid: Uuid,
     pub dns_domain: Option<String>,
     pub limit_priv: String,
-    pub max_locked_memory: u64,
     pub max_lwps: u64,
-    pub max_msg_ids: u64,
-    pub max_sem_ids: u64,
-    pub max_shm_ids: u64,
-    pub max_shm_memory: u64,
+    pub max_shm_memory: Option<u64>,
     pub max_swap: u64,
-    pub server_uuid: Uuid,
     pub zfs_filesystem: String,
     pub zfs_io_priority: u64,
-    pub zfs_root_recsize: u64,
-    pub zone_state: String,
-    pub zonename: Uuid,
     pub zonepath: String,
-    pub zpool: String,
     pub create_timestamp: String,
     pub last_modified: String,
     pub platform_buildstamp: String,
     pub nics: Vec<Nic>,
     #[serde(default = "default_u64")]
     pub cpu_cap: u64,
-    // snapshots
-    // tags
-    // routes
-    // internal_metadata
-    // customer_metadata
 
     // if started
     pub boot_timestamp: Option<String>,

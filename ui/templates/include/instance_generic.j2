@@ -30,7 +30,11 @@
 
         {% call input::text_view("Privileges", instance.generic.limit_priv) %}
         {% call input::text_view("Max Lightweight Processes", instance.generic.max_lwps) %}
-        {% call input::text_view("Max Shared Memory", instance.generic.max_shm_memory) %}
+
+        {% if let Some(max_shm_memory) = instance.generic.max_shm_memory %}
+          {% call input::text_view("Max Shared Memory", max_shm_memory) %}
+        {% endif %}
+
         {% call input::text_view("Max Swap", instance.generic.max_swap) %}
         {% call input::text_view("ZFS Filesystem", instance.generic.zfs_filesystem) %}
         {% call input::text_view("ZFS IO Priority", instance.generic.zfs_io_priority) %}
