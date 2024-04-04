@@ -110,7 +110,8 @@ info() {
 get_avail_versions() {
 	vcurl "${URL_PREFIX}/?limit=1000" | \
 	  json -ga name | \
-	  sed -e 's/^smartos\-ui\-//' -e 's/\.tar\.gz$//'
+	  sed -e 's/^smartos\-ui\-//' -e 's/\.tar\.gz$//' | \
+	  sort -t '.' -n -k1,1 -k2,2 -k3,3
 }
 
 avail() {
