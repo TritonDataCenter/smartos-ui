@@ -153,9 +153,13 @@
                     </td>
                     <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8 filter-subject">{{instance.brand}}</td>
                     <td class="py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
+                      {% if image == "00000000-0000-0000-0000-000000000000" %}
+                        Custom
+                      {% else %}
                         <a
                           href="/images/{{instance.image_uuid}}"
                           class="text-sm underline hover:text-gray-300 filter-subject">{{image}}</a>
+                      {% endif %}
                     </td>
                     <td class="text-sm py-4 pl-0 pr-4 sm:table-cell sm:pr-8 text-gray-400">
                       {% if let Some(primary_ip) = instance.primary_ip %}

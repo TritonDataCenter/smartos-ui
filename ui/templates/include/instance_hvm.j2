@@ -22,36 +22,40 @@
 
         {% if let Some(boot) = disk.boot %}
           {% if boot %}
-            <div class="sm:col-span-1">
-              <label for="disk_{{loop.index}}_image_uuid" class="block text-sm font-medium leading-6 text-white">
-                Image
-              </label>
-              <div class="mt-2">
-                <a
-                  class="inline-block py-1.5 underline decoration-solid text-blue-600 hover:text-blue-500"
-                  href="/images/{{self.image.manifest.uuid}}"
-                  {% if let Some(description) = self.image.manifest.description %}
-                    title="{{description}}"
-                  {% endif %}>
-                  {{self.image.manifest.name}}@{{self.image.manifest.version}}
-                </a>
+            {% if let Some(image) = image %}
+              <div class="sm:col-span-1">
+                <label for="disk_{{loop.index}}_image_uuid" class="block text-sm font-medium leading-6 text-white">
+                  Image
+                </label>
+                <div class="mt-2">
+                  <a
+                    class="inline-block py-1.5 underline decoration-solid text-blue-600 hover:text-blue-500"
+                    href="/images/{{image.manifest.uuid}}"
+                    {% if let Some(description) = image.manifest.description %}
+                      title="{{description}}"
+                    {% endif %}>
+                    {{image.manifest.name}}@{{image.manifest.version}}
+                  </a>
+                </div>
               </div>
-            </div>
+            {% endif %}
           {% endif %}
         {% endif %}
-        <div class="sm:col-span-2">
-          <label for="disk_{{loop.index}}_image_uuid" class="block text-sm font-medium leading-6 text-white">
-            Image UUID
-          </label>
-          <div class="mt-2">
-            <input
-              type="text"
-              name="disk_{{loop.index}}_image_uuid"
-              id="disk_{{loop.index}}_image_uuid"
-              class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
-              value="{{disk.image_uuid}}" readonly>
+        {% if let Some(image_uuid) = disk.image_uuid %}
+          <div class="sm:col-span-2">
+            <label for="disk_{{loop.index}}_image_uuid" class="block text-sm font-medium leading-6 text-white">
+              Image UUID
+            </label>
+            <div class="mt-2">
+              <input
+                type="text"
+                name="disk_{{loop.index}}_image_uuid"
+                id="disk_{{loop.index}}_image_uuid"
+                class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                value="{{image_uuid}}" readonly>
+            </div>
           </div>
-        </div>
+        {% endif %}
         <div class="sm:col-span-1">
           <label for="disk_{{loop.index}}_image_size" class="block text-sm font-medium leading-6 text-white">
             Image Size <sup>MiB</sup>

@@ -39,7 +39,8 @@ pub struct InstanceValidateResponse {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Disk {
     pub boot: Option<bool>,
-    pub image_uuid: Uuid,
+    pub image_uuid: Option<Uuid>,
+    #[serde(default)]
     pub image_size: u64,
 }
 
@@ -79,7 +80,7 @@ pub struct Generic {
     pub last_modified: String,
     pub platform_buildstamp: String,
     pub nics: Vec<Nic>,
-    #[serde(default = "default_u64")]
+    #[serde(default)]
     pub cpu_cap: u64,
 
     // if started
@@ -144,7 +145,7 @@ impl HVM {
     }
     pub fn get_boot_image_uuid(&self) -> Uuid {
         if let Some(boot_disk) = self.disks.iter().find(|d| d.boot.is_some()) {
-            boot_disk.image_uuid
+            boot_disk.image_uuid.unwrap_or(UuidBuilder::nil().into_uuid())
         } else {
             UuidBuilder::nil().into_uuid()
         }
@@ -517,8 +518,4 @@ pub struct Vnc {
 #[derive(Deserialize, Debug, JsonSchema)]
 pub struct Info {
     pub vnc: Vnc,
-}
-
-pub fn default_u64() -> u64 {
-    0
 }

@@ -1806,7 +1806,7 @@ dependencies = [
 
 [[package]]
 name = "smartos_ui"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "askama",
  "build-data",
