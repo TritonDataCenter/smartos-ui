@@ -1,0 +1,78 @@
+{#
+
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+  Copyright 2024 MNX Cloud, Inc.
+
+#}
+{%- import "macros/icons.j2" as icons -%}
+{% extends "layout/authed.j2" %}
+{% block title %}{{title}}{% endblock %}
+{% block content %}
+<form id="content">
+
+    {% match instance_enum %}
+
+      {% when Instance::Joyent with (instance) %}
+        {% let brand = "joyent" %}
+        {% include "include/instance_header.j2" %}
+        {% if let Some(json_string) = json %}
+          {% include "include/json_viewer.j2" %}
+        {% else %}
+          {% include "include/instance_connection_info.j2" %}
+          {% include "include/instance_generic.j2" %}
+          {% include "include/instance_native.j2" %}
+        {% endif %}
+
+      {% when Instance::JoyentMinimal with (instance) %}
+        {% let brand = "joyent-minimal" %}
+        {% include "include/instance_header.j2" %}
+        {% if let Some(json_string) = json %}
+          {% include "include/json_viewer.j2" %}
+        {% else %}
+          {% include "include/instance_connection_info.j2" %}
+          {% include "include/instance_generic.j2" %}
+          {% include "include/instance_native.j2" %}
+        {% endif %}
+
+      {% when Instance::LX with (instance) %}
+        {% let brand = "lx" %}
+        {% include "include/instance_header.j2" %}
+        {% if let Some(json_string) = json %}
+          {% include "include/json_viewer.j2" %}
+        {% else %}
+          {% include "include/instance_connection_info.j2" %}
+          {% include "include/instance_generic.j2" %}
+          {% include "include/instance_native.j2" %}
+          {% include "include/instance_lx.j2" %}
+        {% endif %}
+
+      {% when Instance::Bhyve with (instance) %}
+        {% let brand = "bhyve" %}
+        {% include "include/instance_header.j2" %}
+        {% if let Some(json_string) = json %}
+          {% include "include/json_viewer.j2" %}
+        {% else %}
+          {% include "include/instance_connection_info.j2" %}
+          {% include "include/instance_generic.j2" %}
+          {% include "include/instance_hvm.j2" %}
+        {% endif %}
+
+      {% when Instance::KVM with (instance) %}
+        {% let brand = "kvm" %}
+        {% include "include/instance_header.j2" %}
+        {% if let Some(json_string) = json %}
+          {% include "include/json_viewer.j2" %}
+        {% else %}
+          {% include "include/instance_connection_info.j2" %}
+          {% include "include/instance_generic.j2" %}
+          {% include "include/instance_hvm.j2" %}
+        {% endif %}
+
+    {% endmatch %}
+
+
+</form>
+{% endblock %}

@@ -1,0 +1,343 @@
+{#
+
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+  Copyright 2024 MNX Cloud, Inc.
+
+#}
+{%- import "macros/icons.j2" as icons -%}
+{%- import "macros/inputs.j2" as input -%}
+{% extends "layout/authed.j2" %}
+{% block title %}{{title}}{% endblock %}
+{% block content %}
+<form id="content">
+  {% if let Some(image) = image %}
+    <header class="header-bg top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/10 px-4 shadow-sm sm:px-6 lg:px-8">
+      <h1 class="text-base font-semibold leading-7 text-xl text-white">
+        {% call icons::box("inline w-8 h-8") %}
+        <span class="align-middle pl-2">{{image.manifest.name}}</span>
+      </h1>
+
+      <div class="flex flex-1 items-center justify-end gap-x-6 mb-10 my-10">
+        {% if json.is_none() %}
+          <button
+            type="submit"
+            data-hx-get="/images/{{image.manifest.uuid}}?json=true"
+            data-hx-target="#main"
+            data-hx-select="#content"
+            data-hx-indicator="#json-loader"
+            class="btn btn-clear">
+              <span class="htmx-indicator" id="json-loader">
+                <span class="loader-icon">
+                  {% call icons::loading("h-6 w-6 inline pr-1") %}
+                </span>
+                <span class="default-icon">
+                  {% call icons::code("h-6 w-6 inline") %}
+                </span>
+                <span class="align-middle btn-text">View JSON</span>
+              </span>
+          </button>
+        {% else %}
+          <button
+            type="submit"
+            data-hx-get="/images/{{image.manifest.uuid}}"
+            data-hx-target="#main"
+            data-hx-select="#content"
+            data-hx-indicator="#properties-loader"
+            class="btn btn-clear">
+              <span class="htmx-indicator" id="properties-loader">
+                <span class="loader-icon">
+                  {% call icons::loading("h-6 w-6 inline pr-1") %}
+                </span>
+                <span class="default-icon">
+                  {% call icons::list("h-6 w-6 inline") %}
+                </span>
+                <span class="align-middle btn-text">View Properties</span>
+              </span>
+          </button>
+        {% endif %}
+        <button
+          type="submit"
+          data-hx-delete="/images/{{image.manifest.uuid}}"
+          data-hx-target="#notifications"
+          data-hx-confirm="Are you sure you want to delete this image?"
+          data-hx-disabled-elt="this"
+          data-hx-indicator="#delete-loader"
+          class="btn btn-warn">
+            <span class="htmx-indicator" id="delete-loader">
+              <span class="loader-icon">
+                {% call icons::loading("h-6 w-6 inline pr-1") %}
+              </span>
+              <span class="default-icon">
+                {% call icons::trash("h-6 w-6 inline") %}
+              </span>
+              <span class="align-middle btn-text">Delete</span>
+            </span>
+        </button>
+      </div>
+    </header>
+
+    {% match json %}
+      {% when Some with (json_string) %}
+        {% include "include/json_viewer.j2" %}
+      {% when None %}
+    {% endmatch %}
+
+    {%  if json.is_none() %}
+      <div class="mx-auto px-8">
+        <div class="space-y-12">
+          <div class="pb-12">
+            <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+              {% call input::text_view("UUID", image.manifest.uuid) %}
+              {% call input::text_view("Name", image.manifest.name) %}
+              {% call input::text_view("Version", image.manifest.version) %}
+              {% if let Some(published_at) = image.manifest.published_at %}
+                {% call input::text_view("Published", published_at) %}
+              {% endif %}
+              {% call input::text_view("Type", image.manifest.type) %}
+              {% call input::text_view("OS", image.manifest.os) %}
+              {% if let Some(homepage) = image.manifest.homepage %}
+                {% call input::link_new_tab("Homepage", homepage) %}
+              {% endif %}
+              {% if let Some(description) = image.manifest.description %}
+                {% call input::textarea_view("Description", description) %}
+              {% endif %}
+              {% if let Some(eula) = image.manifest.eula %}
+                {% call input::text_view("EULA", eula) %}
+              {% endif %}
+              {% if let Some(icon) = image.manifest.icon %}
+                {% call input::bool_view(
+                  "Icon",
+                  "icon",
+                  icon,
+                  "Indicates if the image has an icon file.")
+                %}
+              {% endif %}
+              {% if let Some(generate_passwords) = image.manifest.generate_passwords %}
+                {% call input::bool_view(
+                  "Generate Passwords",
+                  "generate_passwords",
+                  generate_passwords,
+                  "A boolean indicating whether to generate passwords for the users in the \"users\" field.")
+                %}
+              {% endif %}
+              {% if let Some(users) = image.manifest.users%}
+                <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+                  <span class="text-base font-semibold leading-7 text-white">Users</span>
+                </div>
+                {% for user in users %}
+                  <div class="sm:col-span-1 sm:col-start-1">
+                    <label for="user_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">
+                      Name
+                    </label>
+                    <div class="mt-2">
+                      <input
+                        type="text"
+                        name="user_{{loop.index}}"
+                        id="user_{{loop.index}}"
+                        class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                        value="{{user.name}}" readonly>
+                    </div>
+                  </div>
+                {% endfor %}
+                <div class="sm:col-span-full border-b border-white/10 mt-4 pt-4"></div>
+              {% endif %}
+              {% if let Some(inherited_directories) = image.manifest.inherited_directories %}
+                <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+                  <span class="text-base font-semibold leading-7 text-white">
+                    Inherited Directories
+                  </span>
+                </div>
+                {% for dir in inherited_directories %}
+                  <div class="sm:col-span-4 sm:col-start-1">
+                    <label for="inherited_directories_{{loop.index}}_image_uuid" class="block text-sm font-medium leading-6 text-white">Directory</label>
+                    <div class="mt-2">
+                      <input type="text"
+                        name="inherited_directories_{{loop.index}}"
+                        id="inherited_directories_{{loop.index}}"
+                        class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                        value="{{dir}}" readonly>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endif %}
+              {% if let Some(nic_driver) = image.manifest.nic_driver%}
+                {% call input::text_view("Nic Driver", nic_driver) %}
+              {% endif %}
+              {% if let Some(disk_driver) = image.manifest.disk_driver %}
+                {% call input::text_view("Disk Driver", disk_driver) %}
+              {% endif %}
+              {% if let Some(cpu_type) = image.manifest.cpu_type %}
+                {% call input::text_view("CPU Type", cpu_type) %}
+              {% endif %}
+              {% if let Some(image_size) = image.manifest.image_size %}
+                {% call input::text_view("Image Size (MiB)", image_size) %}
+              {% endif %}
+              {% if let Some(channels) = image.manifest.channels %}
+                <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+                  <span class="text-base font-semibold leading-7 text-white">
+                    Channels
+                  </span>
+                </div>
+                {% for channel in channels %}
+                  <div class="sm:col-span-2 sm:col-start-1">
+                    <label for="channel_{{loop.index}}_image_uuid" class="block text-sm font-medium leading-6 text-white">Channel</label>
+                    <div class="mt-2">
+                      <input type="text"
+                        name="inherited_directories_{{loop.index}}"
+                        id="inherited_directories_{{loop.index}}"
+                        class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                        value={{channel}} readonly>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endif %}
+              {% call input::text_view("Owner", image.manifest.owner) %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if let Some(requirements) = image.manifest.requirements %}
+        <div class="mx-auto px-8">
+          <div class="space-y-12">
+            <div class="pb-12">
+              <h2 class="text-base font-semibold leading-7 text-white">
+                Requirements
+              </h2>
+              <p class="mt-1 text-sm leading-6 text-gray-600">
+                The requirements for provisioning a VM with this image
+              </p>
+
+              <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                {% if let Some(brand) = requirements.brand %}
+                  {% call input::text_view("Brand", brand) %}
+                {% endif %}
+
+                {% if let Some(bootrom) = requirements.bootrom %}
+                  {% call input::text_view("Boot ROM", bootrom) %}
+                {% endif %}
+
+                {% if let Some(min_ram) = requirements.min_ram %}
+                  {% call input::text_view("Minimum RAM", min_ram) %}
+                {% endif %}
+
+                {% if let Some(max_ram) = requirements.max_ram %}
+                  {% call input::text_view("Maximum RAM", max_ram) %}
+                {% endif %}
+
+                {% if let Some(bootrom) = requirements.bootrom %}
+                  {% call input::text_view("Boot ROM", bootrom) %}
+                {% endif %}
+
+                {% if let Some(ssh_key) = requirements.ssh_key %}
+                  {% call input::bool_view("SSH Key", "ssh_key_required", ssh_key,
+                    "Indicates that provisioning with this image requires that an SSH public key be provided.") %}
+                {% endif %}
+
+                {% if let Some(min_platform) = requirements.min_platform %}
+                  <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+                    <span class="text-base font-semibold leading-7 text-white">
+                      Minimum Platform Requirements
+                    </span>
+                  </div>
+                  {% if let Some(min_platform_obj) = min_platform.as_object() %}
+                    {% for (sdc_version, platform) in min_platform_obj %}
+                      <div class="sm:col-span-2 sm:col-start-1">
+                        <label for="min_plat_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">
+                          SDC v{{sdc_version}}
+                        </label>
+                        <div class="mt-2">
+                          <input
+                            type="text"
+                            name="min_plat_{{loop.index}}"
+                            id="min_plat_{{loop.index}}"
+                            class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                            value="{{platform}}" readonly>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                {% endif %}
+
+                {% if let Some with (max_platform) = requirements.max_platform %}
+                  <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+                    <span class="text-base font-semibold leading-7 text-white">
+                      Maximum Platform Requirements
+                    </span>
+                  </div>
+                  {% if let Some(max_platform_obj) = max_platform.as_object()%}
+                    {% for (sdc_version, platform) in max_platform_obj %}
+                      <div class="sm:col-span-2 sm:col-start-1">
+                        <label for="max_plat_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">
+                          SDC v{{sdc_version}}
+                        </label>
+                        <div class="mt-2">
+                          <input
+                            type="text"
+                            name="max_plat_{{loop.index}}"
+                            id="max_plat_{{loop.index}}"
+                            class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                            value="{{platform}}" readonly>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                {% endif %}
+                {% if let Some(networks) = requirements.networks %}
+                  {% for network in networks %}
+                    <div class="sm:col-span-6 border-t border-white/10 mt-4 pt-4">
+                      <span class="text-base font-semibold leading-7 text-white">
+                        Required Network {{loop.index}}
+                      </span>
+                    </div>
+
+                    <div class="sm:col-span-2 sm:col-start-1">
+                      <label for="network_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">
+                        Name
+                      </label>
+                      <div class="mt-2">
+                        <input
+                          type="text"
+                          name="network_{{loop.index}}"
+                          id="network_{{loop.index}}"
+                          class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                          value="{{network.name}}" readonly>
+                      </div>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                      <label for="network_{{loop.index}}" class="block text-sm font-medium leading-6 text-white">
+                        Description
+                      </label>
+                      <div class="mt-2">
+                        <input
+                          type="text"
+                          name="network_{{loop.index}}"
+                          id="network_{{loop.index}}"
+                          class="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+                          value="{{network.description}}" readonly>
+                      </div>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endif %}
+  {% else %}
+    <div class="text-center">
+      <h1 class="mt-16 text-3xl font-bold text-white sm:text-5xl">Image not found</h1>
+      <p class="mt-6 text-base leading-7 text-gray-400">
+        The requested image:
+        <code class="text-white p-1 bg-blue-900">{{id}}</code>
+        is not installed.
+      </p>
+    </div>
+  {% endif %}
+</form>
+{% endblock %}

@@ -1,0 +1,60 @@
+{#
+
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+  Copyright 2024 MNX Cloud, Inc.
+
+#}
+{%- import "macros/icons.j2" as icons -%}
+<div id="modal-content" class="fixed inset-0 z-10 w-screen overflow-y-auto">
+  <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+    <div class="relative transform overflow-hidden rounded-lg bg-gray-700 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+      <div class="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
+        <button
+          type="button"
+          class="modal-close cursor-pointer rounded-md bg-gray-700 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+          {% call icons::close("h-6 w-6 cursor-pointer") %}
+        </button>
+      </div>
+      <div class="sm:flex sm:items-start">
+        <div class="bg-white mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10">
+          {% match kind %}
+            {% when NotificationKind::Ok %}
+              {% call icons::ok("h-6 w-6 text-green-600") %}
+            {% when NotificationKind::Error %}
+              {% call icons::error("h-6 w-6 text-red-600") %}
+          {% endmatch %}
+        </div>
+        <div class="pt-2 text-center sm:ml-4 sm:mt-0 sm:text-left">
+          <h3 class="text-base font-semibold leading-6 text-white" id="modal-title">{{ subject }}</h3>
+          <div class="mt-2">
+            <p class="text-sm text-gray-200">
+              {{ message }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {% match buttons %}
+        {% when Some with (btns) %}
+          <div class="modal-buttons mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+            {% for button in btns %}
+              <button
+                type="button"
+                {% for attr in button.attributes %}
+                  {{attr|safe}}
+                {% endfor %}
+                data-hx-on::after-request="window.scrollTo({top: 0, behavior: 'instant'})"
+                class="modal-close mr-2 btn {% for class in button.classes %}{{class}} {% endfor %}">
+                {{ button.text }}
+              </button>
+            {% endfor %}
+          </div>
+        {% when None %}
+      {% endmatch %}
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,37 @@
+{#
+
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+  Copyright 2024 MNX Cloud, Inc.
+
+#}
+{%- import "macros/icons.j2" as icons -%}
+{% if success -%}
+  <div class="validation rounded border-l-4 border-green-400 bg-green-50 p-4">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        {% call icons::ok("h-6 w-6 text-green-700") %}
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-green-700 pr-4">
+          {{message}}
+        </p>
+      </div>
+    </div>
+  </div>
+{% else -%}
+  <div class="validation rounded border-l-4 border-red-400 bg-red-50 p-4">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        {% call icons::error("h-6 w-6 text-red-700") %}
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-red-700 pr-6">
+          <span class="font-medium text-red-800">Validation Failed:</span> {{message}}
+        </p>
+      </div>
+    </div>
+  </div>
+{% endif -%}

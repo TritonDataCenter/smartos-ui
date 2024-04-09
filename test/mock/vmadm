@@ -1,0 +1,188 @@
+#!/usr/bin/env node --no-warnings
+
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+/*
+ * Copyright 2024 MNX Cloud, Inc.
+ */
+
+const { join } = require('node:path')
+const { readFileSync, writeFileSync, unlinkSync } = require('node:fs')
+
+const root = join(__dirname, '..', 'data', 'db', 'vm')
+
+function fatal (msg) {
+  console.error(msg)
+  process.exit(1)
+}
+
+function getPayload (uuid) {
+  try {
+    const file = uuid ? join(root, `${uuid}.json`) : '/dev/stdin'
+    return JSON.parse(readFileSync(file, 'utf-8'))
+  } catch (e) {
+    fatal(e)
+  }
+}
+
+function setPayload (vm) {
+  writeFileSync(join(root, `${vm.uuid}.json`), JSON.stringify(vm))
+}
+
+function getImageSize (uuid) {
+  const imgRoot = join(__dirname, '..', 'data', 'db', 'img')
+  try {
+    const img = JSON.parse(readFileSync(join(imgRoot, `${uuid}.json`), 'utf-8'))
+    return img.manifest.image_size
+  } catch (e) {
+    fatal(e)
+  }
+}
+
+function randInt () {
+  return Math.floor(Math.random() * 9000)
+}
+
+const cmd = {
+  create: () => {
+    const vm = getPayload()
+    vm.v = 1
+    vm.hvm = false
+    vm.autoboot = vm.autoboot === undefined
+    vm.firewall_enabled = vm.firewall_enabled !== undefined
+    vm.billing_id = vm.billing_id || '00000000-0000-0000-0000-000000000000'
+    vm.owner_uuid = vm.owner_uuid || '00000000-0000-0000-0000-000000000000'
+    vm.ram = vm.ram || vm.max_physical_memory || 256
+    vm.state = 'running'
+    vm.quota = (vm.quota === null || vm.quota === undefined) ? 0 : vm.quota
+    vm.cpu_shares = vm.cpu_shares || 100
+    vm.dns_domain = vm.dns_domain || 'local'
+    vm.limit_priv = vm.limit_priv || 'default'
+    vm.max_locked_memory = vm.max_locked_memory || vm.ram
+    vm.max_lwps = vm.max_lwps || 2000
+    vm.max_msg_ids = vm.max_msg_ids || 4096
+    vm.max_sem_ids = vm.max_sem_ids || 4096
+    vm.max_shm_ids = vm.max_shm_ids || 4096
+    vm.max_shm_memory = vm.max_shm_memory || vm.ram
+    vm.max_swap = vm.ram > 256 ? vm.ram : 256
+    vm.zfs_io_priority = vm.zfs_io_priority || 100
+    vm.zfs_root_recsize = vm.zfs_root_recsize || 131072
+    vm.zonedid = randInt()
+    vm.pid = randInt()
+    vm.zoneid = randInt()
+    vm.zonename = vm.uuid
+    vm.zone_state = 'running'
+    vm.platform_buildstamp = '20240208T000334Z'
+    vm.server_uuid = '00000000-0000-0000-0000-000000000000'
+    vm.create_timestamp = new Date()
+    vm.last_modified = new Date()
+    vm.boot_timestamp = new Date()
+    vm.init_restarts = 0
+    vm.zfs_filesystem = `zones/${vm.uuid}`
+    vm.zpool = 'zones'
+    vm.zonepath = `/${vm.zfs_filesystem}`
+
+    if (!vm.nics) {
+      vm.nics = []
+    }
+
+    if (!vm.brand) {
+      fatal('{"bad_brand": "undefined"}')
+    }
+    switch (vm.brand) {
+      case 'joyent':
+      case 'joyent-minimal':
+        vm.max_physical_memory = vm.ram
+        vm.tmpfs = vm.tmpfs || vm.max_swap
+        break
+      case 'lx':
+        vm.max_physical_memory = vm.ram
+        vm.tmpfs = vm.tmpfs || vm.max_swap
+        vm.kernel_version = vm.kernel_version || '0.0.0'
+        break
+      case 'bhyve':
+      case 'kvm':
+        vm.hvm = true
+        vm.vcpus = vm.vcpus || 1
+        vm.com1 = vm.com1 || '/dev/zconsole'
+        vm.com2 = vm.com2 || 'socket,/tmp/vm.ttyb'
+        vm.zlog_mode = vm.zlog_mode || 'g--'
+        vm.zlog_name = vm.zlog_name || 'platform.log'
+        vm.max_physical_memory = vm.max_physical_memory || vm.ram + 1024
+        vm.disks.forEach(d => {
+          d.image_size = getImageSize(d.image_uuid)
+        })
+        break
+    }
+    setTimeout(() => setPayload(vm), 2000)
+  },
+  validate: ([subcmd]) => {
+    setTimeout(() => {
+      const { brand } = getPayload()
+      if (!brand) {
+        fatal('{"bad_brand": "undefined"}')
+      }
+      if (subcmd === 'create') {
+        return console.error(`VALID 'create' payload for ${brand} brand VMs.`)
+      }
+      fatal(`${subcmd} is currently unsupported in the mock scripts`)
+    }, 3000)
+  },
+  delete: ([uuid]) => unlinkSync(join(root, `${uuid}.json`)),
+  start: ([uuid]) => {
+    const vm = getPayload(uuid)
+    if (vm.state === 'running') {
+      return console.error(`Unable to start VM ${uuid}: VM ${uuid} is already 'running'`)
+    }
+
+    vm.state = 'running'
+    vm.pid = randInt()
+    vm.init_restarts = 0
+    vm.boot_timestamp = new Date()
+    vm.zoneid = randInt()
+
+    delete vm.exit_status
+    delete vm.exit_timestamp
+
+    setPayload(vm)
+    console.error(`Successfully started VM ${uuid}`)
+  },
+  stop: ([uuid]) => {
+    const vm = getPayload(uuid)
+    if (vm.state === 'stopped') {
+      return console.error(`VM ${uuid} is already not 'running' (currently: stopped)`)
+    }
+    vm.state = 'stopped'
+    vm.exit_status = 0
+    vm.exit_timestamp = new Date()
+
+    delete vm.pid
+    delete vm.init_restarts
+    delete vm.boot_timestamp
+    delete vm.zoneid
+
+    setPayload(vm)
+    console.error(`Successfully completed stop for VM ${uuid}`)
+  },
+  info: ([uuid]) => {
+    const vm = getPayload(uuid)
+
+    if (vm.brand !== 'bhyve' || vm.brand !== 'kvm') {
+      console.log(JSON.stringify({
+        vnc: {
+          host: '127.0.0.1',
+          port: randInt(),
+          display: randInt()
+        }
+      }))
+    } else {
+      console.error(`Unable to get VM info for VM ${uuid}: no info types supported for brand ${vm.brand}`)
+    }
+  }
+}
+
+cmd[process.argv[2]](process.argv.slice(3))

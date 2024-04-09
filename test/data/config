@@ -1,0 +1,21 @@
+#
+# This file was auto-generated and must be source-able by bash.
+#
+
+admin_nic=d0:50:99:d0:85:34
+admin_ip=172.16.3.3
+admin_netmask=255.255.248.0
+admin_network=
+admin_gateway=172.16.3.3
+
+headnode_default_gateway=172.16.0.1
+
+dns_resolvers=172.16.0.1,1.1.1.1
+dns_domain=lan.somewhere.tld
+
+ntp_hosts=0.smartos.pool.ntp.org
+compute_node_ntp_hosts=172.16.3.3
+
+hostname=smartos
+
+smt_enabled=true

@@ -1,0 +1,228 @@
+{% macro home(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+</svg>
+{% endmacro %}
+
+{% macro info(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+</svg>
+{% endmacro %}
+
+{% macro error(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+</svg>
+{% endmacro %}
+
+{% macro ok(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
+{% endmacro %}
+
+{% macro trash(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+</svg>
+{% endmacro %}
+
+{% macro servers(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 0 1-3-3m3 3a3 3 0 1 0 0 6h13.5a3 3 0 1 0 0-6m-16.5-3a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3m-19.5 0a4.5 4.5 0 0 1 .9-2.7L5.737 5.1a3.375 3.375 0 0 1 2.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 0 1 .9 2.7m0 0a3 3 0 0 1-3 3m0 3h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Zm-3 6h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Z" />
+</svg>
+{% endmacro %}
+
+{% macro server(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
+</svg>
+{% endmacro %}
+
+{% macro empty_box(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-2.25-1.313M21 7.5v2.25m0-2.25-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3 2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75 2.25-1.313M12 21.75V19.5m0 2.25-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25" />
+</svg>
+{% endmacro %}
+
+{% macro box(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+</svg>
+{% endmacro %}
+
+{% macro logout(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+</svg>
+{% endmacro %}
+
+{% macro plus_circle(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
+{% endmacro %}
+
+{% macro import(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75v6.75m0 0-3-3m3 3 3-3m-8.25 6a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+</svg>
+{% endmacro %}
+
+{% macro doc_check(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 0 1 9 9v.375M10.125 2.25A3.375 3.375 0 0 1 13.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 0 1 3.375 3.375M9 15l2.25 2.25L15 12" />
+</svg>
+{% endmacro %}
+
+{% macro play_circle(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" />
+</svg>
+{% endmacro %}
+
+{% macro stop_circle(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+  <path stroke-linecap="round" stroke-linejoin="round" d="M9 9.563C9 9.252 9.252 9 9.563 9h4.874c.311 0 .563.252.563.563v4.874c0 .311-.252.563-.563.563H9.564A.562.562 0 0 1 9 14.437V9.564Z" />
+</svg>
+{% endmacro %}
+
+{% macro close(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+</svg>
+{% endmacro %}
+
+{% macro book(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+</svg>
+{% endmacro %}
+
+{% macro code(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+</svg>
+{% endmacro %}
+
+{% macro list(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+</svg>
+{% endmacro %}
+
+{% macro search(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 15.75-2.489-2.489m0 0a3.375 3.375 0 1 0-4.773-4.773 3.375 3.375 0 0 0 4.774 4.774ZM21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
+{% endmacro %}
+
+{% macro cog(classes) %}
+{# MIT License Copyright (c) Tailwind Labs, Inc. #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+</svg>
+{% endmacro %}
+
+{% macro loading(classes) %}
+{# By Sam Herbert (@sherb), for everyone. More @ http://goo.gl/7AJzbL #}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" stroke="#fff">
+    <g fill="none" fill-rule="evenodd">
+        <g transform="translate(1 1)" stroke-width="2">
+            <circle stroke-opacity=".5" cx="18" cy="18" r="18"/>
+            <path d="M36 18c0-9.94-8.06-18-18-18">
+                <animateTransform
+                    attributeName="transform"
+                    type="rotate"
+                    from="0 18 18"
+                    to="360 18 18"
+                    dur="1s"
+                    repeatCount="indefinite"/>
+            </path>
+        </g>
+    </g>
+</svg>
+{% endmacro %}
+
+{% macro smartos(classes) %}
+<svg
+  class="{% if classes.is_empty() %}w-6 h-6{% else %}{{classes}}{% endif %}"
+  x="0px" y="0px"  viewBox="0 0 64.6 64.6" style="enable-background:new 0 0 64.6 64.6;" xml:space="preserve">
+<style type="text/css">
+  .st0{fill:#80CFE3;}
+  .st1{fill:none;stroke:#011B2A;stroke-width:2;stroke-linejoin:bevel;stroke-miterlimit:10;}
+</style>
+<g>
+  <path class="st0" d="M62.2,64.6H2.4c-1.3,0-2.4-1.1-2.4-2.4V2.4C0,1.1,1.1,0,2.4,0h59.8c1.3,0,2.4,1.1,2.4,2.4v59.8
+    C64.6,63.5,63.5,64.6,62.2,64.6z"/>
+  <polyline class="st1" points="32.3,39.8 32.3,53.9 54.6,53.9 54.6,31.6 10,31.6 10,9.3 32.3,9.3 32.3,25.8"/>
+</g>
+</svg>
+{% endmacro %}

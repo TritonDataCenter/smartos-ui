@@ -1,0 +1,93 @@
+{#
+
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+  Copyright 2024 MNX Cloud, Inc.
+
+#}
+{%- import "macros/icons.j2" as icons -%}
+{% extends "layout/main.j2" %}
+{% block title %}Dashboard{% endblock %}
+{% block body %}
+
+{# Tailwind classes for the active navigation entry and inactive ones #}
+{% let active = "active-sidebar-nav" %}
+{% let inactive = "inactive-sidebar-nav" %}
+<body class="h-full">
+<div id="navigation">
+  <div class="xl:fixed xl:inset-y-0 xl:z-50 xl:flex xl:w-72 xl:flex-col">
+    <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-black/10 px-6 ring-1 ring-white/5">
+      <div class="flex h-16 shrink-0 items-center pt-px" title="UI Version: {{crate::VERSION}} ({{crate::GIT_COMMIT_SHORT}})">
+        {% call icons::smartos("h-10 w-10") %}
+        <h1 class="text-white pl-4">SmartOS</h1>
+      </div>
+      <nav class="flex flex-1 flex-col" data-hx-sync="this:replace" data-hx-target="#main" data-hx-select="#content">
+        <ul class="flex flex-1 flex-col gap-y-7">
+          <li>
+            <ul class="-mx-2 space-y-1">
+              <li>
+                <a href="/dashboard"
+                  data-hx-get="/dashboard"
+                  class="{% if title == "Dashboard" %}{{active}}{% else %}{{inactive}}{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer main-nav">
+                  {% call icons::home("") %}
+                  Dashboard
+                </a>
+              </li>
+              <li>
+                <a href="/instances"
+                data-hx-get="/instances"
+                class="{% if title == "Instances" %}{{active}}{% else %}{{inactive}}{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer main-nav">
+                  {% call icons::servers("") %}
+                  Instances
+                </a>
+              </li>
+              <li class="pb-2">
+                <a href="/images"
+                  data-hx-get="/images"
+                  class="{% if title == "Images" %}{{active}}{% else %}{{inactive}}{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer main-nav">
+                  {% call icons::box("") %}
+                  Images
+                </a>
+              </li>
+              <li class="pt-2 border-t border-white/10">
+                <a href="/config/gz"
+                  data-hx-get="/config/gz"
+                  class="{% if title == "Global Zone Config" %}{{active}}{% else %}{{inactive}}{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer main-nav">
+                  {% call icons::cog("") %}
+                  Global Zone Config
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="-mx-2 mt-auto">
+            <a
+              href="https://docs.smartos.org/"
+              target="_blank"
+              class="{{inactive}} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer">
+              {% call icons::book("") %}
+              SmartOS Docs
+            </a>
+          </li>
+          <li class="-mx-2 mb-2 -mt-6">
+            <a href="/logout"
+            class="{{inactive}} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer">
+              {% call icons::logout("") %}
+              Logout
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <div id="main" class="lg:pl-72">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+<div id="modal"></div>
+<div id="notifications"></div>
+</body>
+{% endblock %}

@@ -1,0 +1,55 @@
+{#
+
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+  Copyright 2024 MNX Cloud, Inc.
+
+#}
+{%- import "macros/inputs.j2" as input -%}
+<div class="mx-auto px-8">
+  <div class="space-y-12">
+    <div class="pb-12 mt-10  border-b border-white/10">
+      <h2 class="text-base font-semibold leading-7 text-white">Connection Info</h2>
+      <p class="mt-1 text-sm leading-6 text-gray-600">
+        Networking information for connecting to instance.
+      </p>
+      <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+        {% if instance_enum.is_hvm() %}
+          {% if let Some(vnc_info) = self.info %}
+            {% if let Some(vnc) = vnc_info.vnc %}
+              {% if let Some(host) = vnc.host %}
+                {% if let Some(port) = vnc.port %}
+                  {% call input::link("VNC Info",
+                    format!("vnc://{}:{}", host, port)) %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endif %}
+        {% for nic in instance.generic.nics %}
+          {% if let Some(tag) = nic.nic_tag %}
+            {% call input::text_view("NIC Tag", tag) %}
+          {% endif %}
+          {% if let Some(ips) = nic.ips %}
+            {% for ip in ips %}
+              {% call input::text_view("IP", ip) %}
+            {% endfor %}
+          {% endif %}
+          {% if let Some(gateways) = nic.gateways %}
+            {% for gateway in gateways %}
+              {% call input::text_view("Gateway", gateway) %}
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+        {% if instance.generic.nics.len() == 0 %}
+          <p class="sm:col-span-4 text-sm leading-6 text-gray-400">
+            Instance does not have any NICs
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+

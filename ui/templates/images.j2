@@ -1,0 +1,114 @@
+{#
+
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+  Copyright 2024 MNX Cloud, Inc.
+
+#}
+{%- import "macros/icons.j2" as icons -%}
+{% extends "layout/authed.j2" %}
+{% block title %}{{title}}{% endblock %}
+{% block content %}
+<div id="content">
+  <header class="header-bg top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/10 bg-gray-900 px-4 shadow-sm sm:px-6 lg:px-8">
+    <h1 class="text-base font-semibold leading-7 text-xl text-white">
+      {% call icons::box("inline w-8 h-8") %}
+      <span class="align-middle pl-2">Installed Images</span>
+    </h1>
+    <div class="flex flex-1 items-center justify-end gap-x-6 mb-10 my-10">
+      <a
+        data-hx-get="/import"
+        data-hx-target="#main"
+        data-hx-select="#content"
+        data-hx-indicator="#import-loader"
+        data-hx-disabled-elt="this"
+        title="Import Image"
+        class="btn btn-primary">
+          <span class="htmx-indicator" id="import-loader">
+            <span class="loader-icon">
+              {% call icons::loading("h-6 w-6 inline pr-1") %}
+            </span>
+            <span class="default-icon">
+              {% call icons::import("h-6 w-6 inline") %}
+            </span>
+          </span>
+          <span class="align-middle btn-text">Available Images</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    {% if !images.is_empty() %}
+      {% call icons::search("text-slate-500 w-6 h-6 ml-2 mt-2 inline-block float-left") %}
+      <div class="grid grid-cols-4">
+        <input
+          type="search"
+          data-rows="#installed-images tr"
+          placeholder="Filter installed images..."
+          class="filterable bg-transparent border-0 text-white focus:ring-0 sm:text-sm sm:leading-6 col-span-1"/>
+        {% call icons::close("hidden text-slate-500 w-6 h-6 mt-2 cursor-pointer inline-block filter-clear col-span-1") %}
+      </div>
+    {% endif %}
+    <div class="px-4 sm:px-6 lg:px-8">
+      <div class="flow-root">
+        <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
+          <div class="inline-block min-w-full py-2 align-middle">
+            {% if images.is_empty() %}
+              {% include "include/no_images.j2" %}
+            {% else %}
+              <table class="sortable w-full whitespace-nowrap text-left">
+                <colgroup>
+                  <col class="w-full sm:w-4/12">
+                  <col class="lg:w-1/12">
+                  <col class="lg:w-4/12">
+                  <col class="lg:w-2/12">
+                  <col class="lg:w-2/12">
+                </colgroup>
+                <thead class="border-b border-t border-white/10 text-sm leading-6 text-white">
+                  <tr class="sticky-header">
+                    <th scope="col" class="sticky top-0 z-10 py-2 pl-4 pr-8 sm:pl-6 lg:pl-8 font-semibold sm:table-cell bg-gray-900">Name</th>
+                    <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold sm:table-cell bg-gray-900">UUID</th>
+                    <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold sm:table-cell bg-gray-900">Version</th>
+                    <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">State</th>
+                    <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-8 font-semibold md:table-cell bg-gray-900">Type</th>
+                    <th scope="col" class="sticky top-0 z-10 py-2 pl-0 pr-4 font-semibold md:table-cell bg-gray-900">OS</th>
+                  </tr>
+                </thead>
+                <tbody id="installed-images" class="divide-y divide-white/5">
+                  {% for image in images %}
+                  <tr
+                    data-hx-get="/images/{{image.manifest.uuid}}"
+                    data-hx-target="#main"
+                    data-hx-select="#content"
+                    class="hover:bg-gray-800 cursor-pointer">
+                    <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
+                      <div class="flex items-center gap-x-4">
+                        <div class="truncate text-sm font-medium leading-6 text-white filter-subject">{{image.manifest.name}}</div>
+                      </div>
+                    </td>
+                    <td class="py-4 pl-0 pr-4 text-sm leading-6 text-gray-400 sm:table-cell sm:pr-6 lg:pr-8">{{image.manifest.uuid}}</td>
+                    <td class="py-4 pl-0 pr-4 sm:table-cell sm:pr-8">
+                      <div class="flex gap-x-3">
+                        <div class="text-sm leading-6 text-gray-400">{{image.manifest.version}}</div>
+                      </div>
+                    </td>
+                    <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20">{{image.manifest.state}}</td>
+                    <td class="py-4 pl-0 pr-8 text-sm leading-6 text-gray-400 md:table-cell lg:pr-20 filter-subject">{{image.manifest.type|format_word}}</td>
+                    <td class="py-4 pl-0 pr-4 text-sm text-gray-400 leading-6 sm:pr-8 lg:pr-20 filter-subject">{{image.manifest.os|format_word}}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            {% endif %}
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+{% endblock %}

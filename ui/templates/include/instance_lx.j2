@@ -1,0 +1,26 @@
+{#
+
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+  Copyright 2024 MNX Cloud, Inc.
+
+#}
+{%- import "macros/inputs.j2" as input -%}
+<div class="mx-auto px-8">
+  <div class="space-y-12">
+    <div class="pb-12">
+      <h2 class="text-base font-semibold leading-7 text-white">
+        LX Properties
+      </h2>
+      <p class="mt-1 text-sm leading-6 text-gray-600">
+        Instance properties specific to a Linux zone.
+      </p>
+
+      <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+        {% call input::text_view("Kernel Version", instance.kernel_version) %}
+      </div>
+    </div>
+  </div>
+</div>
