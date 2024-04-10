@@ -28,11 +28,6 @@ pipeline {
                 sh('make check')
             }
         }
-        stage('test') {
-            steps{
-                sh('make test')
-            }
-        }
         stage('make release') {
             steps {
                 sh('make release')

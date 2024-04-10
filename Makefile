@@ -122,7 +122,7 @@ devrun: debug
 	./tools/devrun.sh
 
 .PHONY: check
-check:: fmt fmt-js clippy
+check:: nodejs fmt fmt-js clippy
 
 .PHONY: release
 release: all
