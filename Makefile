@@ -29,6 +29,18 @@ SMF_MANIFESTS =	smf/manifests/ui.xml smf/manifests/executor.xml
 J2_FILES ?= $(shell find $(TOP)/ui/templates -name *.j2)
 JS_FILES ?= $(wildcard $(TOP)/ui/assets/*.js)
 
+# We need a Node newer than what's available in sdc-node (v6)
+# At least v14 which is available in 21.4.0 is sufficient
+.PHONY: nodejs
+ifeq ($(shell uname -s),SunOS)
+nodejs:
+	pkgin -y in npm
+else
+# On other OSes, assume you have a new enough Node
+nodejs:
+	node --version
+endif
+
 ui/assets/node_modules: ui/assets/package.json ui/assets/package-lock.json
 	cd ui/assets && npm install --omit=dev
 
@@ -51,7 +63,7 @@ ui/assets/main.js.gz: ui/assets/main.js
 	cd ui/assets && rm -f main.js.gz && gzip ./main.js
 
 .PHONY: assets
-assets: ui/assets/main.css.gz ui/assets/main.js.gz
+assets: nodejs ui/assets/main.css.gz ui/assets/main.js.gz
 
 .PHONY: clean
 clean:: clean-assets
