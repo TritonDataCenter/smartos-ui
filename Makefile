@@ -121,7 +121,7 @@ devrun: debug
 	./tools/devrun.sh
 
 .PHONY: check
-check:: nodejs fmt fmt-js clippy
+check:: assets fmt fmt-js clippy
 
 .PHONY: test
 test: | $(CARGO_EXEC)
