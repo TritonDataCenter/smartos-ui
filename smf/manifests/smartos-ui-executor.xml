@@ -1,13 +1,24 @@
 <?xml version="1.0"?>
 <!DOCTYPE service_bundle SYSTEM "/usr/share/lib/xml/dtd/service_bundle.dtd.1">
 <service_bundle type="manifest" name="smartos-ui-executor">
-    <service name="system/smartdc/smartos-ui-executor" type="service" version="0">
+    <service
+        name="system/smartdc/smartos-ui-executor"
+        type="service"
+        version="0">
         <create_default_instance enabled="true"/>
         <single_instance/>
-        <dependency name='vmadmd' grouping='require_all' restart_on='none' type='service'>
+        <dependency
+            name='vmadmd'
+            grouping='require_all'
+            restart_on='none'
+            type='service'>
             <service_fmri value='svc:/system/smartdc/vmadmd:default'/>
         </dependency>
-        <exec_method type="method" name="start" timeout_seconds="30" exec="/opt/smartos/ui/bin/executor &amp;">
+        <exec_method
+            type="method"
+            name="start"
+            timeout_seconds="30"
+            exec="/opt/smartos/ui/bin/executor &amp;">
             <method_context working_directory="/opt/smartos/ui">
                 <method_credential user="root" group="staff"/>
                 <method_environment>
@@ -15,10 +26,18 @@
                 </method_environment>
             </method_context>
         </exec_method>
-        <exec_method type="method" name="restart" exec=":kill" timeout_seconds="30">
+        <exec_method
+            type="method"
+            name="restart"
+            exec=":kill"
+            timeout_seconds="30">
             <method_context working_directory="/opt/smartos/ui"/>
         </exec_method>
-        <exec_method type="method" name="stop" exec=":kill" timeout_seconds="30">
+        <exec_method
+            type="method"
+            name="stop"
+            exec=":kill"
+            timeout_seconds="30">
             <method_context working_directory="/opt/smartos/ui"/>
         </exec_method>
         <property_group name="startd" type="framework">

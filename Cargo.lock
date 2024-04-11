@@ -1778,23 +1778,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
 
 [[package]]
-name = "smartos_executor"
-version = "0.1.16"
-dependencies = [
- "dropshot",
- "http 0.2.12",
- "hyper",
- "schemars",
- "serde",
- "serde_json",
- "slog",
- "smartos_shared",
- "time",
- "tokio",
- "uuid",
-]
-
-[[package]]
 name = "smartos_shared"
 version = "0.1.16"
 dependencies = [
@@ -1831,6 +1814,23 @@ dependencies = [
  "time",
  "tokio",
  "url",
+ "uuid",
+]
+
+[[package]]
+name = "smartos_ui_executor"
+version = "0.1.16"
+dependencies = [
+ "dropshot",
+ "http 0.2.12",
+ "hyper",
+ "schemars",
+ "serde",
+ "serde_json",
+ "slog",
+ "smartos_shared",
+ "time",
+ "tokio",
  "uuid",
 ]
 

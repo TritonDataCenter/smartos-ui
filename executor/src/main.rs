@@ -11,8 +11,8 @@
 #[macro_use]
 extern crate slog;
 
-use smartos_executor::{endpoints, endpoints::Context};
 use smartos_shared::config::Config;
+use smartos_ui_executor::{endpoints, endpoints::Context};
 
 use dropshot::{
     ApiDescription, ConfigDropshot, ConfigLogging, HandlerTaskMode,

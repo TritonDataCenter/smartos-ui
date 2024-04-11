@@ -19,4 +19,4 @@ time = { version = "0.3", features = ["serde", "formatting", "parsing", "macros"
 url = { version = "2.5", features = ["serde"] }
 dropshot = "0.10"
 hyper = "0.14"
-http = "0.2.11"
+http = "0.2"

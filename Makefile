@@ -5,7 +5,6 @@
 #
 
 #
-# Copyright 2020 Joyent, Inc.
 # Copyright 2024 MNX Cloud, Inc.
 #
 
@@ -124,6 +123,10 @@ devrun: debug
 .PHONY: check
 check:: nodejs fmt fmt-js clippy
 
+.PHONY: test
+test: | $(CARGO_EXEC)
+	$(CARGO) test
+
 .PHONY: release
 release: all
 	@echo "Building $(NAME)-$(shell ./target/release/smartos_ui version).tar.gz"
@@ -134,7 +137,7 @@ release: all
 	cp $(CARGO_TARGET_DIR)/release/smartos_ui \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin/ui
 
-	cp $(CARGO_TARGET_DIR)/release/smartos_executor \
+	cp $(CARGO_TARGET_DIR)/release/smartos_ui_executor \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin/executor
 
 	@mkdir -p $(RELSTAGEDIR)/root/var/svc/manifest/site

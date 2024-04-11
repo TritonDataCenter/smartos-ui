@@ -1,5 +1,5 @@
 [package]
-name = "smartos_executor"
+name = "smartos_ui_executor"
 version = "0.1.16"
 homepage = "https://github.com/tritondatacenter/smartos-ui"
 description = "SmartOS UI Executor"

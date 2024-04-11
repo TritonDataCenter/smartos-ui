@@ -5,7 +5,6 @@
  */
 
 /*
- * Copyright 2021 Joyent, Inc.
  * Copyright 2024 MNX Cloud, Inc.
  */
 
@@ -26,6 +25,11 @@ pipeline {
         stage('check') {
             steps{
                 sh('make check')
+            }
+        }
+        stage('test') {
+            steps{
+                sh('make test')
             }
         }
         stage('make release') {
