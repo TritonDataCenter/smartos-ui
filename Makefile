@@ -127,10 +127,6 @@ check:: assets fmt fmt-js clippy
 test: | $(CARGO_EXEC)
 	$(CARGO) test
 
-.PHONY: test
-test: | $(CARGO_EXEC)
-	$(CARGO) test
-
 .PHONY: release
 release: all
 	@echo "Building $(NAME)-$(shell ./target/release/smartos_ui version).tar.gz"

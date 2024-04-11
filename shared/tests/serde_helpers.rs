@@ -9,7 +9,7 @@
  */
 
 use serde::Deserialize;
-use serde_json::{Error, Value};
+use serde_json::Error;
 use smartos_shared::serde_helpers::{
     deserialize_into_bool, deserialize_into_u64,
 };

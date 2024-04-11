@@ -17,19 +17,26 @@ where
     let mut result: u64 = 0;
 
     match json_value {
+        // Some valid JSON number (1, -43, 0.5, -1.9, etc)
         Value::Number(number_value) => {
             let mut result: u64 = 0;
+            // Try to get the number as a u64
             if let Some(result_u64) = number_value.as_u64() {
                 result = result_u64
+            // Try to get the number as a f64
             } else if let Some(result_f64) = number_value.as_f64() {
+                // Convert the f64 into a u64
                 result = result_f64 as u64
             }
             Ok(result)
         }
         Value::String(string_value) => {
+            // Try to parse the string as a u64
             if let Ok(result_u64) = string_value.parse::<u64>() {
                 result = result_u64
+            // Try to parse the string as a u64
             } else if let Ok(result_f64) = string_value.parse::<f64>() {
+                // Convert the f64 into a u64
                 result = result_f64 as u64
             }
             Ok(result)
