@@ -151,6 +151,50 @@ Imported image ${uuid} (${manifest.name}@${manifest.version})`)
           },
           zpool: 'zones'
         })
+        // Also doesn't comply with:
+        // https://images.tritondatacenter.com/docs
+        list.push({
+          manifest: {
+            v: '2',
+            uuid: 'e5e8a3f8-cede-44e6-a076-02aadb2f4f21',
+            owner: '00000000-0000-0000-0000-000000000000',
+            name: 'Server2022',
+            description: 'Windows Server 2022 1.0.0 VM image',
+            version: '1.0.1',
+            state: 'active',
+            disabled: false,
+            public: true,
+            os: 'windows',
+            type: 'zvol',
+            files: [
+              {
+                sha1: '90f7cdb992fda3c1e7b5bab0e90e0aea707ad4e6',
+                size: 6925386848,
+                compression: 'gzip'
+              }
+            ],
+            requirements: {
+              networks: [
+                {
+                  name: 'net0',
+                  description: 'public'
+                }
+              ],
+              ssh_key: true
+            },
+            generate_passwords: 'true',
+            users: [
+              {
+                name: 'administrator'
+              }
+            ],
+            image_size: '20480',
+            disk_driver: 'virtio',
+            nic_driver: 'virtio',
+            cpu_type: 'host'
+          },
+          zpool: 'zones'
+        })
         console.log(JSON.stringify(list, null, 2))
       })
   }

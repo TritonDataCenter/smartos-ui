@@ -9,7 +9,10 @@
  */
 
 use crate::instance::Brand;
-use crate::serde_helpers::{deserialize_into_bool, deserialize_into_u64};
+use crate::serde_helpers::{
+    deserialize_into_bool, deserialize_into_option_bool,
+    deserialize_into_option_u64, deserialize_into_u64,
+};
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -108,7 +111,7 @@ pub struct Manifest {
 
     /// A boolean indicating whether to generate passwords for the users in the
     /// "users" field. If not present, the default value is true.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_into_option_bool")]
     pub generate_passwords: Option<bool>,
 
     /// A list of inherited directories (other than the defaults for the brand).
@@ -124,6 +127,7 @@ pub struct Manifest {
     pub cpu_type: Option<String>,
 
     /// The size (in MiB) of this VM image's disk. (if type==="zvol")
+    #[serde(default, deserialize_with = "deserialize_into_option_u64")]
     pub image_size: Option<u64>,
 
     /// Array of channel names to which this image belongs.

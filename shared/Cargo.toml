@@ -1,6 +1,6 @@
 [package]
 name = "smartos_shared"
-version = "0.1.16"
+version = "0.1.17"
 homepage = "https://github.com/tritondatacenter/smartos-ui"
 description = "SmartOS UI shared structs and functions"
 edition = "2021"
