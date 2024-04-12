@@ -13,4 +13,6 @@
 source /tmp/.sysinfo.parsable
 ip="$Admin_IP"
 
+[[ -d "/var/run/smartos_ui" ]] || mkdir -p "/var/run/smartos_ui"
+
 UI_BIND_HTTP_ADDRESS=$ip:8880 UI_BIND_HTTPS_ADDRESS=$ip:4443 ./bin/ui

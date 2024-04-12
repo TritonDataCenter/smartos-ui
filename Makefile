@@ -131,8 +131,7 @@ test: | $(CARGO_EXEC)
 release: all
 	@echo "Building $(NAME)-$(shell ./target/release/smartos_ui version).tar.gz"
 
-	@mkdir -p $(RELSTAGEDIR)/root/opt/smartos/ui/bin \
-		$(RELSTAGEDIR)/root/opt/smartos/ui/chroot
+	@mkdir -p $(RELSTAGEDIR)/root/opt/smartos/ui/bin
 
 	cp $(CARGO_TARGET_DIR)/release/smartos_ui \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin/ui
