@@ -131,6 +131,7 @@ test: | $(CARGO_EXEC)
 release: all
 	@echo "Building $(NAME)-$(shell ./target/release/smartos_ui version).tar.gz"
 
+	# Executables
 	@mkdir -p $(RELSTAGEDIR)/root/opt/smartos/ui/bin
 
 	cp $(CARGO_TARGET_DIR)/release/smartos_ui \
@@ -139,17 +140,25 @@ release: all
 	cp $(CARGO_TARGET_DIR)/release/smartos_ui_executor \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin/executor
 
+	cp $(TOP)/tools/ui.sh \
+		$(RELSTAGEDIR)/root/opt/smartos/ui/bin
+
+	@mkdir -p $(RELSTAGEDIR)/root/opt/smartdc/bin
+
+	cp $(TOP)/tools/uiadm.sh \
+		$(RELSTAGEDIR)/root/opt/smartdc/bin/uiadm
+
+	# Chroot
 	@mkdir -p $(RELSTAGEDIR)/root/var/svc/manifest/site
 
+	# SMF Manifests
 	cp $(TOP)/smf/manifests/smartos-ui.xml \
 		$(RELSTAGEDIR)/root/var/svc/manifest/site
 
 	cp $(TOP)/smf/manifests/smartos-ui-executor.xml \
 		$(RELSTAGEDIR)/root/var/svc/manifest/site
 
-	cp $(TOP)/tools/ui.sh \
-		$(RELSTAGEDIR)/root/opt/smartos/ui/bin
-
+	# Logs
 	@mkdir -p $(RELSTAGEDIR)/root/var/log
 
 	# UI process doesn't have permission to create this file
