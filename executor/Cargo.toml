@@ -1,6 +1,6 @@
 [package]
 name = "smartos_ui_executor"
-version = "0.1.17"
+version = "0.1.18"
 homepage = "https://github.com/tritondatacenter/smartos-ui"
 description = "SmartOS UI Executor"
 edition = "2021"

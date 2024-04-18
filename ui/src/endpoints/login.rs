@@ -65,7 +65,7 @@ pub async fn post_index(
     if user == ctx.context().config.login_user && authed {
         try_join!(
             ctx.context().vminfod.get_instances(),
-            ctx.context().executor.get_images(),
+            ctx.context().executor.get_images(&ctx.log),
         )
         .map_err(to_internal_error)?;
         return session::create(&ctx, user);

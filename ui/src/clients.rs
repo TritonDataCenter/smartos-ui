@@ -21,6 +21,7 @@ use smartos_shared::{
 };
 
 use reqwest::{Client as HTTPClient, RequestBuilder, Response};
+use slog::Logger;
 use uuid::Uuid;
 
 /// A generic handler that consists of either an HTTP request error or a JSON
@@ -155,10 +156,13 @@ impl ExecutorClient {
         self.get("sysinfo").send().await?.error_for_status()?.json().await
     }
 
-    pub async fn get_images(&self) -> Result<Vec<Image>, reqwest::Error> {
+    pub async fn get_images(
+        &self,
+        log: &Logger,
+    ) -> Result<Vec<Image>, reqwest::Error> {
         let response =
             self.get("image").send().await?.error_for_status()?.text().await?;
-        Ok(Image::deserialize_list(response.as_str()))
+        Ok(Image::deserialize_list(response.as_str(), log))
     }
 
     pub async fn get_image(&self, id: &Uuid) -> Result<Image, reqwest::Error> {
@@ -184,10 +188,11 @@ impl ExecutorClient {
 
     pub async fn get_available_images(
         &self,
+        log: &Logger,
     ) -> Result<Vec<Image>, reqwest::Error> {
         let response =
             self.get("avail").send().await?.error_for_status()?.text().await?;
-        Ok(Image::deserialize_list(response.as_str()))
+        Ok(Image::deserialize_list(response.as_str(), log))
     }
 
     pub async fn delete_image(&self, id: &Uuid) -> Result<(), reqwest::Error> {

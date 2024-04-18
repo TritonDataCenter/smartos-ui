@@ -17,6 +17,7 @@ use crate::serde_helpers::{
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use slog::{warn, Logger};
 use std::fmt::{Display, Error, Formatter};
 use std::str::FromStr;
 use url::Url;
@@ -43,6 +44,7 @@ pub struct Manifest {
     pub uuid: Uuid,
 
     /// The UUID of the owner of this image (the account that created it).
+    #[serde(default)]
     pub owner: Uuid,
 
     /// A short name for this image. Max 512 characters (though practical usage should be much shorter). No uniqueness guarantee.
@@ -74,7 +76,7 @@ pub struct Manifest {
     pub disabled: bool,
 
     /// Indicates if this image is publicly available.
-    #[serde(deserialize_with = "deserialize_into_bool")]
+    #[serde(default, deserialize_with = "deserialize_into_bool")]
     pub public: bool,
 
     /// The date at which the image is activated. Set by the IMGAPI server.
@@ -361,14 +363,16 @@ impl Image {
     /// Deserializes each image in a list of images individually so that
     /// images from external sources, which don't strictly follow the IMGAPI
     /// format won't cause issues elsewhere.
-    pub fn deserialize_list(list: &str) -> Vec<Image> {
+    pub fn deserialize_list(list: &str, log: &Logger) -> Vec<Image> {
         let mut images: Vec<Image> = Vec::new();
         let mut values: Vec<Value> =
             serde_json::from_str(list).unwrap_or(Vec::new());
         for value in values.drain(..) {
             match serde_json::from_value(value) {
                 Ok(image) => images.push(image),
-                Err(err) => eprintln!("\n\nERROR: {:?}", err),
+                Err(err) => {
+                    warn!(log, "Failed to serialize manifest: {:?}", err);
+                }
             }
         }
         images

@@ -1787,6 +1787,7 @@ dependencies = [
  "schemars",
  "serde",
  "serde_json",
+ "slog",
  "time",
  "url",
  "uuid",

@@ -45,8 +45,12 @@ pub async fn get_index(
         return redirect_login(response, &ctx);
     }
 
-    let images =
-        ctx.context().executor.get_images().await.map_err(to_internal_error)?;
+    let images = ctx
+        .context()
+        .executor
+        .get_images(&ctx.log)
+        .await
+        .map_err(to_internal_error)?;
 
     let template = ImagesTemplate { title: "Images", images };
     let result = template.render().map_err(to_internal_error)?;
@@ -197,12 +201,16 @@ pub async fn get_import_index(
     let mut images = ctx
         .context()
         .executor
-        .get_available_images()
+        .get_available_images(&ctx.log)
         .await
         .map_err(to_internal_error)?;
 
-    let installed_images =
-        ctx.context().executor.get_images().await.map_err(to_internal_error)?;
+    let installed_images = ctx
+        .context()
+        .executor
+        .get_images(&ctx.log)
+        .await
+        .map_err(to_internal_error)?;
 
     images.retain(|available| {
         !installed_images

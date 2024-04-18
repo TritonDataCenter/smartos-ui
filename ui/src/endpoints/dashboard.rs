@@ -48,7 +48,7 @@ pub async fn get_index(
     let image_count = ctx
         .context()
         .executor
-        .get_images()
+        .get_images(&ctx.log)
         .await
         .map_err(to_internal_error)?
         .len();

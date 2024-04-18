@@ -312,8 +312,12 @@ pub async fn get_index(
         .await
         .map_err(to_internal_error)?;
 
-    let images =
-        ctx.context().executor.get_images().await.map_err(to_internal_error)?;
+    let images = ctx
+        .context()
+        .executor
+        .get_images(&ctx.log)
+        .await
+        .map_err(to_internal_error)?;
     let image_count = images.len();
 
     let mut instance_views = ctx
@@ -526,8 +530,12 @@ pub async fn get_provision(
         .map_err(to_internal_error)?;
 
     let mut image_list = BTreeMap::<String, Vec<Image>>::new();
-    let mut images =
-        ctx.context().executor.get_images().await.map_err(to_internal_error)?;
+    let mut images = ctx
+        .context()
+        .executor
+        .get_images(&ctx.log)
+        .await
+        .map_err(to_internal_error)?;
 
     while let Some(image) = images.pop() {
         if image_uuid == image.manifest.uuid.to_string() {
