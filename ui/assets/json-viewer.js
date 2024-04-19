@@ -15,7 +15,7 @@ import {
   basicSetup,
   json,
   oneDark
-} from '@tpaul/codemirror6-json-rolledup'
+} from './codemirror.mjs'
 
 // Setup a read-only CodeMirror instance for JSON viewing
 export const setupJSONViewer = () => {

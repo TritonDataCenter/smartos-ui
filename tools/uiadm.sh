@@ -12,7 +12,7 @@
 set -o pipefail
 
 # Default well-known source of SmartOS UI Images
-URL_PREFIX=https://us-central.manta.mnx.io/tpaul/public/smartos_ui_dev
+URL_PREFIX=https://us-central.manta.mnx.io/tpaul/public/smartos_ui_dev/release
 #URL_PREFIX=https://us-central.manta.mnx.io/Joyent_Dev/public/SmartOS-UI
 INSTALL_PREFIX=/opt/smartos/ui
 

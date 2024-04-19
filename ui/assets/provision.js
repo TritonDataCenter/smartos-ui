@@ -16,7 +16,7 @@ import {
   basicSetup,
   json,
   oneDark
-} from '@tpaul/codemirror6-json-rolledup'
+} from './codemirror.mjs'
 
 // HTMLX needs access to the editors
 window.editors = {}
