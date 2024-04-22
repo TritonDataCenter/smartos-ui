@@ -171,6 +171,12 @@ release: all
 
 	@rm -rf $(RELSTAGEDIR)
 
+.PHONY: publish
+publish: release
+	mkdir -p $(ENGBLD_BITS_DIR)/$(NAME)
+	cp $(TOP)/$(NAME)-$(shell ./target/release/smartos_ui version).tar.gz \
+		$(ENGBLD_BITS_DIR)/$(NAME)
+
 include ./deps/eng/tools/mk/Makefile.deps
 include ./deps/eng/tools/mk/Makefile.targ
 include ./deps/eng/tools/mk/Makefile.rust.targ

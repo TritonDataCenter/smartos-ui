@@ -14,3 +14,5 @@ test/data/db/img/*
 test/data/db/vm/*
 !test/data/db/vm/.gitkeep
 ._*
+bits
+smartos-ui*.tar.gz

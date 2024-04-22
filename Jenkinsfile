@@ -32,9 +32,9 @@ pipeline {
                 sh('make test')
             }
         }
-        stage('make release') {
+        stage('make publish') {
             steps {
-                sh('make release')
+                sh('make publish bits-upload')
             }
         }
     }
