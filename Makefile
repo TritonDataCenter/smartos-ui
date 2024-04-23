@@ -43,6 +43,12 @@ endif
 ui/assets/node_modules: ui/assets/package.json ui/assets/package-lock.json
 	cd ui/assets && npm install --omit=dev
 
+	# The npm version available in the Jenkins agent will downgrade the
+	# package-lock version to v1 causing the workspace to be dirty. Once a newer
+	# sdc-node version is available this can be removed (and the pkgsrc node can
+	# be replaced with sdc-node.)
+	git checkout ui/assets/package-lock.json
+
 ui/assets/main.css: ui/assets/main.in.css ui/assets/tailwind.config.js $(J2_FILES)
 	cd ui/assets && \
 		./node_modules/.bin/tailwindcss -m -i ./main.in.css -o ./main.css && \
