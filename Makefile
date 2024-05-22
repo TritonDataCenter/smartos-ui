@@ -91,11 +91,11 @@ all: release_build
 
 .PHONY: release_build
 release_build: assets $(RS_FILES) | $(CARGO_EXEC)
-	$(CARGO) build --release
+	STAMP=$(STAMP) $(CARGO) build --release
 
 .PHONY: debug
 debug: assets $(RS_FILES) | $(CARGO_EXEC)
-	$(CARGO) build
+	STAMP=$(STAMP) $(CARGO) build
 
 .PHONY: fmt
 fmt: | $(CARGO_EXEC)
@@ -103,7 +103,7 @@ fmt: | $(CARGO_EXEC)
 
 .PHONY: clippy
 clippy: | $(CARGO_EXEC)
-	$(CARGO) clippy
+	STAMP=$(STAMP) $(CARGO) clippy
 
 .PHONY: version
 version:
@@ -131,11 +131,11 @@ check:: assets fmt fmt-js clippy
 
 .PHONY: test
 test: | $(CARGO_EXEC)
-	$(CARGO) test
+	STAMP=$(STAMP) $(CARGO) test
 
 .PHONY: release
 release: all
-	@echo "Building $(NAME)-$(shell ./target/release/smartos_ui version).tar.gz"
+	@echo "Building $(NAME)-$(STAMP).tar.gz"
 
 	# Executables
 	@mkdir -p $(RELSTAGEDIR)/root/opt/smartos/ui/bin
@@ -173,14 +173,14 @@ release: all
 	chown nobody $(RELSTAGEDIR)/root/var/log/smartos_ui.log
 
 	cd $(RELSTAGEDIR) && $(TAR) -I pigz -cf \
-		$(TOP)/$(NAME)-$(shell ./target/release/smartos_ui version).tar.gz root
+		$(TOP)/$(NAME)-$(STAMP).tar.gz root
 
 	@rm -rf $(RELSTAGEDIR)
 
 .PHONY: publish
 publish: release
 	mkdir -p $(ENGBLD_BITS_DIR)/$(NAME)
-	cp $(TOP)/$(NAME)-$(shell ./target/release/smartos_ui version).tar.gz \
+	cp $(TOP)/$(NAME)-$(STAMP).tar.gz \
 		$(ENGBLD_BITS_DIR)/$(NAME)
 	cp $(TOP)/tools/uiadm.sh $(ENGBLD_BITS_DIR)/$(NAME)
 

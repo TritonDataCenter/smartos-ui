@@ -31,11 +31,19 @@ use tokio::try_join;
 async fn main() -> Result<(), String> {
     let name = option_env!("CARGO_PKG_NAME").unwrap_or("?");
     let full_version = format!("{}-{}", VERSION, GIT_COMMIT_SHORT);
+    let build_stamp = env!("STAMP", "STAMP not defined.");
 
     // If provided with a single argument of "version", print version and exit.
     let mut args = env::args();
     if args.len() > 1 && args.nth(1).is_some_and(|arg| arg == "version") {
         println!("{}", full_version);
+        return Ok(());
+    }
+
+    // If provided with a single argument of "ts", print build_stamp and exit.
+    let mut args = env::args();
+    if args.len() > 1 && args.nth(1).is_some_and(|arg| arg == "stamp") {
+        println!("{}", build_stamp);
         return Ok(());
     }
 
