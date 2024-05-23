@@ -19,6 +19,8 @@ ENGBLD_REQUIRE := $(shell git submodule update --init deps/eng)
 include ./deps/eng/tools/mk/Makefile.defs
 include ./deps/eng/tools/mk/Makefile.rust.defs
 
+export STAMP
+
 BUILD_PLATFORM = 20210826T002459Z
 RELEASE_TARBALL :=	$(NAME)-pkg-$(STAMP).tar.gz
 RELSTAGEDIR :=		/tmp/$(NAME)-$(STAMP)
@@ -91,11 +93,11 @@ all: release_build
 
 .PHONY: release_build
 release_build: assets $(RS_FILES) | $(CARGO_EXEC)
-	STAMP=$(STAMP) $(CARGO) build --release
+	$(CARGO) build --release
 
 .PHONY: debug
 debug: assets $(RS_FILES) | $(CARGO_EXEC)
-	STAMP=$(STAMP) $(CARGO) build
+	$(CARGO) build
 
 .PHONY: fmt
 fmt: | $(CARGO_EXEC)
@@ -103,7 +105,7 @@ fmt: | $(CARGO_EXEC)
 
 .PHONY: clippy
 clippy: | $(CARGO_EXEC)
-	STAMP=$(STAMP) $(CARGO) clippy
+	$(CARGO) clippy
 
 .PHONY: version
 version:
@@ -131,7 +133,7 @@ check:: assets fmt fmt-js clippy
 
 .PHONY: test
 test: | $(CARGO_EXEC)
-	STAMP=$(STAMP) $(CARGO) test
+	$(CARGO) test
 
 .PHONY: release
 release: all
