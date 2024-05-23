@@ -138,36 +138,48 @@ info() {
 get_avail_versions() {
 	branch="$1"
 	ui="$INSTALL_PREFIX/bin/ui"
-	if [[ -n $branch ]]; then
-		vcurl "${URL_PREFIX}/?limit=1000" | json -ga name |\
-			grep "$branch" | grep -v latest
-	elif [[ -f "$ui" ]]; then
+	if [[ -f "$ui" ]]; then
 		stamp="$("$ui" stamp)"
 		marker="&marker=${stamp}"
 		vcurl "${URL_PREFIX}/?limit=1000$marker" | json -ga name |\
-			grep "$branch" | grep -v "$version" | grep -v latest
+			grep "$branch" | grep -v "$stamp" | grep -v latest
 	else
 		vcurl "${URL_PREFIX}/?limit=1000" | json -ga name |\
-			grep master | grep -v latest
+			grep "$branch" | grep -v latest
 	fi
 }
 
 install() {
+
+	OPTIND=1
+	while getopts "b:" options; do
+	   case $options in
+	      b ) BRANCH="${OPTARG}";;
+	      * ) usage ;;
+	   esac
+	done
+
+	shift $(( OPTIND -1 ))
+
+	echo "1 is $1"
+	echo "2 is $2"
+
+	# Accept an alternate installation root
+	root="/${2}"
+
 	if [[ -z "$1" ]]; then
 		err "Either a version or 'latest' must be provided"
 	elif [[ "$1" == "latest" ]]; then
 		ui="$INSTALL_PREFIX/bin/ui"
-		version=$(basename "$(vcurl "${URL_PREFIX}/master-latest")")
-		if [[ -f "$ui" ]] && [[ "$("$ui" stamp)" == "$version" ]]; then
+		version=$(basename "$(vcurl "${URL_PREFIX}/${BRANCH:=master}-latest")")
+		if [[ ${root} == '/' ]] && [[ -f "$ui" ]] && \
+		    [[ "$("$ui" stamp)" == "$version" ]]; then
 			err "Latest version is already installed: $version"
 		fi
 		echo "Installing latest version: $version"
 	else
 		version="$1"
 	fi
-
-	# Accept an alternate installation root
-	root="/${2}"
 
 	# # Get the minimium supported PI from the Manta object's metadata
 	# minimium_pi=$("${CURL[@]}" -I -o /dev/null -w '%header{m-minimum-pi}' \
@@ -200,7 +212,7 @@ install() {
 	fi
 
 	# Don't install services if an alternate root was provided.
-	if [[ ${#root} == 1 ]]; then
+	if [[ ${root} == '/' ]]; then
 		install_services
 		echo "Service running at https://$Admin_IP:4443"
 	fi

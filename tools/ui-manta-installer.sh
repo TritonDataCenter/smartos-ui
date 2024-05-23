@@ -36,4 +36,4 @@ fi
 curl -L -o "${installer}" -sf "${MANTA_URL}${latest}/${FNAME}"
 
 chmod +x "${installer}"
-${installer} avail
+${installer} install -b "${BRANCH}" latest
