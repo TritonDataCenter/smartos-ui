@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+/*
+ * Copyright 2024 MNX Cloud, Inc.
+ */
+
+const { join } = require('node:path')
+const { createReadStream, readdirSync, readFileSync } = require('node:fs')
+const server = require('node:http').createServer()
+
+const port = 9090
+const root = join(__dirname, '..', 'data', 'db', 'vm')
+
+server.on('request', (req, res) => {
+  const [, id] = req.url.split('/').filter(p => p)
+
+  if (id) {
+    return createReadStream(join(root, `${id}.json`)).on('error', e => {
+      console.error(e)
+      res.writeHead(404, 'Not Found').end()
+    }).pipe(res)
+  }
+
+  try {
+    const vms = readdirSync(root)
+      .filter(file => !file.startsWith('.'))
+      .map(file => JSON.parse(readFileSync(join(root, file))))
+    res.writeHead(200, 'Ok').end(JSON.stringify(vms))
+  } catch (e) {
+    console.error(e)
+    res.writeHead(404, 'Not Found').end()
+  }
+})
+
+server.listen(port, () => console.log(`Starting mock vminfod on port ${port}`))

@@ -1,0 +1,44 @@
+{#
+
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+  Copyright 2024 MNX Cloud, Inc.
+
+#}
+{%- import "macros/inputs.j2" as input -%}
+<div class="mx-auto px-8">
+  <div class="space-y-12">
+    <div class="pb-12">
+      <h2 class="text-base font-semibold leading-7 text-white">
+        Native Zone Properties
+      </h2>
+      <p class="mt-1 text-sm leading-6 text-gray-600">
+        Instance properties specific to a native zone.
+      </p>
+
+      {% if let Some(image) = self.image %}
+        <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+          <div class="sm:col-span-4">
+            <label for="prop-image-uuid" class="block text-sm font-medium leading-6 text-white">
+              Image
+            </label>
+            <div class="mt-2">
+              <div class="flex">
+                <a
+                  class="underline decoration-solid text-blue-600 hover:text-blue-500"
+                  href="/images/{{image.manifest.uuid}}"
+                  {% if let Some(description) = image.manifest.description %}
+                    title="{{description}}"
+                  {% endif %}>
+                  {{image.manifest.name}}@{{image.manifest.version}} ({{image.manifest.uuid}})
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

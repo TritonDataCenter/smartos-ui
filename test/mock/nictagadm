@@ -1,0 +1,4 @@
+#!/bin/bash
+
+root="$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)/../data"
+cat "$root/nictagadm.txt"

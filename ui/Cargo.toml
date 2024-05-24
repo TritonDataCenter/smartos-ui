@@ -1,0 +1,40 @@
+[package]
+name = "smartos_ui"
+version = "0.1.19"
+homepage = "https://github.com/tritondatacenter/smartos-ui"
+description = "SmartOS UI"
+edition = "2021"
+repository = "https://github.com/tritondatacenter/smartos-ui"
+license = "MPL-2.0"
+authors = [
+    "MNX Cloud (mnx.io)"
+]
+
+[dependencies]
+smartos_shared = { path = "../shared" }
+tokio = "1.35"
+hyper = "0.14"
+dropshot = "0.10"
+slog = "2.7"
+schemars = { version = "0.8", features = ["url"] }
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"]}
+nanoid = "0.4"
+askama = "0.12"
+reqwest = { version = "0.11", features = ["json"] }
+privdrop = "0.5"
+uuid = { version = "1.7", features = ["serde", "v4"] }
+http = "0.2"
+pwhash = "1.0"
+url = { version = "2.5", features = ["serde"] }
+time = "0.3"
+
+[target.'cfg(target_os = "illumos")'.dependencies]
+illumos-priv = "0.2"
+
+[target.'cfg(target_os = "illumos")'.dependencies.reqwest]
+version = "0.11"
+features = ["json", "native-tls-vendored"]
+
+[build-dependencies]
+build-data = "0"

@@ -1,0 +1,119 @@
+{#
+
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+  Copyright 2024 MNX Cloud, Inc.
+
+#}
+<header class="header-bg top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/10 px-4 shadow-sm sm:px-6 lg:px-8">
+  <h1 class="text-base font-semibold leading-7 text-xl text-white">
+    {% call icons::server("inline w-8 h-8") %}
+    <span class="align-middle pl-2">
+      {{instance.generic.alias.as_deref().unwrap_or(instance.generic.uuid.to_string().as_ref())}}
+    </span>
+  </h1>
+  <div class="flex flex-1 items-center justify-end gap-x-6 mb-10 my-10">
+      {% if json.is_none() %}
+      <button
+        type="submit"
+        data-hx-get="/instances/{{instance.generic.uuid}}?json=true"
+        data-hx-target="#main"
+        data-hx-select="#content"
+        data-hx-indicator="#json-loader"
+        class="btn btn-clear">
+          <span class="htmx-indicator" id="json-loader">
+            <span class="loader-icon">
+              {% call icons::loading("h-6 w-6 inline pr-1") %}
+            </span>
+            <span class="default-icon">
+              {% call icons::code("h-6 w-6 inline") %}
+            </span>
+            <span class="align-middle btn-text">View JSON</span>
+          </span>
+      </button>
+    {% else %}
+      <button
+        type="submit"
+        data-hx-get="/instances/{{instance.generic.uuid}}"
+        data-hx-target="#main"
+        data-hx-select="#content"
+        data-hx-indicator="#properties-loader"
+        class="btn btn-clear">
+          <span class="htmx-indicator" id="properties-loader">
+            <span class="loader-icon">
+              {% call icons::loading("h-6 w-6 inline pr-1") %}
+            </span>
+            <span class="default-icon">
+              {% call icons::list("h-6 w-6 inline") %}
+            </span>
+            <span class="align-middle btn-text">View Properties</span>
+          </span>
+      </button>
+    {% endif %}
+    {% if instance.generic.state == "running" %}
+      <button
+        data-hx-post="/instances/{{instance.generic.uuid}}/stop"
+        data-hx-target="#notifications"
+        data-hx-swap="beforeend"
+        data-hx-confirm="Are you sure you want to stop this instance?"
+        data-hx-indicator="#instance-stop-indicator"
+        data-hx-disabled-elt="this"
+        title="Stop this instance"
+        type="submit"
+        class="btn btn-amber">
+        <span class="htmx-indicator" id="instance-stop-indicator">
+          <span class="loader-icon">
+            {% call icons::loading("h-6 w-6 inline pr-1") %}
+          </span>
+          <span class="default-icon">
+            {% call icons::stop_circle("h-6 w-6 inline") %}
+          </span>
+        </span>
+        <span class="align-middle btn-text">Stop</span>
+      </button>
+    {% else %}
+      <button
+        data-hx-post="/instances/{{instance.generic.uuid}}/start"
+        data-hx-target="#notifications"
+        data-hx-swap="beforeend"
+        data-hx-indicator="#instance-start-indicator"
+        data-hx-disabled-elt="this"
+        title="Start this instance"
+        type="submit"
+        class="btn btn-primary">
+        <span class="htmx-indicator" id="instance-start-indicator">
+          <span class="loader-icon">
+            {% call icons::loading("h-6 w-6 inline pr-1") %}
+          </span>
+          <span class="default-icon">
+            {% call icons::play_circle("h-6 w-6 inline") %}
+          </span>
+        </span>
+        <span class="align-middle btn-text">Start</span>
+      </button>
+    {% endif %}
+    <button
+      data-hx-delete="/instances/{{instance.generic.uuid}}"
+      data-hx-target="#notifications"
+      data-hx-swap="beforeend"
+      data-hx-confirm="Are you sure you want to delete this instance?"
+      data-hx-indicator="#instance-delete-indicator"
+      data-hx-disabled-elt="this"
+      title="Delete this instance"
+      type="submit"
+      class="btn btn-warn">
+      <span class="htmx-indicator" id="instance-delete-indicator">
+        <span class="loader-icon">
+          {% call icons::loading("h-6 w-6 inline pr-1") %}
+        </span>
+        <span class="default-icon">
+          {% call icons::trash("h-6 w-6 inline") %}
+        </span>
+      </span>
+      <span class="align-middle btn-text">Delete</span>
+    </button>
+
+  </div>
+</header>

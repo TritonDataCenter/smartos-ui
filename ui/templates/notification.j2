@@ -1,0 +1,55 @@
+{#
+
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+  Copyright 2024 MNX Cloud, Inc.
+
+#}
+{%- import "macros/icons.j2" as icons -%}
+<div id="notification-{{id}}"
+  data-for-entity="{{entity_id}}"
+  {% if let Some(interval) = timeout %}
+    data-hx-ext="remove-me"
+    data-remove-me="{{interval}}"
+  {% endif %}
+  class="notification pointer-events-none z-[99] fixed inset-0 flex items-end sm:items-start sm:pt-16 sm:pr-8">
+  <div class="flex w-full flex-col items-center space-y-4 sm:items-end">
+    <div class="border border-slate-700 pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-slate-800 shadow-lg ring-1 ring-black ring-opacity-5 mt-1">
+      <div class="p-4">
+        <div class="flex items-start">
+          <div class="flex-shrink-0 notification-icons">
+            {% match kind %}
+              {% when NotificationKind::Ok %}
+                {% call icons::ok("h-6 w-6 text-green-400") %}
+              {% when NotificationKind::Error %}
+                {% call icons::error("h-6 w-6 text-red-400") %}
+            {% endmatch %}
+          </div>
+          <div class="ml-3 w-0 flex-1 pt-0.5">
+            <p class="notification-heading text-sm font-medium text-white">{{ subject }}</p>
+            <p class="notification-body mt-1 text-sm text-slate-500">{{ message }}</p>
+          </div>
+          <div class="ml-4 flex flex-shrink-0">
+            <button
+              type="button"
+              data-target="#notification-{{id}}"
+              class="notification-close cursor-pointer inline-flex rounded-md bg-slate-600 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+              {% call icons::close("h-5 w-5") %}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {# Handles redirecting user if requested #}
+  {% if let Some(path) = redirect %}
+    <div
+      data-hx-get="{{path}}"
+      data-hx-target="#main"
+      data-hx-select="#content"
+      data-hx-trigger="load"
+      data-created-at="{{created_at}}"></div>
+  {% endif %}
+</div>

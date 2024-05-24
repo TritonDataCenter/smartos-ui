@@ -1,0 +1,223 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+/*
+ * Copyright 2024 MNX Cloud, Inc.
+ */
+
+@import 'node_modules/sortable-tablesort/sortable-base.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    /*
+     * Classes for the side bar navigation
+     */
+    .active-sidebar-nav {
+        @apply bg-gray-800;
+        @apply text-white;
+    }
+    .inactive-sidebar-nav {
+        @apply text-gray-400;
+        @apply hover:text-white hover:bg-gray-800
+    }
+    .inactive-sidebar-nav:hover {
+        @apply text-white;
+        @apply bg-gray-800;
+    }
+
+    /*
+     * Classes for the provisioning editor tabs
+     */
+    .active-editor-tab {
+        @apply border-blue-500;
+        @apply text-blue-600;
+    }
+    .inactive-editor-tab {
+        @apply border-transparent;
+        @apply text-gray-500;
+    }
+    .inactive-editor-tab:hover {
+      @apply border-gray-300;
+      @apply text-gray-400;
+    }
+
+    /*
+     *  Informational tooltip
+     */
+    .tooltip {
+      @apply invisible absolute;
+    }
+
+    .has-tooltip:hover .tooltip {
+      @apply visible z-50;
+    }
+
+    /*
+     * A consistently-styled, generic button
+     */
+    .btn {
+        @apply cursor-pointer;
+        @apply rounded-md;
+        @apply px-3;
+        @apply py-2;
+        @apply text-sm;
+        @apply font-semibold;
+        @apply shadow-sm;
+        @apply focus-visible:outline;
+        @apply focus-visible:outline-2;
+        @apply focus-visible:outline-offset-2;
+    }
+
+    /*
+     * Button with an icon and text looks better with slight right padding
+     */
+    .btn > .btn-text {
+        @apply pr-1;
+    }
+
+    /*
+     * A button with no background except on hover
+     */
+    .btn-clear {
+        @apply text-white;
+        @apply hover:bg-gray-800;
+    }
+
+    /*
+     * A blue button with black text
+     */
+    .btn-primary {
+        @apply text-black;
+        @apply bg-blue-600;
+        @apply hover:bg-blue-500;
+        @apply focus-visible:outline-blue-600;
+    }
+
+    /*
+     * A red button with white text
+     */
+    .btn-warn {
+        @apply text-white;
+        @apply bg-red-500;
+        @apply hover:bg-red-400;
+        @apply focus-visible:outline-red-500;
+    }
+
+    /*
+     * An amber button with white text
+     */
+    .btn-amber {
+        @apply text-white;
+        @apply bg-amber-500;
+        @apply hover:bg-amber-400;
+        @apply focus-visible:outline-amber-500;
+    }
+
+    /*
+     * A disabled button
+     */
+    .btn-disabled {
+        @apply text-slate-400;
+        @apply bg-slate-500;
+        @apply hover:bg-slate-500;
+        @apply focus-visible:outline-slate-500;
+    }
+
+    .sticky-header > th {
+        @apply bg-gray-800;
+    }
+
+    .header-bg {
+        background: linear-gradient(90deg, rgba(36,184,235,0.397) 0%, rgba(27,24,39,0.269) 100%, rgba(34,34,34,1) 100%);
+    }
+}
+
+/* Misc custom classes */
+#notify {
+    z-index:99 !important;
+}
+
+.notify-icons svg {
+    display:none;
+}
+
+/*
+ * Kind of hacky, but will give each new notification a slight margin
+ * to give a stacking effect until we can handle this better.
+ */
+#notifications .notification:nth-child(2) {
+    margin-top:0.5em;
+    margin-right:0.5em;
+}
+
+#notifications .notification:nth-child(3) {
+    margin-top:1em;
+    margin-right:1em;
+}
+
+#notifications .notification:nth-child(4) {
+    margin-top:1.5em;
+    margin-right:1.5em;
+}
+
+#notifications .notification:nth-child(5) {
+    margin-top:2em;
+    margin-right:2em;
+}
+
+#notifications .notification:nth-child(6) {
+    margin-top:2.5em;
+    margin-right:2.5em;
+}
+
+#notifications .notification:nth-child(7) {
+    margin-top:3em;
+    margin-right:3em;
+}
+
+#notifications .notification:nth-child(8) {
+    margin-top:3.5em;
+    margin-right:3.5em;
+}
+
+#tab-navs.htmx-request .inactive-editor-tab {
+    display:none;
+}
+
+.htmx-indicator {
+    opacity: 1 !important;
+}
+
+.htmx-indicator .loader-icon {
+    display:none;
+}
+
+.htmx-request .default-icon {
+    display:inline;
+}
+
+.htmx-request .htmx-indicator .loader-icon {
+    display:inline;
+}
+
+.htmx-request .htmx-indicator .default-icon {
+    display:none;
+}
+
+.htmx-request.htmx-indicator .loader-icon {
+    display:inline;
+}
+
+.htmx-request.htmx-indicator .default-icon {
+    display:none;
+}
+
+/* when clicking on a table header to sort, don't highlight the text */
+thead > tr > th {
+  user-select: none;
+}

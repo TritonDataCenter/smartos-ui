@@ -1,0 +1,203 @@
+#!/usr/bin/env node --no-warnings
+
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+/*
+ * Copyright 2024 MNX Cloud, Inc.
+ */
+
+const { join } = require('node:path')
+const {
+  readdirSync, readFileSync, writeFileSync, unlinkSync
+} = require('node:fs')
+
+const root = join(__dirname, '..', 'data', 'db', 'img')
+const sources = [{ url: 'https://images.smartos.org', type: 'imgapi' }]
+
+const cmd = {
+  list: () => {
+    const imgs = readdirSync(root)
+      .filter(file => !file.startsWith('.'))
+      .map(file => {
+        return JSON.parse(readFileSync(join(root, file)))
+      })
+    console.log(JSON.stringify(imgs, null, 2))
+  },
+  get: ([uuid]) => {
+    console.log(readFileSync(join(root, `${uuid}.json`), 'utf-8'))
+  },
+  sources: () => console.log(JSON.stringify(sources, null, 2)),
+  import: ([,, source, uuid]) => {
+    fetch(`${source}/images/${uuid}`)
+      .then(res => res.json())
+      .then(manifest => {
+        if (manifest.code && manifest.code === 'ResourceNotFound') {
+          console.error(`imgadm import: error (ActiveImageNotFound): \
+an active image "${uuid}" was not found in image sources`)
+          process.exit(1)
+        }
+        setTimeout(() => {
+          const fileName = join(root, `${uuid}.json`)
+          writeFileSync(fileName, JSON.stringify({ manifest, source }))
+          console.log(`Image ${uuid} import success: Importing ${uuid} \
+(${manifest.name}@${manifest.version}) from "${source}"
+Gather image ${uuid} ancestry
+Must download and install 1 image (100.0 MiB)
+Downloaded image ${uuid} (100.0 MiB)
+Imported image ${uuid} (${manifest.name}@${manifest.version})`)
+        }, 3000)
+      }).catch(() => {
+        console.error('imgadm import: error')
+        process.exit(1)
+      })
+  },
+  delete: ([uuid]) => unlinkSync(join(root, `${uuid}.json`)),
+  avail: () => {
+    const [{ url }] = sources
+    fetch(`${url}/images`)
+      .then(res => res.json())
+      .then(images => {
+        const list = images.map(manifest => ({ manifest, source: url }))
+        // Image doesn't exist in source, used for testing error handling
+        list.push({
+          manifest: {
+            v: 2,
+            uuid: '00000000-0000-0000-0000-000000000001',
+            owner: '00000000-0000-0000-0000-000000000000',
+            name: 'bogus-20244',
+            version: '20240214',
+            state: 'active',
+            disabled: false,
+            public: true,
+            published_at: '2024-02-14T04:10:34Z',
+            type: 'zvol',
+            os: 'linux',
+            files: [
+              {
+                sha1: '80563f87c4b6a5e3cacf28a7b758b8de2f91e148',
+                size: 404943968,
+                compression: 'gzip'
+              }
+            ],
+            description: 'A bogus image that will never exist in the source.',
+            homepage: 'https://i.no.de/8bebf7b8979b8a11',
+            requirements: {
+              min_ram: 500,
+              networks: [
+                {
+                  name: 'net0',
+                  description: 'public'
+                }
+              ],
+              ssh_key: true
+            },
+            users: [
+              {
+                name: 'root'
+              }
+            ],
+            nic_driver: 'virtio',
+            disk_driver: 'virtio',
+            cpu_type: 'host',
+            image_size: 10240,
+            tags: {
+              role: 'os'
+            }
+          },
+          source: url
+        })
+        // Intentionally doesn't comply with:
+        // https://images.tritondatacenter.com/docs
+        list.push({
+          manifest: {
+            v: '2',
+            name: 'not-strict-minimal-64-trunk',
+            version: '20181018',
+            type: 'zone-dataset',
+            description: 'A 64-bit SmartOS image with just bootstrap packages installed. Ideal for users who want the smallest possible image upon which to build.',
+            homepage: 'https://docs.joyent.com/images/smartos/minimal',
+            published_at: '2018-10-18T10:21:26Z',
+            owner: '00000000-0000-0000-0000-000000000000',
+            public: 'false',
+            os: 'smartos',
+            urn: 'sdc:sdc:minimal-64-trunk:20181018',
+            files: [
+              {
+                compression: 'gzip',
+                sha1: '7eed76719f8f06bba785e3f883234ee3bd22afa6',
+                size: 28949229
+              }
+            ],
+            requirements: {
+              min_platform: {
+                '7.0': '20141030T081701Z'
+              },
+              networks: [
+                {
+                  name: 'net0',
+                  description: 'public'
+                }
+              ]
+            },
+            uuid: '91b904c0-d2bf-11e8-b86c-eb4613bea6ce',
+            tags: {
+              role: 'os',
+              group: 'minimal-64-trunk'
+            }
+          },
+          zpool: 'zones'
+        })
+        // Also doesn't comply with:
+        // https://images.tritondatacenter.com/docs
+        list.push({
+          manifest: {
+            v: '2',
+            uuid: 'e5e8a3f8-cede-44e6-a076-02aadb2f4f21',
+            owner: '00000000-0000-0000-0000-000000000000',
+            name: 'Server2022',
+            description: 'Windows Server 2022 1.0.0 VM image',
+            version: '1.0.1',
+            state: 'active',
+            disabled: false,
+            public: true,
+            os: 'windows',
+            type: 'zvol',
+            files: [
+              {
+                sha1: '90f7cdb992fda3c1e7b5bab0e90e0aea707ad4e6',
+                size: 6925386848,
+                compression: 'gzip'
+              }
+            ],
+            requirements: {
+              networks: [
+                {
+                  name: 'net0',
+                  description: 'public'
+                }
+              ],
+              ssh_key: true
+            },
+            generate_passwords: 'true',
+            users: [
+              {
+                name: 'administrator'
+              }
+            ],
+            image_size: '20480',
+            disk_driver: 'virtio',
+            nic_driver: 'virtio',
+            cpu_type: 'host'
+          },
+          zpool: 'zones'
+        })
+        console.log(JSON.stringify(list, null, 2))
+      })
+  }
+}
+
+cmd[process.argv[2]](process.argv.slice(3))
