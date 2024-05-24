@@ -142,28 +142,28 @@ release: all
 	# Executables
 	@mkdir -p $(RELSTAGEDIR)/root/opt/smartos/ui/bin
 
-	cp $(CARGO_TARGET_DIR)/release/smartos_ui \
+	cp -p $(CARGO_TARGET_DIR)/release/smartos_ui \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin/ui
 
-	cp $(CARGO_TARGET_DIR)/release/smartos_ui_executor \
+	cp -p $(CARGO_TARGET_DIR)/release/smartos_ui_executor \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin/executor
 
-	cp $(TOP)/tools/ui.sh \
+	cp -p $(TOP)/tools/ui.sh \
 		$(RELSTAGEDIR)/root/opt/smartos/ui/bin
 
 	@mkdir -p $(RELSTAGEDIR)/root/opt/smartdc/bin
 
-	cp $(TOP)/tools/uiadm.sh \
+	cp -p $(TOP)/tools/uiadm.sh \
 		$(RELSTAGEDIR)/root/opt/smartdc/bin/uiadm
 
 	# Chroot
 	@mkdir -p $(RELSTAGEDIR)/root/var/svc/manifest/site
 
 	# SMF Manifests
-	cp $(TOP)/smf/manifests/smartos-ui.xml \
+	cp -p $(TOP)/smf/manifests/smartos-ui.xml \
 		$(RELSTAGEDIR)/root/var/svc/manifest/site
 
-	cp $(TOP)/smf/manifests/smartos-ui-executor.xml \
+	cp -p $(TOP)/smf/manifests/smartos-ui-executor.xml \
 		$(RELSTAGEDIR)/root/var/svc/manifest/site
 
 	# Logs
@@ -182,9 +182,9 @@ release: all
 .PHONY: publish
 publish: release
 	mkdir -p $(ENGBLD_BITS_DIR)/$(NAME)
-	cp $(TOP)/$(NAME)-$(STAMP).tar.gz \
+	cp -p $(TOP)/$(NAME)-$(STAMP).tar.gz \
 		$(ENGBLD_BITS_DIR)/$(NAME)
-	cp $(TOP)/tools/uiadm.sh $(ENGBLD_BITS_DIR)/$(NAME)
+	cp -p $(TOP)/tools/uiadm.sh $(ENGBLD_BITS_DIR)/$(NAME)
 
 include ./deps/eng/tools/mk/Makefile.deps
 include ./deps/eng/tools/mk/Makefile.targ
