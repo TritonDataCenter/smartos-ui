@@ -1779,7 +1779,7 @@ checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
 
 [[package]]
 name = "smartos_shared"
-version = "0.1.20"
+version = "0.1.21"
 dependencies = [
  "dropshot",
  "http 0.2.12",
@@ -1795,7 +1795,7 @@ dependencies = [
 
 [[package]]
 name = "smartos_ui"
-version = "0.1.20"
+version = "0.1.21"
 dependencies = [
  "askama",
  "build-data",
@@ -1820,7 +1820,7 @@ dependencies = [
 
 [[package]]
 name = "smartos_ui_executor"
-version = "0.1.20"
+version = "0.1.21"
 dependencies = [
  "dropshot",
  "http 0.2.12",

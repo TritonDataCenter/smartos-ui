@@ -31,7 +31,17 @@ use tokio::try_join;
 async fn main() -> Result<(), String> {
     let name = option_env!("CARGO_PKG_NAME").unwrap_or("?");
     let full_version = format!("{}-{}", VERSION, GIT_COMMIT_SHORT);
-    let build_stamp = env!("STAMP", "STAMP not defined.");
+
+    // We want the build stamp provided by the Makefile inserted into the
+    // binary, but this runs afoul of things like `cargo check`. By making it
+    // optional, and inserting a well-known fake stamp if it's missing, we
+    // can successfully get through `cargo check`
+    let build_stamp_r = option_env!("STAMP");
+    let build_stamp;
+    match build_stamp_r {
+        Some(x) => build_stamp = x,
+        None => build_stamp = "00000000T000000Z",
+    }
 
     // If provided with a single argument of "version", print version and exit.
     let mut args = env::args();
