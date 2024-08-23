@@ -37,10 +37,7 @@ async fn main() -> Result<(), String> {
     // optional, and inserting a well-known fake stamp if it's missing, we
     // can successfully get through `cargo check`
     let build_stamp_r = option_env!("STAMP");
-    let build_stamp = match build_stamp_r {
-        Some(x) => x,
-        None => "00000000T000000Z",
-    };
+    let build_stamp = build_stamp_r.unwrap_or("00000000T000000Z");
 
     // If provided with a single argument of "version", print version and exit.
     let mut args = env::args();
