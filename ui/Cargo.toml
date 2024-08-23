@@ -1,6 +1,6 @@
 [package]
 name = "smartos_ui"
-version = "0.1.19"
+version = "0.1.20"
 homepage = "https://github.com/tritondatacenter/smartos-ui"
 description = "SmartOS UI"
 edition = "2021"

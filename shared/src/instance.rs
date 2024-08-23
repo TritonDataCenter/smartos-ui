@@ -98,7 +98,7 @@ pub struct Generic {
     pub zoneid: Option<u64>,
 
     // if stopped
-    pub exit_status: Option<u64>,
+    pub exit_status: Option<i64>,
     pub exit_timestamp: Option<String>,
 }
 
