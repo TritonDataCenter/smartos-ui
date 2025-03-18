@@ -4,7 +4,7 @@
   License, v. 2.0. If a copy of the MPL was not distributed with this
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-  Copyright 2024 MNX Cloud, Inc.
+  Copyright 2025 MNX Cloud, Inc.
 
 #}
 {%- import "macros/icons.j2" as icons -%}
@@ -28,6 +28,17 @@
 
       {% when Instance::JoyentMinimal with (instance) %}
         {% let brand = "joyent-minimal" %}
+        {% include "include/instance_header.j2" %}
+        {% if let Some(json_string) = json %}
+          {% include "include/json_viewer.j2" %}
+        {% else %}
+          {% include "include/instance_connection_info.j2" %}
+          {% include "include/instance_generic.j2" %}
+          {% include "include/instance_native.j2" %}
+        {% endif %}
+
+      {% when Instance::Builder with (instance) %}
+        {% let brand = "builder" %}
         {% include "include/instance_header.j2" %}
         {% if let Some(json_string) = json %}
           {% include "include/json_viewer.j2" %}

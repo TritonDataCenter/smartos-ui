@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright 2024 MNX Cloud, Inc.
+ * Copyright 2025 MNX Cloud, Inc.
  */
 
 const { join } = require('node:path')
@@ -96,6 +96,7 @@ const cmd = {
     switch (vm.brand) {
       case 'joyent':
       case 'joyent-minimal':
+      case 'builder':
         vm.max_physical_memory = vm.ram
         vm.tmpfs = vm.tmpfs || vm.max_swap
         break
