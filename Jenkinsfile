@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright 2024 MNX Cloud, Inc.
+ * Copyright 2025 MNX Cloud, Inc.
  */
 
 @Library('jenkins-joylib@v1.0.8') _
@@ -41,8 +41,8 @@ pipeline {
 
     post {
         always {
-            joySlackNotifications(channel: 'jenkins')
-            joySlackNotifications(channel: 'smartos')
+            joySlackNotifications()
+            joySlackNotifications(channel: 'cloud-smartos')
         }
     }
 }
