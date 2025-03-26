@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright 2024 MNX Cloud, Inc.
+ * Copyright 2025 MNX Cloud, Inc.
  */
 
 use std::env;
@@ -28,6 +28,7 @@ pub struct Config {
     pub skip_privilege_drop: bool,
     pub cert_file: String,
     pub key_file: String,
+    pub builder_brand: bool,
 }
 
 impl Config {
@@ -73,6 +74,10 @@ impl Config {
             key_file: env::var("KEY_FILE").unwrap_or_else(|_| {
                 String::from("/usbkey/tls/smartos_ui_key.pem")
             }),
+            builder_brand: std::path::Path::new(
+                "/usr/lib/brand/builder/platform.xml",
+            )
+            .exists(),
         }
     }
 }

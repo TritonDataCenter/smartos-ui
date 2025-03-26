@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright 2024 MNX Cloud, Inc.
+ * Copyright 2025 MNX Cloud, Inc.
  */
 
 use crate::instance::Brand;
@@ -350,7 +350,10 @@ impl Image {
                 }
             }
             Type::ZoneDataset => {
-                if brand == &Brand::Joyent || brand == &Brand::JoyentMinimal {
+                if brand == &Brand::Joyent
+                    || brand == &Brand::JoyentMinimal
+                    || brand == &Brand::Builder
+                {
                     return true;
                 }
             }

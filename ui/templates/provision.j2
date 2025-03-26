@@ -4,7 +4,7 @@
   License, v. 2.0. If a copy of the MPL was not distributed with this
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-  Copyright 2024 MNX Cloud, Inc.
+  Copyright 2025 MNX Cloud, Inc.
 
 #}
 {%- import "macros/icons.j2" as icons -%}
@@ -160,6 +160,14 @@
                               title="Joyent Minimal Native Zone">
                               joyent-minimal
                             </option>
+                            {% if builder_brand %}
+                            <option
+                              {% if brand.to_string() == "builder" %}selected{% endif %}
+                              value="builder"
+                              title="Joyent Native Zone with BHYVE devices">
+                              builder
+                            </option>
+                            {% endif %}
                         {% else if (current_image.manifest.type == ImageType::LXDataset) %}
                           <option
                             {% if brand.to_string() == "lx" %}selected{% endif %}

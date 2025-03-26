@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright 2024 MNX Cloud, Inc.
+ * Copyright 2025 MNX Cloud, Inc.
  */
 
 use std::collections::BTreeMap;
@@ -424,6 +424,7 @@ pub struct InstanceCreateTemplate {
     user_script: String,
     cloudinit_data: String,
     dns_domain: String,
+    builder_brand: bool,
 }
 
 #[derive(Deserialize, Serialize, Debug, JsonSchema)]
@@ -522,6 +523,8 @@ pub async fn get_provision(
 
     let title = String::from("Create Instance");
 
+    let builder_brand = ctx.context().config.builder_brand;
+
     let nictags = ctx
         .context()
         .executor
@@ -599,6 +602,7 @@ pub async fn get_provision(
         user_script,
         cloudinit_data,
         dns_domain,
+        builder_brand,
     };
     let result = template.render().map_err(to_internal_error)?;
     htmx_response(response, "/provision", result.into())

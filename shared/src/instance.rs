@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright 2024 MNX Cloud, Inc.
+ * Copyright 2025 MNX Cloud, Inc.
  */
 
 use crate::serde_helpers::deserialize_into_u64;
@@ -218,6 +218,14 @@ pub struct JoyentMinimal {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct Builder {
+    #[serde(flatten)]
+    pub generic: Generic,
+    #[serde(flatten)]
+    pub native: Native,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct LX {
     pub kernel_version: String,
     #[serde(flatten)]
@@ -250,6 +258,8 @@ pub enum Instance {
     Joyent(Joyent),
     #[serde(rename = "joyent-minimal")]
     JoyentMinimal(JoyentMinimal),
+    #[serde(rename = "builder")]
+    Builder(Builder),
     #[serde(rename = "bhyve")]
     Bhyve(Bhyve),
     #[serde(rename = "kvm")]
@@ -267,6 +277,7 @@ impl Instance {
         match self {
             Instance::Joyent(i) => i.generic.uuid,
             Instance::JoyentMinimal(i) => i.generic.uuid,
+            Instance::Builder(i) => i.generic.uuid,
             Instance::Bhyve(i) => i.generic.uuid,
             Instance::KVM(i) => i.generic.uuid,
             Instance::LX(i) => i.generic.uuid,
@@ -277,6 +288,7 @@ impl Instance {
         match self {
             Instance::Joyent(i) => &i.generic.state,
             Instance::JoyentMinimal(i) => &i.generic.state,
+            Instance::Builder(i) => &i.generic.state,
             Instance::Bhyve(i) => &i.generic.state,
             Instance::KVM(i) => &i.generic.state,
             Instance::LX(i) => &i.generic.state,
@@ -287,6 +299,7 @@ impl Instance {
         match self {
             Instance::Joyent(i) => i.generic.alias(),
             Instance::JoyentMinimal(i) => i.generic.alias(),
+            Instance::Builder(i) => i.generic.alias(),
             Instance::Bhyve(i) => i.generic.alias(),
             Instance::KVM(i) => i.generic.alias(),
             Instance::LX(i) => i.generic.alias(),
@@ -297,6 +310,7 @@ impl Instance {
         match self {
             Instance::Joyent(i) => i.native.image_uuid,
             Instance::JoyentMinimal(i) => i.native.image_uuid,
+            Instance::Builder(i) => i.native.image_uuid,
             Instance::LX(i) => i.native.image_uuid,
             Instance::Bhyve(i) => i.hvm.get_boot_image_uuid(),
             Instance::KVM(i) => i.hvm.get_boot_image_uuid(),
@@ -311,6 +325,7 @@ impl TryFrom<Instance> for InstanceView {
         match value {
             Instance::Joyent(i) => i.try_into(),
             Instance::JoyentMinimal(i) => i.try_into(),
+            Instance::Builder(i) => i.try_into(),
             Instance::Bhyve(i) => i.try_into(),
             Instance::KVM(i) => i.try_into(),
             Instance::LX(i) => i.try_into(),
@@ -354,6 +369,27 @@ impl TryFrom<Bhyve> for InstanceView {
             disk_usage: value.hvm.get_disk_usage(),
             image_uuid: value.hvm.get_boot_image_uuid(),
             cpu: value.hvm.get_cpus(value.generic.cpu_cap),
+            primary_ip,
+        })
+    }
+}
+
+impl TryFrom<Builder> for InstanceView {
+    type Error = ();
+
+    fn try_from(value: Builder) -> Result<Self, Self::Error> {
+        let primary_ip = value.generic.primary_ip();
+        let cpu = value.generic.get_cpus();
+        Ok(InstanceView {
+            uuid: value.generic.uuid,
+            alias: value.generic.alias(),
+            brand: Brand::Builder,
+            ram: value.generic.max_physical_memory,
+            hvm: false,
+            state: value.generic.state,
+            disk_usage: value.generic.quota * 1024,
+            image_uuid: value.native.image_uuid,
+            cpu,
             primary_ip,
         })
     }
@@ -428,6 +464,8 @@ pub enum Brand {
     Joyent,
     #[serde(rename = "joyent-minimal")]
     JoyentMinimal,
+    #[serde(rename = "builder")]
+    Builder,
     #[serde(rename = "bhyve")]
     Bhyve,
     #[serde(rename = "kvm")]
@@ -446,6 +484,7 @@ impl Brand {
             (self, image_type),
             (Brand::Joyent, "zone-dataset")
                 | (Brand::JoyentMinimal, "zone-dataset")
+                | (Brand::Builder, "zone-dataset")
                 | (Brand::Bhyve, "zvol")
                 | (Brand::KVM, "zvol")
                 | (Brand::LX, "lx-dataset")
@@ -455,13 +494,17 @@ impl Brand {
     }
 
     pub fn allows_delegate_dataset(&self) -> bool {
-        matches!(self, Brand::Joyent | Brand::JoyentMinimal | Brand::LX)
+        matches!(
+            self,
+            Brand::Joyent | Brand::JoyentMinimal | Brand::Builder | Brand::LX
+        )
     }
 
     pub fn is_hvm(&self) -> bool {
         match self {
             Brand::Joyent => false,
             Brand::JoyentMinimal => false,
+            Brand::Builder => false,
             Brand::Bhyve => true,
             Brand::KVM => true,
             Brand::LX => false,
@@ -476,6 +519,7 @@ impl Display for Brand {
         match *self {
             Brand::Joyent => write!(fmt, "joyent"),
             Brand::JoyentMinimal => write!(fmt, "joyent-minimal"),
+            Brand::Builder => write!(fmt, "builder"),
             Brand::Bhyve => write!(fmt, "bhyve"),
             Brand::KVM => write!(fmt, "kvm"),
             Brand::LX => write!(fmt, "lx"),
@@ -512,6 +556,7 @@ impl FromStr for Brand {
         match value {
             "joyent" => Ok(Brand::Joyent),
             "joyent-minimal" => Ok(Brand::JoyentMinimal),
+            "builder" => Ok(Brand::Builder),
             "bhyve" => Ok(Brand::Bhyve),
             "kvm" => Ok(Brand::KVM),
             "lx" => Ok(Brand::LX),
