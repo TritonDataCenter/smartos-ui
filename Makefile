@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright 2024 MNX Cloud, Inc.
+# Copyright 2025 MNX Cloud, Inc.
 #
 
 NAME = smartos-ui
@@ -190,3 +190,9 @@ include ./deps/eng/tools/mk/Makefile.deps
 include ./deps/eng/tools/mk/Makefile.targ
 include ./deps/eng/tools/mk/Makefile.rust.targ
 
+.PHONY: world
+world: $(TOP)/tools/uiadm.sh
+
+.PHONY: install
+install: $(TOP)/tools/uiadm.sh
+	cp -p $< $(DESTDIR)/sbin/uiadm
