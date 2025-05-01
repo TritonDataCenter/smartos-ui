@@ -21,7 +21,7 @@ include ./deps/eng/tools/mk/Makefile.rust.defs
 
 export STAMP
 
-BUILD_PLATFORM = 20210826T002459Z
+BUILD_PLATFORM :=	20240111T002438Z
 RELEASE_TARBALL :=	$(NAME)-pkg-$(STAMP).tar.gz
 RELSTAGEDIR :=		/tmp/$(NAME)-$(STAMP)
 
@@ -35,7 +35,7 @@ JS_FILES ?= $(wildcard $(TOP)/ui/assets/*.js)
 .PHONY: nodejs
 ifeq ($(shell uname -s),SunOS)
 nodejs:
-	pkgin -y in npm
+	pkgin -y in "nodejs>14"
 else
 # On other OSes, assume you have a new enough Node
 nodejs:
