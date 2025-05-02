@@ -12,6 +12,7 @@ NAME = smartos-ui
 RUST_TOOLCHAIN = 1.84.1
 
 ENGBLD_USE_BUILDIMAGE = false
+ENGBLD_SKIP_VALIDATE_BUILDENV = true
 ENGBLD_BITS_UPLOAD_IMGAPI = false
 
 ENGBLD_REQUIRE := $(shell git submodule update --init deps/eng)
