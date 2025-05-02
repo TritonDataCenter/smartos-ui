@@ -180,6 +180,8 @@ release: all
 
 .PHONY: publish
 publish: release
+	# The eng tooling that will ship these depends on md5sum from coreutils
+	pkgin -y in coreutils
 	mkdir -p $(ENGBLD_BITS_DIR)/$(NAME)
 	cp -p $(TOP)/$(NAME)-$(STAMP).tar.gz \
 		$(ENGBLD_BITS_DIR)/$(NAME)
