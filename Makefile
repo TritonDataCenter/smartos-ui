@@ -51,13 +51,11 @@ ui/assets/node_modules: ui/assets/package.json ui/assets/package-lock.json
 	# be replaced with sdc-node.)
 	git checkout ui/assets/package-lock.json
 
-ui/assets/main.css: ui/assets/main.in.css ui/assets/tailwind.config.js $(J2_FILES)
+ui/assets/main.css: ui/assets/main.in.css ui/assets/tailwind.config.js ui/assets/node_modules $(J2_FILES)
 	cd ui/assets && \
-		./node_modules/.bin/tailwindcss -m -i ./main.in.css -o ./main.css && \
-		gsed -i -e 's/\/\*\#\ sourceMappingURL=main.css.map\ \*\///' ./main.css
+		./node_modules/.bin/tailwindcss -m -i ./main.in.css -o ./main.css
 
-ui/assets/main.css.gz: ui/assets/node_modules ui/assets/main.css
-	cd ui/assets && rm -f ./main.css.gz && gzip ./main.css
+ui/assets/main.css.map: ui/assets/main.css
 
 ui/assets/main.js: ui/assets/node_modules $(JS_FILES)
 	cd ui/assets && \
@@ -66,11 +64,11 @@ ui/assets/main.js: ui/assets/node_modules $(JS_FILES)
 		--format=esm \
 		--outfile=main.js
 
-ui/assets/main.js.gz: ui/assets/main.js
-	cd ui/assets && rm -f main.js.gz && gzip ./main.js
+%.gz: %
+	gzip <$< > $@
 
 .PHONY: assets
-assets: nodejs ui/assets/main.css.gz ui/assets/main.js.gz
+assets: nodejs ui/assets/main.css.gz ui/assets/main.css.map.gz ui/assets/main.js.gz
 
 .PHONY: clean
 clean:: clean-assets
