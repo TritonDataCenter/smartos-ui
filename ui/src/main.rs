@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright 2024 MNX Cloud, Inc.
+ * Copyright 2025 MNX Cloud, Inc.
  */
 
 #[macro_use]
@@ -122,6 +122,9 @@ async fn main() -> Result<(), String> {
 
     // /css/main.css
     api.register(endpoints::assets::get_css_main)?;
+
+    // /css/main.css.map
+    api.register(endpoints::assets::get_css_main_map)?;
 
     // /instances
     api.register(endpoints::instances::get_index)?;

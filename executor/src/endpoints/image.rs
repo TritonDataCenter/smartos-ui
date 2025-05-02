@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright 2024 MNX Cloud, Inc.
+ * Copyright 2025 MNX Cloud, Inc.
  */
 
 use std::process::Stdio;
@@ -186,7 +186,7 @@ pub async fn post_import_by_id(
         return Err(to_internal_error("Unable to get image import queue"));
     }
 
-    let args = ["import", "-q", "-S", &req.url.as_ref(), &id.to_string()];
+    let args = ["import", "-q", "-S", req.url.as_ref(), &id.to_string()];
     debug!(ctx.log, "Executing imgadm {:?}", &args);
     let out = Command::new("imgadm")
         .args(args)

@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright 2024 MNX Cloud, Inc.
+ * Copyright 2025 MNX Cloud, Inc.
  */
 
 use crate::endpoints::Context;
@@ -52,6 +52,22 @@ pub async fn get_css_main(
     _: RequestContext<Context>,
 ) -> Result<Response<Body>, HttpError> {
     let bytes = Bytes::from_static(include_bytes!("../../assets/main.css.gz"));
+    Response::builder()
+        .header("Content-Encoding", "gzip")
+        .header("Content-Type", "text/css")
+        .body(Body::from(bytes))
+        .map_err(to_internal_error)
+}
+
+#[endpoint {
+method = GET,
+path = "/css/main.css.map"
+}]
+pub async fn get_css_main_map(
+    _: RequestContext<Context>,
+) -> Result<Response<Body>, HttpError> {
+    let bytes =
+        Bytes::from_static(include_bytes!("../../assets/main.css.map.gz"));
     Response::builder()
         .header("Content-Encoding", "gzip")
         .header("Content-Type", "text/css")

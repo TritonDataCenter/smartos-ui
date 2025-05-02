@@ -5,13 +5,14 @@
 #
 
 #
-# Copyright 2024 MNX Cloud, Inc.
+# Copyright 2025 MNX Cloud, Inc.
 #
 
 NAME = smartos-ui
-RUST_TOOLCHAIN = 1.75.0
+RUST_TOOLCHAIN = 1.84.1
 
 ENGBLD_USE_BUILDIMAGE = false
+ENGBLD_SKIP_VALIDATE_BUILDENV = true
 ENGBLD_BITS_UPLOAD_IMGAPI = false
 
 ENGBLD_REQUIRE := $(shell git submodule update --init deps/eng)
@@ -21,7 +22,7 @@ include ./deps/eng/tools/mk/Makefile.rust.defs
 
 export STAMP
 
-BUILD_PLATFORM = 20210826T002459Z
+BUILD_PLATFORM :=	20240111T002438Z
 RELEASE_TARBALL :=	$(NAME)-pkg-$(STAMP).tar.gz
 RELSTAGEDIR :=		/tmp/$(NAME)-$(STAMP)
 
@@ -35,7 +36,7 @@ JS_FILES ?= $(wildcard $(TOP)/ui/assets/*.js)
 .PHONY: nodejs
 ifeq ($(shell uname -s),SunOS)
 nodejs:
-	pkgin -y in npm
+	pkgin -y in "nodejs>14"
 else
 # On other OSes, assume you have a new enough Node
 nodejs:
@@ -51,13 +52,11 @@ ui/assets/node_modules: ui/assets/package.json ui/assets/package-lock.json
 	# be replaced with sdc-node.)
 	git checkout ui/assets/package-lock.json
 
-ui/assets/main.css: ui/assets/main.in.css ui/assets/tailwind.config.js $(J2_FILES)
+ui/assets/main.css: ui/assets/main.in.css ui/assets/tailwind.config.js ui/assets/node_modules $(J2_FILES)
 	cd ui/assets && \
-		./node_modules/.bin/tailwindcss -m -i ./main.in.css -o ./main.css && \
-		gsed -i -e 's/\/\*\#\ sourceMappingURL=main.css.map\ \*\///' ./main.css
+		./node_modules/.bin/tailwindcss -m -i ./main.in.css -o ./main.css
 
-ui/assets/main.css.gz: ui/assets/node_modules ui/assets/main.css
-	cd ui/assets && rm -f ./main.css.gz && gzip ./main.css
+ui/assets/main.css.map: ui/assets/main.css
 
 ui/assets/main.js: ui/assets/node_modules $(JS_FILES)
 	cd ui/assets && \
@@ -66,11 +65,11 @@ ui/assets/main.js: ui/assets/node_modules $(JS_FILES)
 		--format=esm \
 		--outfile=main.js
 
-ui/assets/main.js.gz: ui/assets/main.js
-	cd ui/assets && rm -f main.js.gz && gzip ./main.js
+%.gz: %
+	gzip <$< > $@
 
 .PHONY: assets
-assets: nodejs ui/assets/main.css.gz ui/assets/main.js.gz
+assets: nodejs ui/assets/main.css.gz ui/assets/main.css.map.gz ui/assets/main.js.gz
 
 .PHONY: clean
 clean:: clean-assets
@@ -181,6 +180,8 @@ release: all
 
 .PHONY: publish
 publish: release
+	# The eng tooling that will ship these depends on md5sum from coreutils
+	pkgin -y in coreutils
 	mkdir -p $(ENGBLD_BITS_DIR)/$(NAME)
 	cp -p $(TOP)/$(NAME)-$(STAMP).tar.gz \
 		$(ENGBLD_BITS_DIR)/$(NAME)
@@ -190,3 +191,9 @@ include ./deps/eng/tools/mk/Makefile.deps
 include ./deps/eng/tools/mk/Makefile.targ
 include ./deps/eng/tools/mk/Makefile.rust.targ
 
+.PHONY: world
+world: $(TOP)/tools/uiadm.sh
+
+.PHONY: install
+install: $(TOP)/tools/uiadm.sh
+	cp -p $< $(DESTDIR)/sbin/uiadm
