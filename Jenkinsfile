@@ -14,7 +14,8 @@
 pipeline {
 
     agent {
-        label joyCommonLabels(image_ver: '24.4.1')
+        /* XXX KEBE ASKS, all I want is to have this build natively. */
+        label 'image_ver: 24.4.1'
     }
 
     options {
